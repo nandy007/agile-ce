@@ -1,0 +1,203 @@
+<!-- HTML5文件 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Agile CE</title>
+    <script src="../dist/agile.ce.browser.js" charset="UTF-8"></script>
+    <style>
+        .classa {
+            background: red;
+        }
+        
+        .classb {
+            background: blue;
+        }
+    </style>
+    <script>
+    </script>
+</head>
+
+<body>
+    <div id="mobile-list">
+        <h1 v-text="a.b" v-on:click="doChange" v-bind:class="{classa:isA, classb:isB}" v-bind:style="styleObject"></h1>
+        <img v-bind:src="imgSrc" style="height:60px;"/>
+        <ul v-bind:class="classObject" v-bind:style="{ color: activeColor, fontSize: fontSize + 'px' }">
+            <li>固定头部</li>
+            <li v-for="item in brands" v-filter="doFilter" v-show="item.isShow">
+                <b v-text="item.name"></b>
+                <select v-model="selectIndex"><option value='1'>1</option><option value='2'>2</option><option value='3'>3</option></select>
+                <input type="radio" name="ck1" v-model="index" v-bind:value="item.rank" />{{title}}<span>{{$index}}</span><span>Rank: {{item.index}}</span>
+            </li>
+            <li>固定底部</li>
+        </ul>
+
+        <div>
+            <div v-if="range==1">range:1</div>
+            <div v-elseif="range==2">range:2</div>
+            <div v-else="">range:other</div>
+        </div>
+
+        <input type="text" v-model="index"><span>{{index}}</span>
+        <input type="radio" name="pick" v-model="index" value="1">
+        <input type="radio" name="pick" v-model="index" value="2">
+        <input type="radio" name="pick" v-model="index" value="3">
+        <input type="checkbox" name="ck" v-model="ck" v-bind:value="index" />
+        <input type="checkbox" name="ck" v-model="ck" value="2" />
+        <input type="checkbox" name="ck" v-model="ck" value="3" />
+    </div>
+    <script type="text/template" id="demo_script">
+        <div id="tag_cloud">
+            <%
+for(var i=0,len=tagCloud.length;i<len;i++){
+	var ctx = tagCloud[i];
+%>
+                /*原样输出为*/
+                <a href='#' class='tag_item<% if(ctx[' is_selected ']){ %> selected<%}%>' title='<%=ctx[' title ']%>'>
+                    <%=ttt%>
+                        <%=#add(ctx['text'])%>
+                </a><br/>
+                <%
+}
+%>
+
+                    /*不写data则共享主模板的数据
+                    <% include('include_tpl', {text:'<b>这是新数据</b>'}) %><br/>
+                        <% include('include_tpl', {text:'<b>这是新数据</b>'}) %><br/>
+                            <% include('include_tpl') %>*/
+        </div>
+
+    </script>
+    <script type="text/javascript">
+        (function() {
+            var obj = {
+                'title': 'Mobile List',
+                'showRank': true,
+                'classObject': {
+                    'classa': true,
+                    'classb': false
+                },
+                isA: true,
+                isB: false,
+                styleObject: {
+                    color: 'green',
+                    fontSize: '13px'
+                },
+                activeColor: 'yellow',
+                fontSize: 30,
+                'brands': [{
+                    'name': 'Apple',
+                    'rank': 1
+                }, {
+                    'name': 'Galaxy',
+                    'rank': 2
+                }, {
+                    'name': 'OPPO',
+                    'rank': 3
+                }],
+                'a': {
+                    'b': 'test'
+                },
+                index: 1,
+                selectIndex: '2',
+                pick: 'b',
+                ck: ['2'],
+                getIndex: function() {
+                    return ++obj.index;
+                },
+                doChange: function(e) {
+                    obj.a.b = 'new data';
+                },
+                imgSrc: 'https://www.baidu.com/img/bd_logo1.png',
+                doFilter: function(index, item) {
+                    item.index = index;
+                    item.isShow = index > 0;
+                },
+                range : 1
+            };
+            var str = '<div><h1 v-text="a.b"></h1><ul><li v-for="item in brands"><b v-text="item.name"></b><input type="checkbox"/>{{title}}<span v-show="showRank">Rank: {{getIndex()}}</span></li></ul><input type="text" v-model="index"><span>{{index}}</span><input type="radio" name="pick" v-model="index" value="1"><input type="radio" name="pick" v-model="index"  value="2"><input type="radio" name="pick" v-model="index" value="3"></div>';
+
+
+            //var $ = require('JQLite');
+
+            var $element = $('#mobile-list');
+
+            var $str = $.parseHTML(str);
+
+            $element.render(obj);
+            
+            obj.title = 'new title ';
+            obj.range = 2;
+            //obj.styleObject.color = 'red';
+            //obj.activeColor = 'green';
+            //obj.isB = true;
+            setTimeout(function() {
+
+                //obj.showRank = false;
+
+                obj.a.b = '2222';
+                //obj.brands.push({'name': 'huawei', 'rank': 4});
+                //obj.brands.pop();
+                //obj.brands.unshift({'name': 'Sanxing', 'rank': 5});
+                //obj.brands.shift();
+                //obj.brands.splice(0);		
+                obj.brands.unshift({
+                    'name': 'Sanxing',
+                    'rank': 6
+                }, {
+                    'name': 'Nandy',
+                    'rank': 7
+                });
+                //obj.brands.splice(1,1);
+                //obj.brands.push({'name': 'Sanxing', 'rank': 4}, {'name': 'Nandy', 'rank': 5});
+                //obj.brands.$set(1, {'name': 'huawei', 'rank': 4});
+                //obj.selectIndex = '3';
+                //obj.pick = 'c';
+                //obj.ck.push('3');
+                //obj.brands.reverse();
+
+                //obj.brands = [];
+            }, 3000);
+
+
+            var data = {
+                tagCloud: [
+
+                ],
+                text: '这是共享数据',
+                text1: '测试数据',
+                ttt: 22
+            };
+            for (var j = 0; j < 100; j++) {
+                data.tagCloud.push({
+                    is_selected: true,
+                    title: '这是一本设计模式的书',
+                    text: '<b>设计模式</b>'
+                });
+            }
+
+            //template.config('escape', false);
+            $.template.helper('add', function(str) {
+                return str + '[追加的数据]';
+            });
+            //template.set('mytemplate1', document.getElementById('demo_script').innerHTML);
+            var str = document.getElementById('demo_script').innerHTML;
+            var html = [];
+            //var startTime = new Date().getTime();
+            for (var i = 0; i < 1; i++) {
+                html.push($.template('demo_script', data));
+                //html.push(template.compile('demo_script')(data));
+            }
+            //var endTime  = new Date().getTime();console.log(endTime - startTime);
+            //console.log(html.join(''));
+
+            //$element.render().destroy();
+            
+        })();
+
+    </script>
+</body>
+
+</html>

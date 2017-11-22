@@ -1,0 +1,30 @@
+{
+  "name": "agile-ce",
+  "version": "0.1.0",
+  "description": "jQuery风格的MVVM框架",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nandy007/agile-ce.git"
+  },
+  "keywords": [
+    "mvvm",
+    "双向绑定",
+    "jQuery风格"
+  ],
+  "author": "nandy007",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nandy007/agile-ce/issues"
+  },
+  "homepage": "https://github.com/nandy007/agile-ce#readme",
+  "devDependencies": {
+    "yargs": "^10.0.3"
+  }
+}
