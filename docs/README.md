@@ -69,14 +69,14 @@ libs下的文件需要经过webpack编译得到可分发的版本方能使用。
 使用方法为：
 
 ```javascript
-var ce = $(selector).render(obj);
+var vm = $(selector).render(obj);
 ```
 
 如需销毁ce调用destroy方法即可：
 
 ```javascript
-var ce = $(selector).render(obj);
-ce.destroy();
+var vm = $(selector).render(obj);
+vm.destroy();
 ```
 
 或者
@@ -84,8 +84,8 @@ ce.destroy();
 ```javascript
 $(selector).render(obj);
 // 只要注入过一次，调用render空方法可返回ce对象，不会重复渲染
-var ce = $(selector).render();
-ce.destroy();
+var vm = $(selector).render();
+vm.destroy();
 ```
 
 其中selector为视图层根节点元素的选择器，请确保选择器相对于页面元素为唯一；obj为一个json对象，内部包含要往视图层渲染的数据内容和函数。可通过对obj对象的操作来控制视图层的刷新。
