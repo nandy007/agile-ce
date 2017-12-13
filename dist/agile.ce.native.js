@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.1.0.1511322143394 beta
+ *	Version	:	0.1.0.1513136069428 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1590,17 +1590,23 @@ var __EXPORTS_DEFINED__ = function (mod, modName) {
 
 		var params = converstHTTPParams(opts);
 
-		http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
+		this.id = http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
+	};
+
+	go.prototype = {
+		abort: function(){
+			if(this.id) http.cancel(this.id);
+		}
 	};
 
 	jqlite.ajax = function (options) {
-		go(options, 'ajax');
+		return new go(options, 'ajax');
 	};
 	jqlite.ajaxForm = function (options) {
-		go(options, 'formSubmit');
+		return new go(options, 'formSubmit');
 	};
 	jqlite.get = function (url, callback) {
-		go({
+		return new go({
 			url: url,
 			dataType: 'json',
 			complete: callback

@@ -1485,17 +1485,23 @@
 
 		var params = converstHTTPParams(opts);
 
-		http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
+		this.id = http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
+	};
+
+	go.prototype = {
+		abort: function(){
+			if(this.id) http.cancel(this.id);
+		}
 	};
 
 	jqlite.ajax = function (options) {
-		go(options, 'ajax');
+		return new go(options, 'ajax');
 	};
 	jqlite.ajaxForm = function (options) {
-		go(options, 'formSubmit');
+		return new go(options, 'formSubmit');
 	};
 	jqlite.get = function (url, callback) {
-		go({
+		return new go({
 			url: url,
 			dataType: 'json',
 			complete: callback
