@@ -1,7 +1,7 @@
 
 (function(){
-	var $ = require('JQLite');
-	var Compiler = require('Compiler');
+	var $ = require('./env').JQLite;
+	var Compiler = require('./Compiler');
 	
 	
 	/**

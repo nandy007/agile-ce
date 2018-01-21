@@ -1,6 +1,6 @@
 (function(){
-	var $ = require('JQLite');
-	var Parser = require('Parser');
+	var $ = require('./env').JQLite;
+	var Parser = require('./Parser');
 
 	var BRACE2RE = /\{\{([^\}]*)\}\}/;
 	var SPLITRE = /[\:\#\$\*\.]/;

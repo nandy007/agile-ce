@@ -32,42 +32,39 @@ var plugins = (function(){
         }));
     }
 
-    plugins.push((function(){
-        function NativeModulePlugin(options) {
-            // Setup the plugin instance with options...
-        }
+    // plugins.push((function(){
+    //     function NativeModulePlugin(options) {
+    //         // Setup the plugin instance with options...
+    //     }
 
-        NativeModulePlugin.prototype.apply = function(compiler) {
-            compiler.plugin('done', function() {
-                var fs = require('fs'), filePath = './dist/'+fileName+'.js', encoding = 'utf-8';
-                var file = fs.readFileSync(filePath, encoding);
-                var content = [];
-                content.push(copyright);
+    //     NativeModulePlugin.prototype.apply = function(compiler) {
+    //         compiler.plugin('done', function() {
+    //             var fs = require('fs'), filePath = './dist/'+fileName+'.js', encoding = 'utf-8';
+    //             var file = fs.readFileSync(filePath, encoding);
+    //             var content = [];
+    //             content.push(copyright);
 
-                var appendContent = fs.readFileSync('./libs/append.js', encoding);
-                content.push(appendContent);  
+    //             var appendContent = fs.readFileSync('./libs/append.js', encoding);
+    //             content.push(appendContent);  
                 
-                content.push(file);
-                fs.writeFile(filePath, content.join(''), {encoding:encoding}, function(err){
-                    err?console.error('写入失败'):console.log('写入成功');
-                });
-            });
-        };
+    //             content.push(file);
+    //             fs.writeFile(filePath, content.join(''), {encoding:encoding}, function(err){
+    //                 err?console.error('写入失败'):console.log('写入成功');
+    //             });
+    //         });
+    //     };
 
-        return new NativeModulePlugin({options: true});
-    })());
+    //     return new NativeModulePlugin({options: true});
+    // })());
 
     return plugins;
 })();
-
 
 module.exports = {
     //插件项
     plugins: plugins,
     //页面入口文件配置
-    entry: {
-        index : './libs/main.js'
-    },
+    entry: ['./main.js'],
     //入口文件输出配置
     output: {
         path: path.join(__dirname, './dist'),
@@ -96,16 +93,6 @@ module.exports = {
         extensions: ['.js', '.json', '.scss'],
         alias: {
             "JQLite": path.join(__dirname, "./libs/JQLite."+usein+".js"),
-            "diff": path.join(__dirname, "./libs/diff.js"),
-            "Observer": path.join(__dirname, "./libs/Observer.js"),
-            "Updater": path.join(__dirname, "./libs/Updater.js"),
-            "Watcher": path.join(__dirname, "./libs/Watcher.js"),
-            "Compiler": path.join(__dirname, "./libs/Compiler.js"),
-            "rule": path.join(__dirname, "./libs/rule.js"),
-            "Parser": path.join(__dirname, "./libs/Parser.js"),
-            "MVVM": path.join(__dirname, "./libs/MVVM.js"),
-            "template": path.join(__dirname, "./libs/template.js"),
-            "jQuery": path.join(__dirname, "./libs/jQuery.js") //only browser
         }
     }
 };

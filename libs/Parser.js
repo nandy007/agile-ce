@@ -1,7 +1,7 @@
 (function () {
-	var $ = require('JQLite');
-	var Updater = require('Updater');
-	var Watcher = require('Watcher');
+	var $ = require('./env').JQLite;
+	var Updater = require('./Updater');
+	var Watcher = require('./Watcher');
 
 	//指令解析规则，可以通过Parser.add方法添加自定义指令处理规则
 	//所有解析规则默认接受四个参数

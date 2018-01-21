@@ -1,7 +1,7 @@
 
 (function(){
 
-	var $ = require('JQLite');
+	var $ = require('./env').JQLite;
 
 	/**
 	 * updater 视图刷新模块

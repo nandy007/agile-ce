@@ -1485,23 +1485,17 @@
 
 		var params = converstHTTPParams(opts);
 
-		this.id = http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
-	};
-
-	go.prototype = {
-		abort: function(){
-			if(this.id) http.cancel(this.id);
-		}
+		http[ajax](params.option, params.callFunction, params.requestProgressFunction, params.responseProgressFunction);
 	};
 
 	jqlite.ajax = function (options) {
-		return new go(options, 'ajax');
+		go(options, 'ajax');
 	};
 	jqlite.ajaxForm = function (options) {
-		return new go(options, 'formSubmit');
+		go(options, 'formSubmit');
 	};
 	jqlite.get = function (url, callback) {
-		return new go({
+		go({
 			url: url,
 			dataType: 'json',
 			complete: callback
@@ -1540,12 +1534,12 @@
 
 
 	jqlite.vm = function (el, data) {
-		var MVVM = require('MVVM');
+		var MVVM = require('./MVVM');
 		return new MVVM(el, data);
 	};
 
 	jqlite.vm.addParser = function (rules) {
-		var Parser = require('Parser');
+		var Parser = require('./Parser');
 		Parser.add(rules);
 	};
 
@@ -1554,7 +1548,7 @@
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(jqlite, 'JQLite');
 
-	var _template = require('template');
+	var _template = require('./template');
 	_template.hooks('get', function (str) {
 		return jqlite.file.read(str);
 	});

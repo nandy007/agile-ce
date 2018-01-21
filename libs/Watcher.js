@@ -1,8 +1,8 @@
 
 (function(){
 
-	var $ = require('JQLite');
-	var Observer = require('Observer');
+	var $ = require('./env').JQLite;
+	var Observer = require('./Observer');
 
 	var watcherUtil = {
 		iterator : function(deps, subs){//深度遍历订阅

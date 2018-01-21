@@ -1,17 +1,12 @@
 (function(){
-
-	var _$ = window.jQuery||require('jQuery'), JQLite = _$, jqlite = JQLite;
+	var _$ = window.jQuery||window.$||require('./jQuery'), JQLite = _$, jqlite = JQLite;
 
 	jqlite.fn.extend({
-		childs : function(){
-			var el = this[0]||{};
-			
-			var children = jqlite.util.copyArray(el.tagName==='select'?el.options:el.childNodes);
-
-			if(arguments.length>0){
-				return jqlite(children.length===0?[]:[children[arguments[0]]]);
+		childs : function(index){
+			if(jqlite.util.isNumber(index)){
+				return this.contents().eq(index);
 			}else{
-				return jqlite(children);
+				return this.contents.apply(this, arguments)
 			}
 		},
 		textContent : function(){
@@ -330,12 +325,12 @@
 
 	
 	jqlite.vm = function(el, data){
-		var MVVM = require('MVVM');
+		var MVVM = require('./MVVM');
 		return new MVVM(el, data);
 	};
 
 	jqlite.vm.addParser = function (rules) {
-		var Parser = require('Parser');
+		var Parser = require('./Parser');
 		Parser.add(rules);
 	};
 
@@ -352,7 +347,7 @@
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(jqlite, 'JQLite');
 
-	var _template = require('template');
+	var _template = require('./template');
 	jqlite.template = _template;
 	
 })();

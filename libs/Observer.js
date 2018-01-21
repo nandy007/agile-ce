@@ -1,7 +1,7 @@
 
 (function () {
 
-	var $ = require('JQLite');
+	var $ = require('./env').JQLite;
 
 	//v8引擎sort算法与浏览器不同，重写sort函数，以xSort代替
 	Array.prototype.xSort = function (fn) {

@@ -1,13 +1,18 @@
 {
   "name": "agile-ce",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "jQuery风格的MVVM框架",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:browser": "webpack --env.usein=browser",
+    "build:browser-dev": "webpack --env.usein=browser --env.compress=false",
+    "build:native": "webpack --env.usein=native",
+    "build:native-dev": "webpack --env.usein=native --env.compress=false",
+    "build": "npm run build:browser && npm run build:browser-dev && npm run build:native && npm run build:native-dev"
   },
   "repository": {
     "type": "git",
@@ -25,6 +30,7 @@
   },
   "homepage": "https://github.com/nandy007/agile-ce#readme",
   "devDependencies": {
+    "webpack": "^3.10.0",
     "yargs": "^10.0.3"
   }
 }

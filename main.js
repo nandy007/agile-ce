@@ -1,5 +1,5 @@
 var env = require('./libs/env');
-env.JQLite = require('./libs/JQLite.browser');
+env.JQLite = require('JQLite');
 if(!env.$) env.$ = env.JQLite;
 
 module.exports = env.JQLite;
