@@ -1,0 +1,50 @@
+<!-- HTML5文件 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Agile CE</title>
+    <script src="../dist/agile.ce.browser.js" charset="UTF-8"></script>
+    <style>
+        li{background: #ccc;}
+        li.active{background: #ff0000;}
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <ul>
+        <li v-for="item in list" v-class="{active: $index==pageNum}">
+            {{item.title}}
+        </li>
+        </ul>
+    </div>
+    <script>
+        var obj = {
+            pageNum:1,
+            list: [
+                {
+                    title:'1'
+                },
+                {
+                    title:'2'
+                },
+                {
+                    title:'3'
+                },
+                {
+                    title:'4'
+                },
+                {
+                    title:'5'
+                }
+            ]
+        };
+        $('#app').render(obj);
+        obj.pageNum = 2;
+    </script>
+</body>
+
+</html>
