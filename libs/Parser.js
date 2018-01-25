@@ -241,7 +241,7 @@
 
 				updater.updateClass($node, cName, parser.getValue(exp, fors));
 
-				var deps = Parser.makePaths(exp, fors);
+				var deps = Parser.getDepsAlias(exp, fors).deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateClass($node, cName, parser.getValue(exp, fors));
@@ -912,17 +912,6 @@
 		});
 
 		return exps.join('.');
-	};
-
-	Parser.makePaths = function (exp, fors) {
-		var expArr = exp.split(/[\+\-\*\/\%\=\?\:\(\)]/g);
-		var arr = [];
-		$.util.each(expArr, function(i, _exp){
-			if(_exp){
-				arr.push(Parser.makePath(_exp, fors));
-			}
-		});
-		return arr;
 	};
 
 	//深度查找指令表达式的别名对应的真实路径
