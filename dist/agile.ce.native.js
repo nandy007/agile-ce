@@ -3627,7 +3627,7 @@ module.exports = require("File");
 	 */
 	up.updateSelectChecked = function ($select, selected, multi) {
 		var getNumber = $select.hasAttr('number');
-		var $options = $select.childs(), leng = $options.length;
+		var $options = $select.children(), leng = $options.length;
 		var multiple = multi || $select.hasAttr('multiple');
 
 		$options.each(function(i){
