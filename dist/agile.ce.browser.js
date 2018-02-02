@@ -10880,6 +10880,7 @@ return jQuery;
 	 * 销毁mvvm对象
 	 */
 	mp.destroy = function(){
+		if(!this.vm) return;
 		this.vm.destroy();
 		this.backup = this.vm = this.$data = null;
 	}
