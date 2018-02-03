@@ -826,9 +826,9 @@
 
 	//字符串是否是常量表示
 	Parser.isConst = function (str) {
-		str = $.util.trim(str);
+		str = $.util.trim(str||'');
 		if(Parser.isOperatorCharacter(str)) return true;
-		strs = str.split('');
+		var strs = str.split('');
 		var start = strs.shift() || '', end = strs.pop() || '';
 		str = (start === '(' ? '' : start) + strs.join('') + (end === ')' ? '' : end);
 		if (this.isBool(str) || this.isNum(str)) return true;
@@ -848,7 +848,7 @@
 
 	//字符串是否是JSON对象表示
 	Parser.isJSON = function (str) {
-		strs = str.split('');
+		var strs = (str||'').split('');
 		var start = strs.shift(), end = strs.pop();
 		return start === '{' && end === '}' ? strs.join('') : '';
 	};
