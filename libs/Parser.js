@@ -272,7 +272,8 @@
 
 			var mutexHandler = function(){
 				if(!nodes){
-					nodes = [$node], $prev = $node.prev(), $next = $node.next();
+					nodes = [$node];
+					var $prev = $node.prev(), $next = $node.next();
 					while($prev.def('__mutexgroup')===mutexGroup){
 						nodes.unshift($prev);
 						$prev = $prev.prev();
