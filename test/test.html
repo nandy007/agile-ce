@@ -16,6 +16,7 @@
 <body>
     <div id="app">
         <ul>
+        <input v-model="d$a" v-bind:value="d$a"></input>
         <li v-for="item in list" v-class="{active: $index==pageNum}">
             {{item.title}}
         </li>
@@ -23,6 +24,7 @@
     </div>
     <script>
         var obj = {
+            'd$a': '1',
             pageNum:1,
             list: [
                 {

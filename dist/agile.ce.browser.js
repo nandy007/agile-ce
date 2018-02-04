@@ -1015,7 +1015,7 @@ module.exports = env;
 		//$index
 		//obj.title
 		//$index>0
-		exp = exp.replace(/([^\w \.'"\/])[ ]*([\w]+)/g, function (s, s1, s2) {
+		exp = exp.replace(/([^\w \.\$'"\/])[ ]*([\w]+)/g, function (s, s1, s2) {
 
 			s = s1 + s2;
 
