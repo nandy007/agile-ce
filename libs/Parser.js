@@ -151,12 +151,12 @@
 				};
 
 				$node.each(function () {
-					$.util.defRec(this, Parser._getProxy(evt), _proxy);
+					$.util.defRec(this, parser._getProxy(evt), _proxy);
 				});
 
-				if (isOnce) $node.off(evt, Parser._proxy);
+				if (isOnce) $node.off(evt, parser._proxy);
 
-				$node.__on__(evt, Parser._proxy);
+				$node.__on__(evt, parser._proxy);
 			});
 		},
 		'vone': function ($node, fors, expression, dir) {
@@ -519,6 +519,8 @@
 		}
 	};
 
+	var _parserIndex = 0;
+
 	/**
 	 * 指令解析器模块
 	 * @param  {Compiler}      vm  [Compiler示例对象]
@@ -541,16 +543,34 @@
 		//数据订阅模块
 		this.watcher = new Watcher(this, this.vm.$data);
 
+		this.parserIndex = _parserIndex++;
+
+		this.initProxy();
+
 		this.init();
 	};
 
 	var pp = Parser.prototype;
+
+	pp.initProxy = function(){
+		var parser = this;
+		this._getProxy = function (type) {
+			return '_proxy_' + type;
+		};
+	
+		this._proxy = function (e) {
+			var _proxy = this[parser._getProxy(e.type)];
+			_proxy.apply(this, arguments);
+		};
+
+	};
 
 	pp.init = function () {
 		var parser = this;
 		//将指令规则添加到Parser对象中
 		$.util.each(directiveRules, function (directive, rule) {
 			parser[directive] = function ($node, fors, expression, dir) {
+				$node.attr('acee', parser.parserIndex);
 				if (dir) {
 					var __directiveDef = $node.def('__directive');
 					if(!__directiveDef){
@@ -780,8 +800,8 @@
 	/**
 	 * 销毁
 	 */
-	pp.destroy = function($element){
-		$element.__remove_on__();
+	pp.destroy = function(){
+		this.vm.$element.__remove_on__(this.parserIndex);
 		this.watcher.destroy();
 		this.$scope = this.watcher = this.updater = null;
 	}
@@ -798,15 +818,7 @@
 			directiveRules[d] = f;
 		});
 	};
-
-	Parser._getProxy = function (type) {
-		return '_proxy_' + type;
-	};
-
-	Parser._proxy = function (e) {
-		var _proxy = this[Parser._getProxy(e.type)];
-		_proxy.apply(this, arguments);
-	};
+	
 
 	//获取指令名v-on:click -> v-on
 	Parser.getDirName = function (dir) {

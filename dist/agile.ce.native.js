@@ -236,12 +236,12 @@ module.exports = require("Document");
 				};
 
 				$node.each(function () {
-					$.util.defRec(this, Parser._getProxy(evt), _proxy);
+					$.util.defRec(this, parser._getProxy(evt), _proxy);
 				});
 
-				if (isOnce) $node.off(evt, Parser._proxy);
+				if (isOnce) $node.off(evt, parser._proxy);
 
-				$node.__on__(evt, Parser._proxy);
+				$node.__on__(evt, parser._proxy);
 			});
 		},
 		'vone': function ($node, fors, expression, dir) {
@@ -604,6 +604,8 @@ module.exports = require("Document");
 		}
 	};
 
+	var _parserIndex = 0;
+
 	/**
 	 * 指令解析器模块
 	 * @param  {Compiler}      vm  [Compiler示例对象]
@@ -626,16 +628,34 @@ module.exports = require("Document");
 		//数据订阅模块
 		this.watcher = new Watcher(this, this.vm.$data);
 
+		this.parserIndex = _parserIndex++;
+
+		this.initProxy();
+
 		this.init();
 	};
 
 	var pp = Parser.prototype;
+
+	pp.initProxy = function(){
+		var parser = this;
+		this._getProxy = function (type) {
+			return '_proxy_' + type;
+		};
+	
+		this._proxy = function (e) {
+			var _proxy = this[parser._getProxy(e.type)];
+			_proxy.apply(this, arguments);
+		};
+
+	};
 
 	pp.init = function () {
 		var parser = this;
 		//将指令规则添加到Parser对象中
 		$.util.each(directiveRules, function (directive, rule) {
 			parser[directive] = function ($node, fors, expression, dir) {
+				$node.attr('acee', parser.parserIndex);
 				if (dir) {
 					var __directiveDef = $node.def('__directive');
 					if(!__directiveDef){
@@ -865,8 +885,8 @@ module.exports = require("Document");
 	/**
 	 * 销毁
 	 */
-	pp.destroy = function($element){
-		$element.__remove_on__();
+	pp.destroy = function(){
+		this.vm.$element.__remove_on__(this.parserIndex);
 		this.watcher.destroy();
 		this.$scope = this.watcher = this.updater = null;
 	}
@@ -883,15 +903,7 @@ module.exports = require("Document");
 			directiveRules[d] = f;
 		});
 	};
-
-	Parser._getProxy = function (type) {
-		return '_proxy_' + type;
-	};
-
-	Parser._proxy = function (e) {
-		var _proxy = this[Parser._getProxy(e.type)];
-		_proxy.apply(this, arguments);
-	};
+	
 
 	//获取指令名v-on:click -> v-on
 	Parser.getDirName = function (dir) {
@@ -1759,13 +1771,12 @@ module.exports = env.JQLite;
 				var $node = $(this), aceEvents = this['__ace-events__'] || [];
 				if (aceEvents.indexOf(evt) > -1) return;
 				aceEvents.push(evt);
-				$node.attr('acee', '1');
 				jqlite.util.defRec(this, '__ace-events__', aceEvents);
 			});
 			this.on.apply(this, arguments);
 		},
-		__remove_on__: function () {
-			$(this).find('[acee="1"]').each(function () {
+		__remove_on__: function(parserIndex){
+			$(this).find('[acee="'+parserIndex+'"]').each(function(){
 				var $node = $(this), aceEvents = this['__ace-events__'] || [];
 				jqlite.util.defRec(this, '__ace-events__', null);
 				jqlite.util.each(aceEvents, function (i, evt) {
@@ -3007,7 +3018,13 @@ module.exports = require("File");
 	 */
 	var Compiler = function(element, model) {
 
+		var compiler = this;
+
 		var $element = $(element);
+
+		// $element.on('DOMNodeRemoved', function(){
+		// 	compiler.destroy();
+		// });
 
 		if (!$element.isElement()||$element.length===0) {
 			return $.util.warn('第一个参数element必须是一个原生DOM对象或者一个JQLite对象: ', element);
@@ -3203,7 +3220,7 @@ module.exports = require("File");
 	 * 销毁
 	 */
 	cp.destroy = function(){
-		this.parser.destroy(this.$element);
+		this.parser.destroy();
 		this.parser = this.$data = null;
 	}
 

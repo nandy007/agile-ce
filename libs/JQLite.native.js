@@ -469,13 +469,12 @@
 				var $node = $(this), aceEvents = this['__ace-events__'] || [];
 				if (aceEvents.indexOf(evt) > -1) return;
 				aceEvents.push(evt);
-				$node.attr('acee', '1');
 				jqlite.util.defRec(this, '__ace-events__', aceEvents);
 			});
 			this.on.apply(this, arguments);
 		},
-		__remove_on__: function () {
-			$(this).find('[acee="1"]').each(function () {
+		__remove_on__: function(parserIndex){
+			$(this).find('[acee="'+parserIndex+'"]').each(function(){
 				var $node = $(this), aceEvents = this['__ace-events__'] || [];
 				jqlite.util.defRec(this, '__ace-events__', null);
 				jqlite.util.each(aceEvents, function (i, evt) {

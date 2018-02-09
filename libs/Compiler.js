@@ -44,7 +44,13 @@
 	 */
 	var Compiler = function(element, model) {
 
+		var compiler = this;
+
 		var $element = $(element);
+
+		// $element.on('DOMNodeRemoved', function(){
+		// 	compiler.destroy();
+		// });
 
 		if (!$element.isElement()||$element.length===0) {
 			return $.util.warn('第一个参数element必须是一个原生DOM对象或者一个JQLite对象: ', element);
@@ -240,7 +246,7 @@
 	 * 销毁
 	 */
 	cp.destroy = function(){
-		this.parser.destroy(this.$element);
+		this.parser.destroy();
 		this.parser = this.$data = null;
 	}
 
