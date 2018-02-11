@@ -1611,10 +1611,18 @@ module.exports = env.JQLite;
 
 	jqlite.JSON = {
 		parse : function(str){
-			return JSON.parse(str)||{};
+			try{
+				return (new Function('try{return '+str+';}catch(e){return null;}'))();
+			}catch(e){
+				return null;
+			}
 		},
-		stringify: function(){
-			return JSON.stringify(str)||'';
+		stringify: function(str){
+			try{
+				return JSON.stringify(str)||'';
+			}catch(e){
+				return '';
+			}
 		}
 	};
 

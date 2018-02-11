@@ -1526,7 +1526,7 @@
 		parse: function (str) {
 			return JSON.parse(str) || {};
 		},
-		stringify: function () {
+		stringify: function (str) {
 			return JSON.stringify(str) || '';
 		}
 	};
