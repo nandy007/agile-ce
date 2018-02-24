@@ -16,15 +16,23 @@
 <body>
     <div id="app">
         <ul>
-        <input v-model="d$a" v-bind:value="d$a"></input>
-        <li v-for="item in list" v-class="{active: $index==pageNum}">
-            {{item.title}}
+
+        <li v-for="item in list" v-text="item.title">
+
         </li>
+        </ul>
+
+        <ul>
+
+                <li v-for="item1 in list1" v-text="item1.title">
+        
+                </li>
         </ul>
     </div>
     <script>
         var obj = {
             'd$a': '1',
+            'a': '222',
             pageNum:1,
             list: [
                 {
@@ -42,10 +50,15 @@
                 {
                     title:'5'
                 }
-            ]
+            ],
+            list1: []
         };
         $('#app').render(obj);
-        obj.pageNum = 2;
+
+        obj.list1.push(obj.list[0], obj.list[1], obj.list[2]);
+
+        obj.list1.splice(0, 1);
+
     </script>
 </body>
 

@@ -966,25 +966,16 @@ module.exports = env;
 		var deps = [];
 		var exps = [];
 		// 匹配单引号/双引号包含的常量和+<>==等运算符操作
-		expression.replace(/('[^']*')|("[^"]*")|(([^\+\-\*\/\%\<\>\=\!]*)([\+\-\*\/\%\<\>\=]|[\+\-\=]{2,3}|\>\=|\<\=|\!\=)([^\+\-\*\/\%\<\>\=\!]*))/g, function(s, s1, s2, s3, s4, s5, s6, s7, s8){
-			s1 = $.util.trim(s1||'');if(s1) exps.push(s1);
-
-			s2 = $.util.trim(s2||'');if(s2) exps.push(s2);
-
-			s4 = $.util.trim(s4||'');if(s4) exps.push(s4);
-			s5 = $.util.trim(s5||'');if(s5) exps.push(s5);
-			s6 = $.util.trim(s6||'');if(s6) exps.push(s6);
-		});
-		if(exps.length===0){
-			exps.push(expression);
-		}
-		$.util.each(exps, function (i, exp) {
-			//常量不作为依赖
-			if (!Parser.isConst(exp)) {
+		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.]*)/g, function(exp){
+			if (exp!==''&&!Parser.isConst(exp)) {
 				deps.push(Parser.makePath(exp, fors));
-				exps[i] = Parser.makeAliasPath(exp, fors);
+				return Parser.makeAliasPath(exp, fors);
 			}
+			return exp;
 		});
+
+		exps.push(expression);
+
 		return {deps:deps, exps:exps};
 	};
 
@@ -11825,7 +11816,7 @@ return jQuery;
 
 			for(var i=pos;i<len;i++){
 				
-				var ni = i+gap;
+				var ni = i+gap,
 					oPath = $access+'.'+i,
 					nPath = $access+'.'+ni,
 					oIndexPath = oPath+'.*',

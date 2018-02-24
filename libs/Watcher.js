@@ -191,7 +191,7 @@
 
 			for(var i=pos;i<len;i++){
 				
-				var ni = i+gap;
+				var ni = i+gap,
 					oPath = $access+'.'+i,
 					nPath = $access+'.'+ni,
 					oIndexPath = oPath+'.*',
