@@ -11898,7 +11898,7 @@ return jQuery;
 
 	// 增加$reset方法重置数组，如果没有参数则重置为空数组
 	Array.prototype.$reset = function (arr) {
-		return this.splice.apply(this, [0, this.length||1].cancat(arr||[]));
+		return this.splice.apply(this, [0, this.length||1].concat(arr||[]));
 	};
 
 	// 重写的数组操作方法
