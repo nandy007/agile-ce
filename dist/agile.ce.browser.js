@@ -165,6 +165,8 @@ module.exports = env;
 
 			var deps = [$access], updater = this.updater;
 
+			var __modelInit = $parent.def('__model_init__');
+
 			this.watcher.watch(deps, function (options, i) {
 
 				if (!options.method) {
@@ -194,6 +196,8 @@ module.exports = env;
 					}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
 					return $listFragment;
 				});
+
+				__modelInit&&__modelInit();
 			});
 		},
 		'von': function ($node, fors, expression, dir, isOnce) {
@@ -528,32 +532,38 @@ module.exports = env;
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;
 
-			var isDefined;
-
 			var multi = $node.hasAttr('multiple');
 
-			var value = parser.getValue(expression, fors);
+			var init = function(){
+				var isDefined;
 
-			if ($.util.isString(value)) {
-				if (multi) {
-					return $.util.warn('<select> 设置的model [' + field + '] 不是数组不能多选');
-				}
-				isDefined = Boolean(value);
-			} else if ($.isArray(value)) {
-				if (!multi) {
-					return $.util.warn(' <select> 没有 multiple 属性，model [' + field + '] 不可以设置为数组');
-				}
-				isDefined = value.length > 0;
-			} else {
-				return $.util.warn('<select>对应的 model [' + field + '] 必须是一个字符串或者数组');
-			}
+				var value = parser.getValue(expression, fors);
 
-			if (isDefined) {
-				updater.updateSelectChecked($node, value, multi);
-			} else {
-				var selects = Parser.getSelecteds($node);
-				duplex[field] = multi ? selects : selects[0];
-			}
+				if ($.util.isString(value) || $.util.isNumber(value)) {
+					if (multi) {
+						return $.util.warn('<select> 设置的model [' + field + '] 不是数组不能多选');
+					}
+					isDefined = Boolean(value);
+				} else if ($.isArray(value)) {
+					if (!multi) {
+						return $.util.warn(' <select> 没有 multiple 属性，model [' + field + '] 不可以设置为数组');
+					}
+					isDefined = value.length > 0;
+				} else {
+					return $.util.warn('<select>对应的 model [' + field + '] 必须是一个字符串或者数组');
+				}
+
+				if (isDefined) {
+					updater.updateSelectChecked($node, value, multi);
+				} else {
+					var selects = Parser.getSelecteds($node);
+					duplex[field] = multi ? selects : selects[0];
+				}
+			};
+
+			init();
+
+			$node.def('__model_init__', init);
 
 			var deps = [access];
 
@@ -11893,6 +11903,12 @@ return jQuery;
 
 	// 增加$set方法修改元素值
 	Array.prototype.$set = function (pos, item) {
+		var len = this.length;
+		if(pos > len){
+			return this.push(item);
+		}else if(pos < 0){
+			return this.unshift(item);
+		}
 		return this.splice(pos, 1, item);
 	};
 

@@ -15,26 +15,26 @@
 
 <body>
     <div id="app">
-        <ul>
-
-        <li v-for="item in list" v-text="item.title">
-
-        </li>
-        </ul>
-
-        <ul>
-
-                <li v-for="item1 in list1" v-text="item1.title">
-        
-                </li>
-        </ul>
+        <select v-model="v" number>
+            <option v-for="item in list" v-text="item.title" v-bind:value="item.title"></option>
+        </select>
+        <button v-on:click="doclick">wwww</button>
     </div>
     <script>
         var obj = {
             'd$a': '1',
             'a': '222',
+            v: 6,
             pageNum:1,
-            list: [
+            list: [],
+            list1: [],
+            doclick: function(){
+                console.log(obj.v);
+            }
+        };
+        
+        $('#app').render(obj);
+        obj.list.$reset([
                 {
                     title:'1'
                 },
@@ -50,14 +50,8 @@
                 {
                     title:'5'
                 }
-            ],
-            list1: []
-        };
-        $('#app').render(obj);
-
-        obj.list1.push(obj.list[0], obj.list[1], obj.list[2]);
-
-        obj.list1.splice(0, 1);
+            ]);
+        obj.list.$set(3, {title:'6'});
 
     </script>
 </body>

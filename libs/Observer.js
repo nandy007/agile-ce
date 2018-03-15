@@ -28,6 +28,12 @@
 
 	// 增加$set方法修改元素值
 	Array.prototype.$set = function (pos, item) {
+		var len = this.length;
+		if(pos > len){
+			return this.push(item);
+		}else if(pos < 0){
+			return this.unshift(item);
+		}
 		return this.splice(pos, 1, item);
 	};
 
