@@ -185,6 +185,31 @@
 			for(var i=start;i<len;i++){
 				watcherUtil.deleteSub(subs, $access+'.'+i);
 			}
+		}else if(rank===0){
+			var len = options.oldLen;
+			var gap = options.newLen-options.oldLen;
+			var subs = this.$depSub;
+
+			for(var i=len-1;i>start-1;i--){
+				var ni = i+gap;
+					oPath = $access+'.'+i,
+					nPath = $access+'.'+ni,
+					oIndexPath = oPath+'.*',
+					nIndexPath = nPath+'.*';
+
+				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+
+				cb({
+					path : nIndexPath,
+					oldVal : i,
+					newVal : ni
+				});
+			}
+
+			if(!handlerFlag) return;
+			for(var i=start;i<start+gap;i++){
+				watcherUtil.deleteSub(subs, $access+'.'+i);
+			}
 		}else{
 			var pos = start + rank;
 			gap = args.length - rank;
@@ -204,6 +229,7 @@
 					oldVal : i,
 					newVal : ni
 				});
+				console.log(i, ni);
 			}
 			if(!handlerFlag) return;
 			if(gap<0){

@@ -11434,8 +11434,14 @@ return jQuery;
 		var $placeholder = $node.def('$placeholder');
 
 		var args = $.util.copyArray(options.args);
-		var startP = args.shift();
-		var spliceLen = args.length>0?(startP+args.shift()):(children.length-startP+1);
+		var startP = args.shift(), rank, spliceLen;
+
+		if(args.length>0){
+			rank = args.shift();
+			spliceLen = startP + (rank||1);
+		}else{
+			spliceLen = children.length-startP+1;
+		}
 
 		for(var i=startP;i<spliceLen;i++){
 			var $child = children[i];
@@ -11453,7 +11459,7 @@ return jQuery;
 				}
 				args = [];
 			};
-			$child&&$child.remove();
+			if(rank!==0) $child&&$child.remove();
 		}
 
 	};
@@ -11820,6 +11826,31 @@ return jQuery;
 			for(var i=start;i<len;i++){
 				watcherUtil.deleteSub(subs, $access+'.'+i);
 			}
+		}else if(rank===0){
+			var len = options.oldLen;
+			var gap = options.newLen-options.oldLen;
+			var subs = this.$depSub;
+
+			for(var i=len-1;i>start-1;i--){
+				var ni = i+gap;
+					oPath = $access+'.'+i,
+					nPath = $access+'.'+ni,
+					oIndexPath = oPath+'.*',
+					nIndexPath = nPath+'.*';
+
+				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+
+				cb({
+					path : nIndexPath,
+					oldVal : i,
+					newVal : ni
+				});
+			}
+
+			if(!handlerFlag) return;
+			for(var i=start;i<start+gap;i++){
+				watcherUtil.deleteSub(subs, $access+'.'+i);
+			}
 		}else{
 			var pos = start + rank;
 			gap = args.length - rank;
@@ -11839,6 +11870,7 @@ return jQuery;
 					oldVal : i,
 					newVal : ni
 				});
+				console.log(i, ni);
 			}
 			if(!handlerFlag) return;
 			if(gap<0){

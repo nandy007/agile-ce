@@ -232,8 +232,14 @@
 		var $placeholder = $node.def('$placeholder');
 
 		var args = $.util.copyArray(options.args);
-		var startP = args.shift();
-		var spliceLen = args.length>0?(startP+args.shift()):(children.length-startP+1);
+		var startP = args.shift(), rank, spliceLen;
+
+		if(args.length>0){
+			rank = args.shift();
+			spliceLen = startP + (rank||1);
+		}else{
+			spliceLen = children.length-startP+1;
+		}
 
 		for(var i=startP;i<spliceLen;i++){
 			var $child = children[i];
@@ -251,7 +257,7 @@
 				}
 				args = [];
 			};
-			$child&&$child.remove();
+			if(rank!==0) $child&&$child.remove();
 		}
 
 	};
