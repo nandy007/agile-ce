@@ -229,7 +229,6 @@
 					oldVal : i,
 					newVal : ni
 				});
-				console.log(i, ni);
 			}
 			if(!handlerFlag) return;
 			if(gap<0){

@@ -50,8 +50,8 @@
         };
         
         $('#app').render(obj);
-        obj.list.splice(1, 0 , {title: 6});
-        obj.list.unshift({title:7})
+        var n = obj.list.splice(3, 1)[0];
+        obj.list.splice(1, 0 , n);
 
     </script>
 </body>
