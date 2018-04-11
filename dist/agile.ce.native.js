@@ -218,7 +218,7 @@ module.exports = require("Document");
 
 				var argsStr = '';
 				funcStr = funcStr.replace(/\((.*)\)/, function (s, s1) {
-					argsStr = s;
+					argsStr = s1;
 					return '';
 				});
 
