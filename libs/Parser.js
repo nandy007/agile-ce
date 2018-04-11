@@ -127,16 +127,13 @@
 			var evts = Parser.parseDir(dir, expression);
 
 			$.util.each(evts, function (evt, func) {
-				var $access = Parser.makePath(expression, fors);
-				var funcStr = Parser.makeAliasPath(expression, fors);
+				var depsAlias = Parser.getDepsAlias(expression, fors);
+
+				var funcStr = depsAlias.exps.join('.');
+
 				var argsStr = '';
 				funcStr = funcStr.replace(/\((.*)\)/, function (s, s1) {
-					/*var args = s1.split(',');
-					$.util.each(args, function (i, arg) {
-						args[i] = Parser.makeAliasPath($.util.trim(arg), fors);
-					});
-					argsStr = args.join(',');*/
-					argsStr = s1;
+					argsStr = s;
 					return '';
 				});
 
@@ -336,6 +333,7 @@
 				case 'text':
 				case 'password':
 				case 'textfield':
+				case 'textinput':
 				case 'textarea': this.vmtext.apply(this, arguments); return;
 				case 'radio': this.vmradio.apply(this, arguments); return;
 				case 'checkbox': this.vmcheckbox.apply(this, arguments); return;

@@ -16,7 +16,7 @@
 <body>
     <div id="app">
         <ul>
-        <li v-for="item in list" v-text="$index+'-'+item.title"></li>
+        <li v-for="item in list" v-text="$index+'-'+item.title" v-on:click="doclick($index)"></li>
         </ul>
         <button v-on:click="doclick">wwww</button>
     </div>
@@ -44,8 +44,8 @@
                 }
             ],
             list1: [],
-            doclick: function(){
-                console.log(obj.v);
+            doclick: function(i){
+                console.log(i);
             }
         };
         
