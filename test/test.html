@@ -16,42 +16,68 @@
 <body>
     <div id="app">
         <ul>
-        <li v-for="item in list" v-text="$index+'-'+item.title" v-on:click="doclick($index)"></li>
+            <select v-model="val">
+                <option v-for="item in list" v-bind:value="item.title" v-text="item.title"></option>
+            </select>
         </ul>
         <button v-on:click="doclick()">wwww</button>
     </div>
     <script>
+        $('select').on('contentchanged', function(){
+            console.log(111);
+        });
         var obj = {
             'd$a': '1',
             'a': '222',
-            v: 6,
+            val: '2',
             pageNum:1,
             list: [
                 {
-                    title:'1'
+                    title:'1',
+                    defaultV: '1'
                 },
                 {
-                    title:'2'
+                    title:'2',
+                    defaultV: ''
                 },
                 {
-                    title:'3'
+                    title:'3',
+                    defaultV: ''
                 },
                 {
-                    title:'4'
+                    title:'4',
+                    defaultV: ''
                 },
                 {
-                    title:'5'
+                    title:'5',
+                    defaultV: ''
                 }
             ],
             list1: [],
-            doclick: function(i){
-                console.log(i);
+            doclick: function(i, item){
+                console.log(obj.val);
             }
         };
         
         $('#app').render(obj);
-        var n = obj.list.splice(3, 1)[0];
-        obj.list.splice(1, 0 , n);
+        //var n = obj.list.splice(3, 1)[0];
+        //obj.list.splice(1, 0 , n);
+
+        setTimeout(function(){
+            // var item3 = obj.list[3];
+            // var item1 = obj.list[1];
+            // obj.list.$set(1, {
+            //     title: item3.title,
+            //     defaultV: item3.defaultV
+            // });
+
+            // obj.list.$set(3, {
+            //     title: item1.title,
+            //     defaultV: item1.defaultV
+            // });
+            obj.list.pop();
+        }, 3000);
+        
 
     </script>
 </body>

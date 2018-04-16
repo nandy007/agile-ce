@@ -222,11 +222,11 @@ module.exports = env;
 					if (argsStr === '') {
 						var func = (new Function('scope', 'node', 'params', 'return '
 							+ funcStr + '.apply(node, params);'));
-						func(scope, this, params);
+						return func(scope, this, params);
 					} else {
 						var func = (new Function('scope', 'node', '$event', 'return '
 							+ funcStr + '.call(node, ' + argsStr + ');'));
-						func(scope, this, params.shift());
+						return func(scope, this, params.shift());
 					}
 				};
 
@@ -647,7 +647,7 @@ module.exports = env;
 	
 		this._proxy = function (e) {
 			var _proxy = this[parser._getProxy(e.type)];
-			_proxy.apply(this, arguments);
+			return _proxy.apply(this, arguments);
 		};
 
 	};
