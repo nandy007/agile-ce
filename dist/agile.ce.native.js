@@ -173,6 +173,8 @@ module.exports = require("Document");
 
 			var __modelInit = $parent.def('__model_init__');
 
+			__modelInit && __modelInit();
+
 			this.watcher.watch(deps, function (options, i) {
 
 				if (!options.method) {
@@ -203,7 +205,7 @@ module.exports = require("Document");
 					return $listFragment;
 				});
 
-				__modelInit&&__modelInit();
+				__modelInit && __modelInit();
 			});
 		},
 		'von': function ($node, fors, expression, dir, isOnce) {
