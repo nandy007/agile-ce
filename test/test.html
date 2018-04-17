@@ -15,10 +15,8 @@
 
 <body>
     <div id="app">
-        <ul>
-            <select v-model="val">
-                <option v-for="item in list" v-bind:value="item.title" v-text="item.title"></option>
-            </select>
+        <ul v-bind:aaa="isEdit&&1==form.b?false:true">
+            aaaa
         </ul>
         <button v-on:click="doclick()">wwww</button>
     </div>
@@ -27,6 +25,10 @@
             console.log(111);
         });
         var obj = {
+            isEdit: true,
+            form: {
+                b:1
+            },
             'd$a': '1',
             'a': '222',
             val: '2',
@@ -75,6 +77,7 @@
             //     title: item1.title,
             //     defaultV: item1.defaultV
             // });
+            obj.isEdit = false;
             obj.list.pop();
         }, 3000);
         
