@@ -256,14 +256,15 @@ module.exports = require("Document");
 			var attrs = Parser.parseDir(dir, expression);
 
 			$.util.each(attrs, function (attr, exp) {
-				
-				var depsAlias = Parser.getDepsAlias(exp, fors);
-
-				exp = depsAlias.exps.join('.');
+				exp = $.util.trim(exp);
 				if (attr === 'class' || attr === 'style') {
 					parser['v' + attr]($node, fors, exp);
 					return;
 				}
+
+				var depsAlias = Parser.getDepsAlias(exp, fors);
+
+				exp = depsAlias.exps.join('.');
 
 				updater.updateAttribute($node, attr, parser.getValue(exp, fors));
 
