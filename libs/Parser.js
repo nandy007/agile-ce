@@ -394,7 +394,7 @@
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				if($node.is(':checked')) duplex[field] = $node.val();
+				if($node.is(':checked')) duplex[field] = Parser.formatValue($node, $node.val());
 			});
 		},
 		'vmcheckbox': function ($node, fors, expression, dir) {
