@@ -1,4 +1,9 @@
-/******/ (function(modules) { // webpackBootstrap
+/*
+ *	Agile CE 移动前端MVVM框架
+ *	Version	:	0.3.7.1525442215463 beta
+ *	Author	:	nandy007
+ *	License MIT @ https://github.com/nandy007/agile-ce
+ *//******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1379,7 +1384,7 @@ module.exports = env.JQLite;
 		},
 		__on__: function (evt, selector, callback) {
 			this.each(function () {
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				if (aceEvents.indexOf(evt) > -1) return;
 				aceEvents.push(evt);
 				jqlite.util.defRec(this, '__ace-events__', aceEvents);
@@ -1387,8 +1392,8 @@ module.exports = env.JQLite;
 			this.on.apply(this, arguments);
 		},
 		__remove_on__: function(parserIndex){
-			$(this).find('[acee="'+parserIndex+'"]').each(function(){
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+			jqlite(this).find('[acee="'+parserIndex+'"]').each(function(){
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				jqlite.util.defRec(this, '__ace-events__', null);
 				jqlite.util.each(aceEvents, function(i, evt){
 					$node.off(evt);

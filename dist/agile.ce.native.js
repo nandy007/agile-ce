@@ -1,4 +1,40 @@
-/******/ (function(modules) { // webpackBootstrap
+/*
+ *	Agile CE 移动前端MVVM框架
+ *	Version	:	0.3.7.1525442221115 beta
+ *	Author	:	nandy007
+ *	License MIT @ https://github.com/nandy007/agile-ce
+ */var __ACE__ = {};
+var __EXPORTS_DEFINED_FACTORY__ = function() {
+
+    if ((typeof module === "object" || typeof module === "function") && typeof module.exports === "object") {
+        module.exports = __ACE__;
+    }
+
+    if (typeof window === 'undefined') return;
+
+    const modName = window.__AGILE_CE_ID__ || 'ace';
+
+    if (typeof window.define === "function" && window.define.amd) {
+        //window.define(modName, [], function () {
+        window.define([], function () {
+            return __ACE__;
+        });
+    }
+
+    if (!window[modName]) window[modName] = __ACE__;
+
+};
+var __EXPORTS_DEFINED__ = function (mod, modName) {
+    if(modName==='JQLite'){
+         for(var k in __ACE__){
+            mod[k] = __ACE__[k];
+         }
+         __ACE__ = mod;
+         __EXPORTS_DEFINED_FACTORY__();
+    }else{
+        __ACE__[modName] = mod;
+    }
+};/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -1328,7 +1364,7 @@ module.exports = env.JQLite;
 		if (jqlite.ui.isJQS(selector)) return selector;
 
 		if (jqlite.isFunction(selector)) {
-			return $(window).on('ready', selector);
+			return jqlite(window).on('ready', selector);
 		}
 
 		var els = selector ? (selector instanceof Array ? selector : (typeof selector === 'string' ? (selector.indexOf('<') === 0 ? jqlite.parseHTML(selector) : jqlite.parseSelector(selector, scope)) : [selector])) : [];
@@ -1521,7 +1557,7 @@ module.exports = env.JQLite;
 						}
 					} else if (typeof this[name] === 'function') {
 						this[name](val);
-					} else {
+					} else if(this.setAttr){
 						this.setAttr(name, val);
 					}
 				});
@@ -1772,7 +1808,7 @@ module.exports = env.JQLite;
 		},
 		__on__: function (evt, selector, callback) {
 			this.each(function () {
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				if (aceEvents.indexOf(evt) > -1) return;
 				aceEvents.push(evt);
 				jqlite.util.defRec(this, '__ace-events__', aceEvents);
@@ -1780,8 +1816,8 @@ module.exports = env.JQLite;
 			this.on.apply(this, arguments);
 		},
 		__remove_on__: function(parserIndex){
-			$(this).find('[acee="'+parserIndex+'"]').each(function(){
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+			jqlite(this).find('[acee="'+parserIndex+'"]').each(function(){
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				jqlite.util.defRec(this, '__ace-events__', null);
 				jqlite.util.each(aceEvents, function (i, evt) {
 					$node.off(evt);

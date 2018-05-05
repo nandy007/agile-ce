@@ -79,7 +79,7 @@
 		},
 		__on__: function (evt, selector, callback) {
 			this.each(function () {
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				if (aceEvents.indexOf(evt) > -1) return;
 				aceEvents.push(evt);
 				jqlite.util.defRec(this, '__ace-events__', aceEvents);
@@ -87,8 +87,8 @@
 			this.on.apply(this, arguments);
 		},
 		__remove_on__: function(parserIndex){
-			$(this).find('[acee="'+parserIndex+'"]').each(function(){
-				var $node = $(this), aceEvents = this['__ace-events__'] || [];
+			jqlite(this).find('[acee="'+parserIndex+'"]').each(function(){
+				var $node = jqlite(this), aceEvents = this['__ace-events__'] || [];
 				jqlite.util.defRec(this, '__ace-events__', null);
 				jqlite.util.each(aceEvents, function(i, evt){
 					$node.off(evt);

@@ -32,30 +32,32 @@ var plugins = (function(){
         }));
     }
 
-    // plugins.push((function(){
-    //     function NativeModulePlugin(options) {
-    //         // Setup the plugin instance with options...
-    //     }
+    plugins.push((function(){
+        function NativeModulePlugin(options) {
+            // Setup the plugin instance with options...
+        }
 
-    //     NativeModulePlugin.prototype.apply = function(compiler) {
-    //         compiler.plugin('done', function() {
-    //             var fs = require('fs'), filePath = './dist/'+fileName+'.js', encoding = 'utf-8';
-    //             var file = fs.readFileSync(filePath, encoding);
-    //             var content = [];
-    //             content.push(copyright);
+        NativeModulePlugin.prototype.apply = function(compiler) {
+            compiler.plugin('done', function() {
+                var fs = require('fs'), filePath = './dist/'+fileName+'.js', encoding = 'utf-8';
+                var file = fs.readFileSync(filePath, encoding);
+                var content = [];
+                content.push(copyright);
 
-    //             var appendContent = fs.readFileSync('./libs/append.js', encoding);
-    //             content.push(appendContent);  
-                
-    //             content.push(file);
-    //             fs.writeFile(filePath, content.join(''), {encoding:encoding}, function(err){
-    //                 err?console.error('写入失败'):console.log('写入成功');
-    //             });
-    //         });
-    //     };
+                if(usein==='native'){
+                    var appendContent = fs.readFileSync('./libs/append.js', encoding);
+                    content.push(appendContent);  
+                }
 
-    //     return new NativeModulePlugin({options: true});
-    // })());
+                content.push(file);
+                fs.writeFile(filePath, content.join(''), {encoding:encoding}, function(err){
+                    err?console.error('写入失败'):console.log('写入成功');
+                });
+            });
+        };
+
+        return new NativeModulePlugin({options: true});
+    })());
 
     return plugins;
 })();
