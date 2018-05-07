@@ -15,8 +15,10 @@
 
 <body>
     <div id="app">
-        <ul v-bind:aaa="isEdit&&1==form.b?false:true">
-            aaaa
+        <ul>
+            <li v-if="val==='2'||test==='4'">aaa</li>
+            <li v-elseif="val==='3'">ccc</li>
+            <li v-else>bbb</li>
         </ul>
         <button v-on:click="doclick()">wwww</button>
     </div>
@@ -31,7 +33,8 @@
             },
             'd$a': '1',
             'a': '222',
-            val: '2',
+            val: '1',
+            test: '4',
             pageNum:1,
             list: [
                 {
@@ -77,8 +80,10 @@
             //     title: item1.title,
             //     defaultV: item1.defaultV
             // });
-            obj.isEdit = false;
-            obj.list.pop();
+            // obj.isEdit = false;
+            // obj.list.pop();
+            obj.val = '3';
+            obj.test = '1';
         }, 3000);
         
 

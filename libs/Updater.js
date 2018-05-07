@@ -301,26 +301,21 @@
 	/**
 	 * 互斥节点内容渲染
 	 */
-	up.mutexRender = function ($node, isRender, cb) {
-		var __render = $node.data(__RENDER);
-		if (!__render) {
-			$node.data(__RENDER, __render = {
-												content : $node.html(), 
-												display : $node.css('display')
-											});
-		}
-		$node.empty();
+	up.mutexRender = function ($node, cb) {
 
-		var $fragment = $.ui.toJQFragment(__render.content);
+		var $clone = $node.clone(true);
+
+		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
 	    
 		// 渲染
-		if (isRender) {
-			cb($fragment);
-			$fragment.appendTo($node);
-			this.updateShowHide($node, __render.display, true);
+		cb($clone);
+		if($replace){
+			$clone.replaceTo($replace);
 		}else{
-			this.updateShowHide($node, __render.display, false);
+			$clone.insertAfter($placeholder);
 		}
+		$placeholder.def('__$replace', $clone);
+
 	};
 
 	/**

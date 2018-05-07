@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.3.7.1525442221115 beta
+ *	Version	:	0.3.8.1525660267333 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -410,29 +410,34 @@ module.exports = require("Document");
 						$next = $next.next();
 					}
 				}
-				var isDoRender = false;
 				$.util.each(nodes, function(i, $el){
 					var curRender = $el.def('__isrender');
-					if(isDoRender){
-						updater.mutexRender($el, false, preCompile);
-					}else{
-						updater.mutexRender($el, isDoRender = curRender, preCompile);
+					if(curRender){
+						updater.mutexRender($el, preCompile);
+						return false;
 					}
 				});
 			};
 
 			var isRender = dir==='v-else'?true:parser.getValue(expression, fors);
-			var mutexGroup = this.getMutexGroup(dir==='v-if');
+			var mutexGroup = this.getMutexGroup(dir==='v-if'?$node:null);
 
 			$node.def('__isrender', isRender);
 			$node.def('__mutexgroup', mutexGroup);
 
 			var $siblingNode = $node.next();
-			var nodes;
+			var nodes, $placeholder = parser.$mutexGroupPlaceholder;
+
+			$node.def('__$placeholder', $placeholder);
 
 			if(!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')){	
+				parser.$mutexGroup.append($node);
 				mutexHandler();
+			}else{
+				parser.$mutexGroup.append($node);
 			}
+
+			
 
 			var deps = Parser.getDepsAlias(expression, fors).deps;
 
@@ -720,11 +725,16 @@ module.exports = require("Document");
 
 	/**
 	 * 获取if else的分组序列
-	 * @param   {Boolean}     isAdd         [是否是新分组]
+	 * @param   {JQLite}     $node          [if条件对应的$node]
 	 * @return  {Number}                    [分组序列]
 	 */
-	pp.getMutexGroup = function(isAdd){
-		if(isAdd) this.mutexGroup = this.mutexGroup + 1;
+	pp.getMutexGroup = function($node){
+		if($node) {
+			this.mutexGroup = this.mutexGroup + 1;
+			this.$mutexGroup = $.ui.createJQFragment();
+			var $placeholder = this.$mutexGroupPlaceholder = $.ui.createJQPlaceholder();
+			$placeholder.insertBefore($node);
+		}
 		return this.mutexGroup;
 	}
 
@@ -3574,26 +3584,21 @@ module.exports = require("File");
 	/**
 	 * 互斥节点内容渲染
 	 */
-	up.mutexRender = function ($node, isRender, cb) {
-		var __render = $node.data(__RENDER);
-		if (!__render) {
-			$node.data(__RENDER, __render = {
-												content : $node.html(), 
-												display : $node.css('display')
-											});
-		}
-		$node.empty();
+	up.mutexRender = function ($node, cb) {
 
-		var $fragment = $.ui.toJQFragment(__render.content);
+		var $clone = $node.clone(true);
+
+		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
 	    
 		// 渲染
-		if (isRender) {
-			cb($fragment);
-			$fragment.appendTo($node);
-			this.updateShowHide($node, __render.display, true);
+		cb($clone);
+		if($replace){
+			$clone.replaceTo($replace);
 		}else{
-			this.updateShowHide($node, __render.display, false);
+			$clone.insertAfter($placeholder);
 		}
+		$placeholder.def('__$replace', $clone);
+
 	};
 
 	/**

@@ -289,29 +289,34 @@
 						$next = $next.next();
 					}
 				}
-				var isDoRender = false;
 				$.util.each(nodes, function(i, $el){
 					var curRender = $el.def('__isrender');
-					if(isDoRender){
-						updater.mutexRender($el, false, preCompile);
-					}else{
-						updater.mutexRender($el, isDoRender = curRender, preCompile);
+					if(curRender){
+						updater.mutexRender($el, preCompile);
+						return false;
 					}
 				});
 			};
 
 			var isRender = dir==='v-else'?true:parser.getValue(expression, fors);
-			var mutexGroup = this.getMutexGroup(dir==='v-if');
+			var mutexGroup = this.getMutexGroup(dir==='v-if'?$node:null);
 
 			$node.def('__isrender', isRender);
 			$node.def('__mutexgroup', mutexGroup);
 
 			var $siblingNode = $node.next();
-			var nodes;
+			var nodes, $placeholder = parser.$mutexGroupPlaceholder;
+
+			$node.def('__$placeholder', $placeholder);
 
 			if(!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')){	
+				parser.$mutexGroup.append($node);
 				mutexHandler();
+			}else{
+				parser.$mutexGroup.append($node);
 			}
+
+			
 
 			var deps = Parser.getDepsAlias(expression, fors).deps;
 
@@ -599,11 +604,16 @@
 
 	/**
 	 * 获取if else的分组序列
-	 * @param   {Boolean}     isAdd         [是否是新分组]
+	 * @param   {JQLite}     $node          [if条件对应的$node]
 	 * @return  {Number}                    [分组序列]
 	 */
-	pp.getMutexGroup = function(isAdd){
-		if(isAdd) this.mutexGroup = this.mutexGroup + 1;
+	pp.getMutexGroup = function($node){
+		if($node) {
+			this.mutexGroup = this.mutexGroup + 1;
+			this.$mutexGroup = $.ui.createJQFragment();
+			var $placeholder = this.$mutexGroupPlaceholder = $.ui.createJQPlaceholder();
+			$placeholder.insertBefore($node);
+		}
 		return this.mutexGroup;
 	}
 
