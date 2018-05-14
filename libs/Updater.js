@@ -303,18 +303,18 @@
 	 */
 	up.mutexRender = function ($node, cb) {
 
-		var $clone = $node.clone(true);
+		var $fragment = $.ui.createJQFragment();
 
 		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
 	    
 		// 渲染
-		cb($clone);
+		cb($node);
 		if($replace){
-			$clone.replaceTo($replace);
-		}else{
-			$clone.insertAfter($placeholder);
+			$fragment.append($replace);
 		}
-		$placeholder.def('__$replace', $clone);
+		$node.insertAfter($placeholder);
+		
+		$placeholder.def('__$replace', $node);
 
 	};
 

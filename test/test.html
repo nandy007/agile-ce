@@ -16,9 +16,8 @@
 <body>
     <div id="app">
         <ul>
-            <li v-if="val==='2'||test==='4'">aaa</li>
-            <li v-elseif="val==='3'">ccc</li>
-            <li v-else>bbb</li>
+            <li v-if="isEdit" v-on:click="doclick" v-text="test"></li>
+            
         </ul>
         <button v-on:click="doclick()">wwww</button>
     </div>
@@ -27,7 +26,7 @@
             console.log(111);
         });
         var obj = {
-            isEdit: true,
+            isEdit: false,
             form: {
                 b:1
             },
@@ -82,8 +81,10 @@
             // });
             // obj.isEdit = false;
             // obj.list.pop();
-            obj.val = '3';
-            obj.test = '1';
+            //obj.val = '3';
+            //obj.test = '1';
+            obj.isEdit = true;
+            obj.test = '5';
         }, 3000);
         
 

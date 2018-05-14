@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.3.8.1525660261981 beta
+ *	Version	:	0.3.9.1526285051897 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -11523,18 +11523,18 @@ return jQuery;
 	 */
 	up.mutexRender = function ($node, cb) {
 
-		var $clone = $node.clone(true);
+		var $fragment = $.ui.createJQFragment();
 
 		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
 	    
 		// 渲染
-		cb($clone);
+		cb($node);
 		if($replace){
-			$clone.replaceTo($replace);
-		}else{
-			$clone.insertAfter($placeholder);
+			$fragment.append($replace);
 		}
-		$placeholder.def('__$replace', $clone);
+		$node.insertAfter($placeholder);
+		
+		$placeholder.def('__$replace', $node);
 
 	};
 

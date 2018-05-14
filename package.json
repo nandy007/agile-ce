@@ -1,6 +1,6 @@
 {
   "name": "agile-ce",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "jQuery风格的MVVM框架",
   "main": "index.js",
   "directories": {
