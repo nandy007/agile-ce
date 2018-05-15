@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.0.1526369404692 beta
+ *	Version	:	0.4.1.1526392729074 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -693,6 +693,8 @@ module.exports = env;
 			this.mutexGroup = this.mutexGroup + 1;
 			this.$mutexGroup = $.ui.createJQFragment();
 			var $placeholder = this.$mutexGroupPlaceholder = $.ui.createJQPlaceholder();
+			var $fragment = $.ui.createJQFragment();
+			$placeholder.def('__$fragment', $fragment);
 			$placeholder.insertBefore($node);
 		}
 		return this.mutexGroup;
@@ -11520,9 +11522,7 @@ return jQuery;
 	 */
 	up.mutexRender = function ($node, cb, isShow) {
 
-		var $fragment = $.ui.createJQFragment();
-
-		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
+		var $placeholder = $node.def('__$placeholder'), $fragment = $placeholder.def('__$fragment'), $replace = $placeholder.def('__$replace');
 
 		// 渲染
 		cb($node);

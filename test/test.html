@@ -18,10 +18,10 @@
         <input type="radio" v-model="test" number value="3"/>
         <input type="radio" v-model="test" number value="4"/>
         <ul>
-            <li v-if="test===3" v-on:click="doclick" v-text="test"></li>
+            <li v-on:click="doclick" v-text="test" v-if="test===3"></li>
             
         </ul>
-        <button v-on:click="doclick()">wwww</button>
+        <button>wwww</button>
     </div>
     <script>
         $('select').on('contentchanged', function(){
@@ -35,7 +35,7 @@
             'd$a': '1',
             'a': '222',
             val: '1',
-            test: 3,
+            test: 4,
             pageNum:1,
             list: [
                 {

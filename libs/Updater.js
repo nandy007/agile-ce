@@ -303,9 +303,7 @@
 	 */
 	up.mutexRender = function ($node, cb, isShow) {
 
-		var $fragment = $.ui.createJQFragment();
-
-		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
+		var $placeholder = $node.def('__$placeholder'), $fragment = $placeholder.def('__$fragment'), $replace = $placeholder.def('__$replace');
 
 		// 渲染
 		cb($node);

@@ -609,6 +609,8 @@
 			this.mutexGroup = this.mutexGroup + 1;
 			this.$mutexGroup = $.ui.createJQFragment();
 			var $placeholder = this.$mutexGroupPlaceholder = $.ui.createJQPlaceholder();
+			var $fragment = $.ui.createJQFragment();
+			$placeholder.def('__$fragment', $fragment);
 			$placeholder.insertBefore($node);
 		}
 		return this.mutexGroup;
