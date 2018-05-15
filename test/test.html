@@ -15,8 +15,10 @@
 
 <body>
     <div id="app">
+        <input type="radio" v-model="test" number value="3"/>
+        <input type="radio" v-model="test" number value="4"/>
         <ul>
-            <li v-if="isEdit" v-on:click="doclick" v-text="test"></li>
+            <li v-if="test===3" v-on:click="doclick" v-text="test"></li>
             
         </ul>
         <button v-on:click="doclick()">wwww</button>
@@ -33,7 +35,7 @@
             'd$a': '1',
             'a': '222',
             val: '1',
-            test: '4',
+            test: 3,
             pageNum:1,
             list: [
                 {
@@ -59,7 +61,7 @@
             ],
             list1: [],
             doclick: function(i, item){
-                console.log(obj.val);
+                console.log(typeof obj.test);
             }
         };
         
@@ -84,7 +86,7 @@
             //obj.val = '3';
             //obj.test = '1';
             obj.isEdit = true;
-            obj.test = '5';
+            //obj.test = '5';
         }, 3000);
         
 

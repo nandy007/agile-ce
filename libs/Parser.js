@@ -291,10 +291,7 @@
 				}
 				$.util.each(nodes, function(i, $el){
 					var curRender = $el.def('__isrender');
-					if(curRender){
-						updater.mutexRender($el, preCompile);
-						return false;
-					}
+					updater.mutexRender($el, preCompile, curRender);
 				});
 			};
 

@@ -301,20 +301,25 @@
 	/**
 	 * 互斥节点内容渲染
 	 */
-	up.mutexRender = function ($node, cb) {
+	up.mutexRender = function ($node, cb, isShow) {
 
 		var $fragment = $.ui.createJQFragment();
 
 		var $placeholder = $node.def('__$placeholder'), $replace = $placeholder.def('__$replace');
-	    
+
 		// 渲染
 		cb($node);
-		if($replace){
-			$fragment.append($replace);
+
+		if(isShow){
+			if($replace){
+				$fragment.append($replace);
+			}
+			$node.insertAfter($placeholder);
+			
+			$placeholder.def('__$replace', $node);
+		}else{
+			$fragment.append($node);
 		}
-		$node.insertAfter($placeholder);
-		
-		$placeholder.def('__$replace', $node);
 
 	};
 
