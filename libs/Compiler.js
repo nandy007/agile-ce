@@ -150,7 +150,8 @@
 					vfor : null,
 					vlike : null,
 					vfilter : null,
-					vcontext : null
+					vcontext : null,
+					vif : null
 				};
 
 			$.util.each(nodeAttrs, function(i, attr){
@@ -167,6 +168,9 @@
 					}else if(compileUtil.isTheDirective('v-context', name)){
 						priorityDirs.vcontext = attr;//v-like指令节点优先编译
 						return null;
+					}else if(compileUtil.isTheDirective('v-if', name) || compileUtil.isTheDirective('v-elseif', name) || compileUtil.isTheDirective('v-else', name)){
+						priorityDirs.vif = attr;//v-if指令最后编译
+						return null;
 					}
 				}else{
 					return null;
@@ -180,6 +184,9 @@
 			}else{
 				if((priorityDirs.vlike)) nodeAttrs.unshift(priorityDirs.vlike);
 				if((priorityDirs.vcontext)) nodeAttrs.unshift(priorityDirs.vcontext);
+			}
+			if(priorityDirs.vif){
+				nodeAttrs.push(priorityDirs.vif);
 			}
 			
 			//编译节点指令

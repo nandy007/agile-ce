@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.1.1526392734703 beta
+ *	Version	:	0.4.2.1526526848419 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3173,7 +3173,8 @@ module.exports = require("File");
 					vfor : null,
 					vlike : null,
 					vfilter : null,
-					vcontext : null
+					vcontext : null,
+					vif : null
 				};
 
 			$.util.each(nodeAttrs, function(i, attr){
@@ -3190,6 +3191,9 @@ module.exports = require("File");
 					}else if(compileUtil.isTheDirective('v-context', name)){
 						priorityDirs.vcontext = attr;//v-like指令节点优先编译
 						return null;
+					}else if(compileUtil.isTheDirective('v-if', name) || compileUtil.isTheDirective('v-elseif', name) || compileUtil.isTheDirective('v-else', name)){
+						priorityDirs.vif = attr;//v-if指令最后编译
+						return null;
 					}
 				}else{
 					return null;
@@ -3203,6 +3207,9 @@ module.exports = require("File");
 			}else{
 				if((priorityDirs.vlike)) nodeAttrs.unshift(priorityDirs.vlike);
 				if((priorityDirs.vcontext)) nodeAttrs.unshift(priorityDirs.vcontext);
+			}
+			if(priorityDirs.vif){
+				nodeAttrs.push(priorityDirs.vif);
 			}
 			
 			//编译节点指令
