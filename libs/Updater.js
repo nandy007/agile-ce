@@ -306,14 +306,12 @@
 		var $placeholder = $node.def('__$placeholder'), $fragment = $placeholder.def('__$fragment'), $replace = $placeholder.def('__$replace');
 
 		// 渲染
-		cb($node);
-
 		if(isShow){
+			cb($node);
 			if($replace){
 				$fragment.append($replace);
 			}
 			$node.insertAfter($placeholder);
-			
 			$placeholder.def('__$replace', $node);
 		}else{
 			$fragment.append($node);

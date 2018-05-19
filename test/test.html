@@ -17,8 +17,11 @@
     <div id="app">
         <input type="radio" v-model="test" number value="3"/>
         <input type="radio" v-model="test" number value="4"/>
+        <input type="radio" v-model="test" number value="5"/>
         <ul>
             <li v-on:click="doclick" v-text="test" v-if="test===3"></li>
+            <li v-on:click="doclick" v-text="test" v-elseif="test===4"></li>
+            <li v-on:click="doclick" v-text="test1" v-else=""></li>
             
         </ul>
         <button>wwww</button>
@@ -36,6 +39,7 @@
             'a': '222',
             val: '1',
             test: 4,
+            test1: '111',
             pageNum:1,
             list: [
                 {

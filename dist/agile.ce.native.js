@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.2.1526526848419 beta
+ *	Version	:	0.4.3.1526722925547 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -397,21 +397,18 @@ module.exports = require("Document");
 				parser.vm.compileSteps($fragment, fors);
 			};
 
-			var mutexHandler = function(){
-				if(!nodes){
-					nodes = [$node];
-					var $prev = $node.prev(), $next = $node.next();
-					while($prev.def('__mutexgroup')===mutexGroup){
-						nodes.unshift($prev);
-						$prev = $prev.prev();
-					}
-					while($next.def('__mutexgroup')===mutexGroup){
-						nodes.push($next);
-						$next = $next.next();
-					}
+			var mutexHandler = function(isFirst){
+				var nodes = $placeholder.def('__nodes');
+				if(isFirst){
+					parser.$mutexGroup.children().each(function(){
+						nodes.push($(this));
+					});
 				}
+				var hasRender = false;
 				$.util.each(nodes, function(i, $el){
 					var curRender = $el.def('__isrender');
+					if(hasRender) curRender = false;
+					if(curRender) hasRender = true;
 					updater.mutexRender($el, preCompile, curRender);
 				});
 			};
@@ -429,7 +426,7 @@ module.exports = require("Document");
 
 			if(!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')){	
 				parser.$mutexGroup.append($node);
-				mutexHandler();
+				mutexHandler(true);
 			}else{
 				parser.$mutexGroup.append($node);
 			}
@@ -732,6 +729,7 @@ module.exports = require("Document");
 			var $placeholder = this.$mutexGroupPlaceholder = $.ui.createJQPlaceholder();
 			var $fragment = $.ui.createJQFragment();
 			$placeholder.def('__$fragment', $fragment);
+			$placeholder.def('__nodes', []);
 			$placeholder.insertBefore($node);
 		}
 		return this.mutexGroup;
@@ -3595,14 +3593,12 @@ module.exports = require("File");
 		var $placeholder = $node.def('__$placeholder'), $fragment = $placeholder.def('__$fragment'), $replace = $placeholder.def('__$replace');
 
 		// 渲染
-		cb($node);
-
 		if(isShow){
+			cb($node);
 			if($replace){
 				$fragment.append($replace);
 			}
 			$node.insertAfter($placeholder);
-			
 			$placeholder.def('__$replace', $node);
 		}else{
 			$fragment.append($node);
