@@ -15,7 +15,7 @@
 
 <body>
     <div id="app">
-        <input type="radio" v-model="test" number value="3"/>
+        <!-- <input type="radio" v-model="test" number value="3"/>
         <input type="radio" v-model="test" number value="4"/>
         <input type="radio" v-model="test" number value="5"/>
         <ul>
@@ -23,6 +23,10 @@
             <li v-on:click="doclick" v-text="test" v-elseif="test===4"></li>
             <li v-on:click="doclick" v-text="test1" v-else=""></li>
             
+        </ul> -->
+        <ul>
+            <li v-for="item in list"><a v-text="item.title"></a></li>
+            <li><a>dsadas</a></li>
         </ul>
         <button>wwww</button>
     </div>
@@ -89,7 +93,7 @@
             // obj.list.pop();
             //obj.val = '3';
             //obj.test = '1';
-            obj.isEdit = true;
+            //obj.isEdit = true;
             //obj.test = '5';
         }, 3000);
         

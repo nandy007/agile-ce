@@ -22,6 +22,10 @@
 
 > [v-bind:attributeName](#cid_0_7)
 
+> [v-class](#cid_0_12)
+
+> [v-style](#cid_0_13)
+
 > [v-show](#cid_0_8)
 
 > [v-if/v-elseif/v-else](#cid_0_9)
@@ -98,12 +102,27 @@ var obj = {
 </div>
 ```
 
+**搭配属性**
+
+<code>mode</code>占位模式，取值为single|null(default)。
+
+为null的时候会在vfor指令对应元素的前后插入fragment元素限定区域；为single则不会插入fragment元素，这时候要求vfor元素没有其他同级元素，一般用于容器内循环，比如slider组件。
+
+
+**注意事项**
+1. 使用vfor组件时，vfor绑定的必须是数组元素；
+2. 对于数组元素的操作必须使用数组函数，包括：pop/push/sort/shift/splice/unshift/reverse;
+3. 除此之外，数组对象扩展了如下函数：xSort(用法同sort)/xPush(用法同push)/$set(重置某个位置的元素)/$reset(重置整个数组对象)；
+4. Array.$set(index, obj);// index为要重置的数组元素的位置，obj为重置后的值
+5. Array.$reset(newArr);// newArr为新的数组，不可直接对数组变量重新赋值
+
+
 <span id="cid_0_3">**v-filter="funcName"**</span>
 
 配合v-for指令实现数据的过滤器。可以通过该指令为数组元素增加附属值来实现定制循环。
 
 v-filer指令会于v-for指令之前被解释执行。
-
+ 
 <code>FuncName</code>为一个函数名，当执行到该指令的时候会调用FuncName(<code>index</code>, <code>item</code>)传参，其中index为当前循环体的索引，item为当前循环体的元素对象。
 
 可以通过给item增加一些附加的key-value数据来实现在v-for循环体内定制化取值。比如：
@@ -232,6 +251,27 @@ MYshouye.prototype = {
 <code>variable</code>为绑定的变量。
 
 variable的值会赋值给元素的attributeName属性。并且在variable变化的时候attributeName跟着变化，反之不会。
+
+<span id="cid_0_12">**v-class="{className:variable}"**</span>
+
+为元素动态绑定class样式。
+
+<code>className</code>为样式名。
+
+<code>variable</code>为绑定的表达式。
+
+当variable表达式的运算结果为true则添加样式，否则将移除样式。
+
+
+<span id="cid_0_12">**v-style="{styleAttr:variable}"**</span>
+
+为元素动态绑定style样式。
+
+<code>styleAttr</code>为样式属性名。
+
+<code>variable</code>为绑定的表达式。
+
+variable的运算结果将作为styleAttr的属性值。
 
 
 <span id="cid_0_8">**v-show="variable"**</span>
