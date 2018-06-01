@@ -26,9 +26,9 @@
         </ul> -->
         <ul>
             <li v-for="item in list"><a v-text="item.title"></a></li>
-            <li><a>dsadas</a></li>
+            <li><a vmignore>{{test}}</a></li>
         </ul>
-        <button>wwww</button>
+        <button vmignore>{{test}}</button>
     </div>
     <script>
         $('select').on('contentchanged', function(){

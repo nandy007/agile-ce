@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.3.1526722925547 beta
+ *	Version	:	0.4.4.1527835042814 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1608,7 +1608,8 @@ module.exports = env.JQLite;
 			return this;
 		},
 		hasAttr: function (name) {
-			return this.length > 0 && this.domList[0].hasAttr(name);
+			var el = this.length>0&&this[0];
+			return el&&el.hasAttribute&&el.hasAttribute(name);
 		},
 		hasClass: function (className) {
 			var classStr = this.length > 0 && this.domList[0].getClassStyle() || '';
@@ -3128,9 +3129,10 @@ module.exports = require("File");
 	cp.walkElement = function ($element, fors, directiveNodes) {
 
 		var _this = this;
-
+		
 		$element.each(function(){
 			var $node = $(this);
+			if($node.hasAttr('vmignore')) return;
 			//缓存指令节点
 			if (compileUtil.hasDirective($node)) {
 				directiveNodes.push({
