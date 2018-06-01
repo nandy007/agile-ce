@@ -259,7 +259,8 @@
 			return this;
 		},
 		hasAttr: function (name) {
-			return this.length > 0 && this.domList[0].hasAttr(name);
+			var el = this.length>0&&this[0];
+			return el&&el.hasAttribute&&el.hasAttribute(name);
 		},
 		hasClass: function (className) {
 			var classStr = this.length > 0 && this.domList[0].getClassStyle() || '';

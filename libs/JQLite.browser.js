@@ -29,7 +29,8 @@
 			return arr;
 		},
 		hasAttr : function (name) {
-			return this.length>0&&this[0].hasAttribute(name);
+			var el = this.length>0&&this[0];
+			return el&&el.hasAttribute&&el.hasAttribute(name);
 		},
 		isElement : function(){
 			return this.length>0&&this[0].nodeType===1;

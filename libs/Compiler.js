@@ -107,9 +107,10 @@
 	cp.walkElement = function ($element, fors, directiveNodes) {
 
 		var _this = this;
-
+		
 		$element.each(function(){
 			var $node = $(this);
+			if($node.hasAttr('vmignore')) return;
 			//缓存指令节点
 			if (compileUtil.hasDirective($node)) {
 				directiveNodes.push({
