@@ -25,7 +25,7 @@
             
         </ul> -->
         <ul>
-            <li v-for="item in list"><a v-text="item.title"></a></li>
+            <li v-for="item in list" v-on:change="doChange($index)"><a v-text="item.title"></a></li>
             <li><a vmignore>{{test}}</a></li>
         </ul>
         <button vmignore>{{test}}</button>
@@ -70,6 +70,10 @@
             list1: [],
             doclick: function(i, item){
                 console.log(typeof obj.test);
+            },
+            doChange: function(index, item){
+                console.log(arguments);
+                obj.list.$set(index, item);
             }
         };
         
@@ -95,6 +99,10 @@
             //obj.test = '1';
             //obj.isEdit = true;
             //obj.test = '5';
+                $('ul li').first().trigger('change', [{
+                    title:'10',
+                    defaultV: '1'
+                }]);
         }, 3000);
         
 

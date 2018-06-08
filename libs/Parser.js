@@ -147,9 +147,9 @@
 							+ funcStr + '.apply(node, params);'));
 						return func(scope, this, params);
 					} else {
-						var func = (new Function('scope', 'node', '$event', 'return '
-							+ funcStr + '.call(node, ' + argsStr + ');'));
-						return func(scope, this, params.shift());
+						var func = (new Function('scope', 'node', '$event', 'params', 'params.unshift(' + argsStr + '); return '
+							+ funcStr + '.apply(node, params);'));
+						return func(scope, this, params.shift(), params);
 					}
 				};
 
