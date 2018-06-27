@@ -124,7 +124,7 @@
 		var len = options.oldLen;
 		var subs = this.$depSub;
 		for(var i=1;i<len;i++){
-			var ni = i-1;
+			var ni = i-1,
 				oPath = $access+'.'+i,
 				nPath = $access+'.'+ni,
 				oIndexPath = oPath+'.*',
@@ -148,7 +148,7 @@
 		var subs = this.$depSub;
 
 		for(var i=len-1;i>-1;i--){
-			var ni = i+gap;
+			var ni = i+gap,
 				oPath = $access+'.'+i,
 				nPath = $access+'.'+ni,
 				oIndexPath = oPath+'.*',
@@ -191,7 +191,7 @@
 			var subs = this.$depSub;
 
 			for(var i=len-1;i>start-1;i--){
-				var ni = i+gap;
+				var ni = i+gap,
 					oPath = $access+'.'+i,
 					nPath = $access+'.'+ni,
 					oIndexPath = oPath+'.*',

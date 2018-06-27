@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.6.1528431077718 beta
+ *	Version	:	0.4.7.1530083073217 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3848,7 +3848,7 @@ module.exports = require("File");
 		var len = options.oldLen;
 		var subs = this.$depSub;
 		for(var i=1;i<len;i++){
-			var ni = i-1;
+			var ni = i-1,
 				oPath = $access+'.'+i,
 				nPath = $access+'.'+ni,
 				oIndexPath = oPath+'.*',
@@ -3872,7 +3872,7 @@ module.exports = require("File");
 		var subs = this.$depSub;
 
 		for(var i=len-1;i>-1;i--){
-			var ni = i+gap;
+			var ni = i+gap,
 				oPath = $access+'.'+i,
 				nPath = $access+'.'+ni,
 				oIndexPath = oPath+'.*',
@@ -3915,7 +3915,7 @@ module.exports = require("File");
 			var subs = this.$depSub;
 
 			for(var i=len-1;i>start-1;i--){
-				var ni = i+gap;
+				var ni = i+gap,
 					oPath = $access+'.'+i,
 					nPath = $access+'.'+ni,
 					oIndexPath = oPath+'.*',
