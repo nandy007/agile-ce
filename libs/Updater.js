@@ -146,7 +146,7 @@
 		var $fragment = cb(options.args);
 		var	$placeholder = $node.def('$placeholder');
 		if($placeholder){
-			var	before$placeholder = $placeholder.before;
+			var	before$placeholder = $placeholder.before,
 				$next = before$placeholder.next();
 			//var children = getVforChildren($parent, options['vforIndex']);
 			while($next && ($next.length===1) && !$next.def('isPlaceholder')){

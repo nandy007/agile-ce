@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.7.1530083067556 beta
+ *	Version	:	0.4.8.1530273961485 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -297,10 +297,10 @@ module.exports = env;
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
 			$.util.each($style, function (style, exp) {
-
+				var depsAlias = Parser.getDepsAlias(exp, fors);
 				updater.updateStyle($node, style, parser.getValue(exp, fors));
 
-				var deps = [Parser.makePath(exp, fors)];
+				var deps = depsAlias.deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateStyle($node, style, parser.getValue(exp, fors));
@@ -11372,7 +11372,7 @@ return jQuery;
 		var $fragment = cb(options.args);
 		var	$placeholder = $node.def('$placeholder');
 		if($placeholder){
-			var	before$placeholder = $placeholder.before;
+			var	before$placeholder = $placeholder.before,
 				$next = before$placeholder.next();
 			//var children = getVforChildren($parent, options['vforIndex']);
 			while($next && ($next.length===1) && !$next.def('isPlaceholder')){

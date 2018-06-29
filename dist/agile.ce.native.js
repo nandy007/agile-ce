@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.7.1530083073217 beta
+ *	Version	:	0.4.8.1530273969068 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -334,10 +334,10 @@ module.exports = require("Document");
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
 			$.util.each($style, function (style, exp) {
-
+				var depsAlias = Parser.getDepsAlias(exp, fors);
 				updater.updateStyle($node, style, parser.getValue(exp, fors));
 
-				var deps = [Parser.makePath(exp, fors)];
+				var deps = depsAlias.deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateStyle($node, style, parser.getValue(exp, fors));
@@ -2556,18 +2556,18 @@ module.exports = env.JQLite;
 			return getCells(sectionindex)[position][cellType];
 		});
 
-		if (!cbs.getView) this.off("getView").on("getView", function (e, position, sectionindex) {
-			array = getter();
-			var $plate = jqlite(e.target);
-			callback.apply(null, [$plate, position, useSection ? array[sectionindex]['cells'] : array]);
-		});
-		// if(!cbs.getCellId) this.off("getView").on("getView", function(e, position, sectionindex) {
+		// if (!cbs.getView) this.off("getView").on("getView", function (e, position, sectionindex) {
 		// 	array = getter();
-		//    	var $copy = cells[getCells(sectionindex)[position][cellType]];
-		//     var $temp = $copy.clone(true);
-		// 	callback.apply(null, [$temp, position, useSection?array[sectionindex]['cells']:array]);
-		// 	jqlite.ui.copyElement(e.target, $temp, true);
+		// 	var $plate = jqlite(e.target);
+		// 	callback.apply(null, [$plate, position, useSection ? array[sectionindex]['cells'] : array]);
 		// });
+		if(!cbs.getCellId) this.off("getView").on("getView", function(e, position, sectionindex) {
+			array = getter();
+		   	var $copy = cells[getCells(sectionindex)[position][cellType]];
+		    var $temp = $copy.clone(true);
+			callback.apply(null, [$temp, position, useSection?array[sectionindex]['cells']:array]);
+			jqlite.ui.copyElement(e.target, $temp, true);
+		});
 		if (!cbs.getCount) this.off("getCount").on("getCount", function (e, sectionindex) {
 			return getCells(sectionindex).length;
 		});
@@ -3435,7 +3435,7 @@ module.exports = require("File");
 		var $fragment = cb(options.args);
 		var	$placeholder = $node.def('$placeholder');
 		if($placeholder){
-			var	before$placeholder = $placeholder.before;
+			var	before$placeholder = $placeholder.before,
 				$next = before$placeholder.next();
 			//var children = getVforChildren($parent, options['vforIndex']);
 			while($next && ($next.length===1) && !$next.def('isPlaceholder')){

@@ -213,10 +213,10 @@
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
 			$.util.each($style, function (style, exp) {
-
+				var depsAlias = Parser.getDepsAlias(exp, fors);
 				updater.updateStyle($node, style, parser.getValue(exp, fors));
 
-				var deps = [Parser.makePath(exp, fors)];
+				var deps = depsAlias.deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateStyle($node, style, parser.getValue(exp, fors));
