@@ -385,7 +385,8 @@
 	 * @param   {String} value
 	 */
 	up.updateRadioChecked = function ($radio, value) {
-		$radio.prop('checked', $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value));
+		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
+		if($radio.prop('checked')!=checkStatus) $radio.prop('checked', checkStatus);
 	};
 
 	/**
@@ -404,7 +405,10 @@
 			value = +value;
 		}
 		
-		$checkbox.prop('checked', $.util.isBoolean(values) ? values : (values.indexOf(value) > -1));
+		var checkStatus = $.util.isBoolean(values) ? values : (values.indexOf(value) > -1);
+
+		if($checkbox.prop('checked')!=checkStatus) $checkbox.prop('checked', checkStatus);
+
 	};
 
 	/**

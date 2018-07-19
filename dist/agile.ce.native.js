@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.9.1530693551788 beta
+ *	Version	:	0.4.11.1531967041525 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3674,7 +3674,8 @@ module.exports = require("File");
 	 * @param   {String} value
 	 */
 	up.updateRadioChecked = function ($radio, value) {
-		$radio.prop('checked', $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value));
+		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
+		if($radio.prop('checked')!=checkStatus) $radio.prop('checked', checkStatus);
 	};
 
 	/**
@@ -3693,7 +3694,10 @@ module.exports = require("File");
 			value = +value;
 		}
 		
-		$checkbox.prop('checked', $.util.isBoolean(values) ? values : (values.indexOf(value) > -1));
+		var checkStatus = $.util.isBoolean(values) ? values : (values.indexOf(value) > -1);
+
+		if($checkbox.prop('checked')!=checkStatus) $checkbox.prop('checked', checkStatus);
+
 	};
 
 	/**

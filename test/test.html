@@ -25,16 +25,18 @@
             
         </ul> -->
         <ul>
-            <li v-for="item in list" v-on:change="doChange($index)"><a v-text="item.title"></a></li>
-            <li><a vmignore>{{test}}</a></li>
+            <li v-for="item in list">
+                <input type="checkbox" v-bind:value="item.defaultV" v-model="cks"/> <span>{{item.title}}</span>
+            </li>
+            
         </ul>
-        <button vmignore>{{test}}</button>
     </div>
     <script>
         $('select').on('contentchanged', function(){
             console.log(111);
         });
         var obj = {
+            cks: ['2'],
             isEdit: false,
             form: {
                 b:1
@@ -52,19 +54,19 @@
                 },
                 {
                     title:'2',
-                    defaultV: ''
+                    defaultV: '2'
                 },
                 {
                     title:'3',
-                    defaultV: ''
+                    defaultV: '3'
                 },
                 {
                     title:'4',
-                    defaultV: ''
+                    defaultV: '4'
                 },
                 {
                     title:'5',
-                    defaultV: ''
+                    defaultV: '5'
                 }
             ],
             list1: [],
@@ -99,10 +101,10 @@
             //obj.test = '1';
             //obj.isEdit = true;
             //obj.test = '5';
-                $('ul li').first().trigger('change', [{
-                    title:'10',
-                    defaultV: '1'
-                }]);
+                // $('ul li').first().trigger('change', [{
+                //     title:'10',
+                //     defaultV: '1'
+                // }]);
         }, 3000);
         
 
