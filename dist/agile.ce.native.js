@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.11.1531967041525 beta
+ *	Version	:	0.4.12.1532162787475 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -2522,21 +2522,19 @@ module.exports = env.JQLite;
 		var index = ($cell.parent().data('AdapteCell') || $parent.children('cell').length) - 1;
 
 		$parent.data('AdapteCell', index);
+		$parent.def('__'+$cell.attr('id'), $cell.clone(true));
 
 		return index === 0;
 	};
 	ao.initEvent = function ($parent, $el, getter, callback) {
 
-		var cells = {};
-
 		var useSection = $parent.hasAttr('use-section');
 
-		jqlite.each($parent.children('cell'), function (i, cell) {
-			var $cell = jqlite(cell).clone(true);
-			cells[$cell.attr('id')] = $cell;
-		});
-
 		var cellType = 'type', sectionTitle = 'title', array;
+
+		var getCellClone = function(id){
+			return $parent.def('__'+id);
+		}
 
 		var getCells = function (sectionindex) {
 			array = getter();
@@ -2563,7 +2561,7 @@ module.exports = env.JQLite;
 		// });
 		if(!cbs.getCellId) this.off("getView").on("getView", function(e, position, sectionindex) {
 			array = getter();
-		   	var $copy = cells[getCells(sectionindex)[position][cellType]];
+		   	var $copy = getCellClone(getCells(sectionindex)[position][cellType]);
 		    var $temp = $copy.clone(true);
 			callback.apply(null, [$temp, position, useSection?array[sectionindex]['cells']:array]);
 			jqlite.ui.copyElement(e.target, $temp, true);
