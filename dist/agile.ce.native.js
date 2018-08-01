@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.12.1532162787475 beta
+ *	Version	:	0.4.13.1533102498675 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -379,7 +379,9 @@ module.exports = require("Document");
 		'vshow': function ($node, fors, expression) {
 			var parser = this, updater = this.updater;
 
-			var defaultValue = $node.css('display') || '';
+			var defaultValue = $node.css('display');
+			if(!defaultValue || defaultValue==='none') defaultValue = '';
+
 
 			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 

@@ -258,7 +258,9 @@
 		'vshow': function ($node, fors, expression) {
 			var parser = this, updater = this.updater;
 
-			var defaultValue = $node.css('display') || '';
+			var defaultValue = $node.css('display');
+			if(!defaultValue || defaultValue==='none') defaultValue = '';
+
 
 			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 

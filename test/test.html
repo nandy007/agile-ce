@@ -28,7 +28,7 @@
             <li v-for="item in list">
                 <input type="checkbox" v-bind:value="item.defaultV" v-model="cks"/> <span>{{item.title}}</span>
             </li>
-            
+            <li v-show="isshow===1" style="display:none;">sdasdasd</li>
         </ul>
     </div>
     <script>
@@ -46,6 +46,7 @@
             val: '1',
             test: 4,
             test1: '111',
+            isshow: 1,
             pageNum:1,
             list: [
                 {
