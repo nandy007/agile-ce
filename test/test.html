@@ -25,10 +25,12 @@
             
         </ul> -->
         <ul>
-            <li v-for="item in list">
+            <li>bbb</li>
+            <li v-for="item in list" tt="1">
                 <input type="checkbox" v-bind:value="item.defaultV" v-model="cks"/> <span>{{item.title}}</span>
             </li>
             <li v-show="isshow===1" style="display:none;">sdasdasd</li>
+            <li>aaa</li>
         </ul>
     </div>
     <script>
@@ -79,12 +81,29 @@
                 obj.list.$set(index, item);
             }
         };
+
+        
         
         $('#app').render(obj);
         //var n = obj.list.splice(3, 1)[0];
         //obj.list.splice(1, 0 , n);
 
+        // console.log($('li[vforIndex="0"]:last').text());
+        
         setTimeout(function(){
+            // while(obj.list.length>800){
+            //     obj.list.pop();
+            // }
+            obj.list.sort(function(x, y){
+                return x.title < y.title;
+            });
+
+            for(var i=6;i<100;i++){
+            obj.list.push({
+                title: i,
+                defaultV: i
+            });
+        }
             // var item3 = obj.list[3];
             // var item1 = obj.list[1];
             // obj.list.$set(1, {
@@ -108,6 +127,11 @@
                 // }]);
         }, 3000);
         
+        // const $fragment = $.ui.createJQFragment();
+
+        // $fragment.append($('<div>aaa</div>'));
+
+        // console.log($fragment.children());
 
     </script>
 </body>

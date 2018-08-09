@@ -69,7 +69,15 @@
 
 			if (isAdapter) {
 				return;
-			}else if($node.attr('mode')==='single'){
+			}
+
+			var domList = [];
+			$listFragment.children().each(function(){
+				domList.push($(this));
+			});
+
+			
+			if($node.attr('mode')==='single'){
 				$listFragment.replaceTo($node);
 			}else{
 				var before$placeholder = $.ui.createJQPlaceholder(),
@@ -111,13 +119,20 @@
 					parser.watcher.change(opts);
 				}, handlerFlag);
 
-				updater.updateList($parent, $node, options, function (arr) {
-					if (__filter) $node.data('__filter', __filter);
-					var baseIndex = Parser.getBaseIndex(options);
-					var $listFragment = parser.preCompileVFor($node, function () {
-						return arr;
-					}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
-					return $listFragment;
+				updater.updateList($parent, $node, options, function (arr, isRender) {
+					var $listFragment;
+					if(isRender){
+						if (__filter) $node.data('__filter', __filter);
+						var baseIndex = Parser.getBaseIndex(options);
+						var $listFragment = parser.preCompileVFor($node, function () {
+							return arr;
+						}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
+					}
+					
+					return {
+						$fragment: $listFragment,
+						domList: domList
+					};
 				});
 
 				__modelInit && __modelInit();

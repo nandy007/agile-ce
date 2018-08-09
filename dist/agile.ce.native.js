@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.13.1533102498675 beta
+ *	Version	:	0.4.14.1533817609708 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -190,7 +190,15 @@ module.exports = require("Document");
 
 			if (isAdapter) {
 				return;
-			}else if($node.attr('mode')==='single'){
+			}
+
+			var domList = [];
+			$listFragment.children().each(function(){
+				domList.push($(this));
+			});
+
+			
+			if($node.attr('mode')==='single'){
 				$listFragment.replaceTo($node);
 			}else{
 				var before$placeholder = $.ui.createJQPlaceholder(),
@@ -232,13 +240,20 @@ module.exports = require("Document");
 					parser.watcher.change(opts);
 				}, handlerFlag);
 
-				updater.updateList($parent, $node, options, function (arr) {
-					if (__filter) $node.data('__filter', __filter);
-					var baseIndex = Parser.getBaseIndex(options);
-					var $listFragment = parser.preCompileVFor($node, function () {
-						return arr;
-					}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
-					return $listFragment;
+				updater.updateList($parent, $node, options, function (arr, isRender) {
+					var $listFragment;
+					if(isRender){
+						if (__filter) $node.data('__filter', __filter);
+						var baseIndex = Parser.getBaseIndex(options);
+						var $listFragment = parser.preCompileVFor($node, function () {
+							return arr;
+						}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
+					}
+					
+					return {
+						$fragment: $listFragment,
+						domList: domList
+					};
 				});
 
 				__modelInit && __modelInit();
@@ -3391,31 +3406,13 @@ module.exports = require("File");
 	};
 
 	//获取vfor数据的第一个节点
-	var getVforFirstChild = function($parent, vforIndex){
-		var $children = $parent.childs();
-		var $node;
-		$children.each(function(){
-			var $child = $(this);
-			if($child.data('vforIndex')===vforIndex){
-				$node = $child;
-				return false;
-			}
-		});
-		return $node;
+	var getVforFirstChild = function(children){
+		return children.length===0?null:children[0];
 	};
 
 	//获取vfor数据的最后一个节点
-	var getVforLastChild = function($parent, vforIndex){
-		var $children = $parent.childs(), len = $children.length;
-		var $node;
-		for(var i=len-1;i>-1;i--){
-			var $child = $($children[i]);
-			if($child.data('vforIndex')===vforIndex){
-				$node = $child;
-				break;
-			}
-		}
-		return $node;
+	var getVforLastChild = function(children){
+		return children.length===0?null:children[children.length-1];
 	};
 
 	//获取vfor数据的所有节点
@@ -3431,8 +3428,15 @@ module.exports = require("File");
 		return arr;
 	};
 
+	function copyFragment($fragment, arr){
+		arr = arr || [];
+		$fragment.children().each(function(){
+			arr.push($(this));
+		});
+	}
+
 	up.updateListXReset = function($parent, $node, options, cb){
-		var $fragment = cb(options.args);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
 		var	$placeholder = $node.def('$placeholder');
 		if($placeholder){
 			var	before$placeholder = $placeholder.before,
@@ -3444,7 +3448,7 @@ module.exports = require("File");
 			}
 			$fragment.insertAfter(before$placeholder);
 		}else{
-			var children = getVforChildren($parent, options['vforIndex']);
+			// var children = getVforChildren($parent, options['vforIndex']);
 			if(children.length===0){
 				$fragment.appendTo($parent);
 			}else{
@@ -3455,69 +3459,76 @@ module.exports = require("File");
 				});
 			}
 		}
+		copy$fragment.unsift(0, children.length);
+		children.splice.apply(children, copy$fragment);
 	};
 
 	up.updateListPop = function($parent, $node, options, cb){
+		var cbrs = cb(options.args), children = cbrs.domList;
 		var $placeholder = $node.def('$placeholder');
 		if($placeholder){
 			var	after$placeholder = $placeholder.after;
 			var $last = after$placeholder.prev();
 			$last&&($last.length===1)&&(!$last.def('isPlaceholder'))&&$last.remove();
 		}else{
-			var $children = getVforLastChild($parent, options['vforIndex']);
+			var $children = getVforFirstChild(children);
 			$children&&$children.remove();
 		}
+		children.pop();
 	};
 
 	up.updateListPush = function($parent, $node, options, cb){
-		var $fragment = cb(options.args);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
 		var $placeholder = $node.def('$placeholder');
 		if($placeholder){
 			var	after$placeholder = $placeholder.after;
 			$fragment.insertBefore(after$placeholder);
 		}else{
-			var $children = getVforLastChild($parent, options['vforIndex']);
+			var $children = getVforLastChild(children);
 			if($children&&$children.length>0){
 				$fragment.insertAfter($children);
 			}else{
 				$fragment.appendTo($parent);
 			}
 		}
+		children.push.apply(children, copy$fragment);
 	};
 
 	up.updateListShift = function($parent, $node, options, cb){
+		var cbrs = cb(options.args), children = cbrs.domList;
 		var $placeholder = $node.def('$placeholder');
 		if($placeholder){
 			var	before$placeholder = $placeholder.before;
 			var $first = before$placeholder.next();
 			$first&&($first.length===1)&&(!$first.def('isPlaceholder'))&&$first.remove();
 		}else{
-			var $children = getVforFirstChild($parent, options['vforIndex']);
+			var $children = getVforFirstChild(children);
 			$children&&$children.remove();
 		}
-		
+		children.shift();
 	};
 
 	up.updateListUnshift = function($parent, $node, options, cb){
-		var $fragment = cb(options.args);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
 		var $placeholder = $node.def('$placeholder');
 		if($placeholder){
 			var	before$placeholder = $placeholder.before;
 			$fragment.insertAfter(before$placeholder);
 		}else{
-			var $children = getVforFirstChild($parent, options['vforIndex']);
+			var $children = getVforFirstChild(children);
 			if($children&&$children.length>0){
 				$fragment.insertBefore($children);
 			}else{
 				$fragment.appendTo($parent);
 			}	
 		}
+		children.unshift.apply(children, copy$fragment);
 	};
 
 	up.updateListSplice = function($parent, $node, options, cb){
 
-		var children = getVforChildren($parent, options.vforIndex);
-
+		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment = [];
+console.log(children);
 		var $placeholder = $node.def('$placeholder');
 
 		var args = $.util.copyArray(options.args);
@@ -3533,7 +3544,9 @@ module.exports = require("File");
 		for(var i=startP;i<spliceLen;i++){
 			var $child = children[i];
 			if(args.length>0){
-				var $fragment = cb(args);
+				// var $fragment = cb(args);
+				var child$cbrs = cb(options.args, true), $fragment = child$cbrs.$fragment;
+				copy$fragment.push.apply(copy$fragment, copyFragment($fragment));
 				if($child){
 					$fragment.insertBefore($child);
 				}else{
@@ -3549,16 +3562,19 @@ module.exports = require("File");
 			if(rank!==0) $child&&$child.remove();
 		}
 
+		copy$fragment.unshift(startP, spliceLen);
+		children.splice.apply(children, copy$fragment);
+
 	};
 
 	up.updateListCommon = function($parent, $node, options, cb){
-		var children = getVforChildren($parent, options.vforIndex);
+		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment;
 		var $placeholder = $node.def('$placeholder');
 		var args = options.newArray;
 		for(var i=0, len=children.length;i<len;i++){
 			var $child = children[i];
 			if(args.length>0){
-				var $fragment = cb(args);
+				var child$cbrs = cb(args, true), $fragment =  child$cbrs.$fragment, copy$fragment = copyFragment($fragment);
 				if($child){
 					$fragment.insertBefore($child);
 				}else{
@@ -3572,6 +3588,10 @@ module.exports = require("File");
 				args = [];
 			};
 			$child&&$child.remove();
+		}
+		if(copy$fragment){
+			copy$fragment.unshift(0, children.length);
+			children.splice.apply(children, copy$fragment);
 		}
 	};
 
