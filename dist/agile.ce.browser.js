@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.14.1533817602521 beta
+ *	Version	:	0.4.15.1533817898257 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -842,7 +842,7 @@ module.exports = env;
 	 */
 	pp.buildAdapterList = function ($node, array, position, fors, alias, access, forsCache, vforIndex, ignor, filter) {
 		var cFors = forsCache[position] = Parser.createFors(fors, alias, access, position, filter, ignor);
-		$node.data('vforIndex', vforIndex);
+		// $node.data('vforIndex', vforIndex);
 		this.$scope['$alias'][alias] = array[position];
 		this.vm.compileSteps($node, cFors, true);
 	};
@@ -867,7 +867,7 @@ module.exports = env;
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, alias, access, ni, filter);
-			var $plate = $node.clone(true).data('vforIndex', vforIndex);
+			var $plate = $node.clone(true);//.data('vforIndex', vforIndex);
 			this.setDeepScope(cFors);
 			this.vm.compileSteps($plate, cFors);
 			$listFragment.append($plate);
@@ -11355,17 +11355,17 @@ return jQuery;
 	};
 
 	//获取vfor数据的所有节点
-	var getVforChildren = function($parent, vforIndex){
-		var $children = $parent.childs(), len = $children.length;
-		var arr = [];
-		$parent.childs().each(function(){
-			var $child = $(this);
-			if($child.data('vforIndex')===vforIndex){
-				arr.push($child);
-			}
-		})
-		return arr;
-	};
+	// var getVforChildren = function($parent, vforIndex){
+	// 	var $children = $parent.childs(), len = $children.length;
+	// 	var arr = [];
+	// 	$parent.childs().each(function(){
+	// 		var $child = $(this);
+	// 		if($child.data('vforIndex')===vforIndex){
+	// 			arr.push($child);
+	// 		}
+	// 	})
+	// 	return arr;
+	// };
 
 	function copyFragment($fragment, arr){
 		arr = arr || [];

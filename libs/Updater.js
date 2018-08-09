@@ -112,17 +112,17 @@
 	};
 
 	//获取vfor数据的所有节点
-	var getVforChildren = function($parent, vforIndex){
-		var $children = $parent.childs(), len = $children.length;
-		var arr = [];
-		$parent.childs().each(function(){
-			var $child = $(this);
-			if($child.data('vforIndex')===vforIndex){
-				arr.push($child);
-			}
-		})
-		return arr;
-	};
+	// var getVforChildren = function($parent, vforIndex){
+	// 	var $children = $parent.childs(), len = $children.length;
+	// 	var arr = [];
+	// 	$parent.childs().each(function(){
+	// 		var $child = $(this);
+	// 		if($child.data('vforIndex')===vforIndex){
+	// 			arr.push($child);
+	// 		}
+	// 	})
+	// 	return arr;
+	// };
 
 	function copyFragment($fragment, arr){
 		arr = arr || [];

@@ -758,7 +758,7 @@
 	 */
 	pp.buildAdapterList = function ($node, array, position, fors, alias, access, forsCache, vforIndex, ignor, filter) {
 		var cFors = forsCache[position] = Parser.createFors(fors, alias, access, position, filter, ignor);
-		$node.data('vforIndex', vforIndex);
+		// $node.data('vforIndex', vforIndex);
 		this.$scope['$alias'][alias] = array[position];
 		this.vm.compileSteps($node, cFors, true);
 	};
@@ -783,7 +783,7 @@
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, alias, access, ni, filter);
-			var $plate = $node.clone(true).data('vforIndex', vforIndex);
+			var $plate = $node.clone(true);//.data('vforIndex', vforIndex);
 			this.setDeepScope(cFors);
 			this.vm.compileSteps($plate, cFors);
 			$listFragment.append($plate);
