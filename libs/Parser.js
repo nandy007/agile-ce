@@ -124,7 +124,7 @@
 					if(isRender){
 						if (__filter) $node.data('__filter', __filter);
 						var baseIndex = Parser.getBaseIndex(options);
-						var $listFragment = parser.preCompileVFor($node, function () {
+						$listFragment = parser.preCompileVFor($node, function () {
 							return arr;
 						}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
 					}

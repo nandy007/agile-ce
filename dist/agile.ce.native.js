@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.15.1533817905378 beta
+ *	Version	:	0.4.16.1533895499702 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -245,7 +245,7 @@ module.exports = require("Document");
 					if(isRender){
 						if (__filter) $node.data('__filter', __filter);
 						var baseIndex = Parser.getBaseIndex(options);
-						var $listFragment = parser.preCompileVFor($node, function () {
+						$listFragment = parser.preCompileVFor($node, function () {
 							return arr;
 						}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
 					}
@@ -3433,6 +3433,7 @@ module.exports = require("File");
 		$fragment.children().each(function(){
 			arr.push($(this));
 		});
+		return arr;
 	}
 
 	up.updateListXReset = function($parent, $node, options, cb){
@@ -3459,7 +3460,7 @@ module.exports = require("File");
 				});
 			}
 		}
-		copy$fragment.unsift(0, children.length);
+		copy$fragment.unshift(0, children.length);
 		children.splice.apply(children, copy$fragment);
 	};
 
@@ -3528,24 +3529,21 @@ module.exports = require("File");
 	up.updateListSplice = function($parent, $node, options, cb){
 
 		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment = [];
-console.log(children);
+
 		var $placeholder = $node.def('$placeholder');
 
 		var args = $.util.copyArray(options.args);
-		var startP = args.shift(), rank, spliceLen;
+		var startP = args.shift(), rank = args.shift(), spliceLen;
 
-		if(args.length>0){
-			rank = args.shift();
-			spliceLen = startP + (rank||1);
-		}else{
-			spliceLen = children.length-startP+1;
-		}
+		if(typeof rank==='undefined') rank = children.length;
+
+		spliceLen = startP + (rank||1);
 
 		for(var i=startP;i<spliceLen;i++){
 			var $child = children[i];
 			if(args.length>0){
 				// var $fragment = cb(args);
-				var child$cbrs = cb(options.args, true), $fragment = child$cbrs.$fragment;
+				var child$cbrs = cb(args, true), $fragment = child$cbrs.$fragment;
 				copy$fragment.push.apply(copy$fragment, copyFragment($fragment));
 				if($child){
 					$fragment.insertBefore($child);
@@ -3562,7 +3560,8 @@ console.log(children);
 			if(rank!==0) $child&&$child.remove();
 		}
 
-		copy$fragment.unshift(startP, spliceLen);
+		copy$fragment.unshift(startP, rank);
+		
 		children.splice.apply(children, copy$fragment);
 
 	};
@@ -4105,7 +4104,8 @@ console.log(children);
 	 * @param   {Array}   paths   [访问路径数组]
 	 */
 	op.observe = function (object, paths) {
-		if ($.isArray(object)) {
+		var isArr = $.isArray(object);
+		if (isArr) {
 			this.observeArray(object, paths);
 		}
 
@@ -4113,7 +4113,7 @@ console.log(children);
 			var ps = $.util.copyArray(paths || []);
 			ps.push(property);
 
-			this.observeObject(object, ps, value);
+			if(!isArr) this.observeObject(object, ps, value);
 
 			if (observeUtil.isNeed(value)) {
 				this.observe(value, ps);

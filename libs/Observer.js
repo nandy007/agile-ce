@@ -92,7 +92,8 @@
 	 * @param   {Array}   paths   [访问路径数组]
 	 */
 	op.observe = function (object, paths) {
-		if ($.isArray(object)) {
+		var isArr = $.isArray(object);
+		if (isArr) {
 			this.observeArray(object, paths);
 		}
 
@@ -100,7 +101,7 @@
 			var ps = $.util.copyArray(paths || []);
 			ps.push(property);
 
-			this.observeObject(object, ps, value);
+			if(!isArr) this.observeObject(object, ps, value);
 
 			if (observeUtil.isNeed(value)) {
 				this.observe(value, ps);

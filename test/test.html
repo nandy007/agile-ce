@@ -25,12 +25,11 @@
             
         </ul> -->
         <ul>
-            <li>bbb</li>
+
             <li v-for="item in list" tt="1">
-                <input type="checkbox" v-bind:value="item.defaultV" v-model="cks"/> <span>{{item.title}}</span>
+                <span>{{item.title}}</span>
             </li>
-            <li v-show="isshow===1" style="display:none;">sdasdasd</li>
-            <li>aaa</li>
+
         </ul>
     </div>
     <script>
@@ -38,48 +37,28 @@
             console.log(111);
         });
         var obj = {
-            cks: ['2'],
-            isEdit: false,
-            form: {
-                b:1
-            },
-            'd$a': '1',
-            'a': '222',
-            val: '1',
-            test: 4,
-            test1: '111',
-            isshow: 1,
-            pageNum:1,
             list: [
-                {
-                    title:'1',
-                    defaultV: '1'
-                },
-                {
-                    title:'2',
-                    defaultV: '2'
-                },
-                {
-                    title:'3',
-                    defaultV: '3'
-                },
-                {
-                    title:'4',
-                    defaultV: '4'
-                },
-                {
-                    title:'5',
-                    defaultV: '5'
-                }
-            ],
-            list1: [],
-            doclick: function(i, item){
-                console.log(typeof obj.test);
-            },
-            doChange: function(index, item){
-                console.log(arguments);
-                obj.list.$set(index, item);
-            }
+                // {
+                //     title:'1',
+                //     defaultV: '1'
+                // },
+                // {
+                //     title:'2',
+                //     defaultV: '2'
+                // },
+                // {
+                //     title:'3',
+                //     defaultV: '3'
+                // },
+                // {
+                //     title:'4',
+                //     defaultV: '4'
+                // },
+                // {
+                //     title:'5',
+                //     defaultV: '5'
+                // }
+            ]
         };
 
         
@@ -89,21 +68,34 @@
         //obj.list.splice(1, 0 , n);
 
         // console.log($('li[vforIndex="0"]:last').text());
-        
-        setTimeout(function(){
+        var myi = 0;
+        var st = setInterval(function(){
+            
+            if(myi>1) {
+                clearInterval(st);
+                obj.list.splice(3,1);
+                obj.list.splice(4,1);
+                obj.list.splice(5,1);
+                return;
+            }
+
             // while(obj.list.length>800){
             //     obj.list.pop();
             // }
-            obj.list.sort(function(x, y){
-                return x.title < y.title;
-            });
-
-            for(var i=6;i<100;i++){
-            obj.list.push({
-                title: i,
-                defaultV: i
-            });
-        }
+            // obj.list.sort(function(x, y){
+            //     return x.title < y.title;
+            // });
+            
+            var arr = [], len = myi+20;
+            for(myi;myi<len;myi++){
+                arr.push({
+                    title: myi,
+                    defaultV: myi
+                });
+            }
+            // console.time(1);
+            obj.list.unshift.apply(obj.list, arr);
+            // console.timeEnd(1);
             // var item3 = obj.list[3];
             // var item1 = obj.list[1];
             // obj.list.$set(1, {
@@ -125,7 +117,7 @@
                 //     title:'10',
                 //     defaultV: '1'
                 // }]);
-        }, 3000);
+        }, 1000);
         
         // const $fragment = $.ui.createJQFragment();
 

@@ -129,6 +129,7 @@
 		$fragment.children().each(function(){
 			arr.push($(this));
 		});
+		return arr;
 	}
 
 	up.updateListXReset = function($parent, $node, options, cb){
@@ -155,7 +156,7 @@
 				});
 			}
 		}
-		copy$fragment.unsift(0, children.length);
+		copy$fragment.unshift(0, children.length);
 		children.splice.apply(children, copy$fragment);
 	};
 
@@ -224,24 +225,21 @@
 	up.updateListSplice = function($parent, $node, options, cb){
 
 		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment = [];
-console.log(children);
+
 		var $placeholder = $node.def('$placeholder');
 
 		var args = $.util.copyArray(options.args);
-		var startP = args.shift(), rank, spliceLen;
+		var startP = args.shift(), rank = args.shift(), spliceLen;
 
-		if(args.length>0){
-			rank = args.shift();
-			spliceLen = startP + (rank||1);
-		}else{
-			spliceLen = children.length-startP+1;
-		}
+		if(typeof rank==='undefined') rank = children.length;
+
+		spliceLen = startP + (rank||1);
 
 		for(var i=startP;i<spliceLen;i++){
 			var $child = children[i];
 			if(args.length>0){
 				// var $fragment = cb(args);
-				var child$cbrs = cb(options.args, true), $fragment = child$cbrs.$fragment;
+				var child$cbrs = cb(args, true), $fragment = child$cbrs.$fragment;
 				copy$fragment.push.apply(copy$fragment, copyFragment($fragment));
 				if($child){
 					$fragment.insertBefore($child);
@@ -258,7 +256,8 @@ console.log(children);
 			if(rank!==0) $child&&$child.remove();
 		}
 
-		copy$fragment.unshift(startP, spliceLen);
+		copy$fragment.unshift(startP, rank);
+		
 		children.splice.apply(children, copy$fragment);
 
 	};
