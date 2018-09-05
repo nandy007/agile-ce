@@ -1,0 +1,70 @@
+<!-- HTML5文件 -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Agile CE</title>
+    <script src="../dist/agile.ce.browser.js" charset="UTF-8"></script>
+    <style>
+        li{background: #ccc;}
+        li.active{background: #ff0000;}
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <span v-text="t"></span>
+        <ul>
+
+            <li v-for="item in list" tt="1">
+                <span>{{item.title}}</span>
+                <select>
+                    <option v-for="i in item.ls" v-text="i.text" v-bind:value="i.val"></option>
+                </select>
+            </li>
+
+        </ul>
+    </div>
+    <script>
+
+        var obj = {
+            t: '啊啊啊',
+            list: [
+                
+            ]
+        };
+
+        
+        console.time('render')
+        $('#app').render(obj);
+        console.timeEnd('render')
+
+        var index = 0, n = 10;
+        var st = setInterval(function(){
+            var arr = [];
+            for(var i=index*10,len=(index+1)*n;i<len;i++){
+                var ss = [];
+                arr.push({
+                    title: 'title'+i,
+                    ls: ss
+                });
+                for(j=0;j<n;j++){
+                    ss.push({
+                        text: 'text'+j,
+                        val: 'val' + j
+                    });
+                }
+            }
+            obj.list.push(...arr);
+            if(10===(index++)){
+                clearInterval(st);
+                return;
+            }
+        },1000)
+
+    </script>
+</body>
+
+</html>

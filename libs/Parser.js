@@ -784,6 +784,7 @@
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, alias, access, ni, filter);
 			var $plate = $node.clone(true);//.data('vforIndex', vforIndex);
+			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 			this.vm.compileSteps($plate, cFors);
 			$listFragment.append($plate);
@@ -811,13 +812,14 @@
 		if (!isParent) scope[str$alias]['$index'] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
-			var filter$func = new Function('scope', '$index', 'cur$item', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret($index, cur$item);}else{ return ret; }');
+			var filter$func = new Function('scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret($index, cur$item, $curNode);}else{ return ret; }');
 			
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
-			filter$func(scope, $index, scope[str$alias][alias]);
+			filter$func(scope, $index, scope[str$alias][alias], fors.__$plate);
 
 			delete fors.filter;
+			delete fors.__$plate;
 			
 			/*var $filter = $.util.copy(scope[str$alias][alias]);
 			$filter['$index'] = $index;
