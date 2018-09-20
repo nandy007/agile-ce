@@ -26,8 +26,8 @@
         </ul> -->
         <ul>
 
-            <li v-for="item in list" tt="1">
-                <span>{{item.title}}</span>
+            <li v-for="item in list" tt="1" useTemplate>
+                <span v-on:click="func.doClick($index)"><%=item.title%><%=a%></span>
             </li>
 
         </ul>
@@ -37,6 +37,7 @@
             console.log(111);
         });
         var obj = {
+            a: 'bbb',
             list: [
                 // {
                 //     title:'1',
@@ -57,8 +58,13 @@
                 // {
                 //     title:'5',
                 //     defaultV: '5'
-                // }
-            ]
+                // } 
+            ],
+            func: {
+                doClick: function(index){
+                    alert(index);
+                }
+            }
         };
 
         

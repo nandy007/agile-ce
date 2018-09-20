@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.17.1536140004351 beta
+ *	Version	:	0.4.18.1537433542719 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -870,12 +870,28 @@ module.exports = env;
 			var $plate = $node.clone(true);//.data('vforIndex', vforIndex);
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
+
+			this.handleTemplate($plate);
+
 			this.vm.compileSteps($plate, cFors);
 			$listFragment.append($plate);
 		}, this);
 
 		return $listFragment;
 	};
+
+	pp.handleTemplate = function($plate){
+		if(!$plate.hasAttr('useTemplate')) return;
+		var tpl = $plate.attr('useTemplate'), $tpl;
+		if(!tpl){
+			if(!(($tpl = $plate.find('script, template')) && $tpl.length>0)){
+				$tpl = $plate;
+			}
+			tpl = $tpl.html();
+		} 
+		var html = $.template(tpl, $.extend({}, this.$scope, this.$scope.$alias));
+		$plate.html(html);
+	}
 
 	/**
 	 * 深度设置$alias别名映射
