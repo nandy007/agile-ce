@@ -34,6 +34,8 @@
 
 > [v-like](#cid_0_11)
 
+> [v-template](#cid_0_14)
+
   
 
 
@@ -263,7 +265,7 @@ variable的值会赋值给元素的attributeName属性。并且在variable变化
 当variable表达式的运算结果为true则添加样式，否则将移除样式。
 
 
-<span id="cid_0_12">**v-style="{styleAttr:variable}"**</span>
+<span id="cid_0_13">**v-style="{styleAttr:variable}"**</span>
 
 为元素动态绑定style样式。
 
@@ -303,6 +305,50 @@ variable的运算结果将作为styleAttr的属性值。
 <span id="cid_0_11">**v-like="textfield|radio|checkbox|select"**</span>
 
 与v-model配合使用，告诉mvvm采用哪种模式来做双向数据绑定。
+
+<span id="cid_0_14">**v-template="null|string"**</span>
+
+v-template指令，用于对子元素使用$.template进行模板预处理，预处理的结果再使用mvvm注入（如果内部含有mvvm指令的话）。
+
+$.template模板注入是不可逆数据注入，不支持数据绑定，仅做注入，所以性能和效率比mvvm高，如果v-for内部数据不需要动态改变，或者仅有少量数据需要动态改变，则可以使用此方法以提高性能。
+
+useTemplate属性可以不设置值，此时模板内容即为v-for内部的innerHTML内容；当设置值的时候，其值为$.template的模板id值，模板id值设置方式如下：
+
+```javascript
+
+$.template.setter(id, templateStr); // id值必须全局唯一
+
+```
+
+完整示例如下：
+
+```html
+
+<ul class="org-user" v-on:click="func.popupCard()">
+    <li v-for="user in formData.users" v-template="contact_orguser">
+
+    </li>
+</ul>
+
+```
+
+
+```javascript
+
+$.template.setter('contact_orguser', `
+        <div class="headIcon">
+            <%if(user.photourl){%>
+                <img src="<%=#user.photourl||''%>" alt="" class="head">
+            <%}else{%>
+                <div style="background: <%=#user.avatar_color||''%>" class="avatar_user"><%=user.avatar_text%></div>
+            <%}%>
+        </div>
+        <span><%=#user.name||''%></span>
+    `);  
+
+```
+
+其中template模板注入的数据跟mvvm注入的数据一致。
 
 <h2 id="cid_1">扩展指令</h2>
 

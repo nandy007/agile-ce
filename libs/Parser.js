@@ -42,6 +42,8 @@
 		},
 		'vfor': function ($node, fors, expression) {
 
+			Parser.transAttr($node, 'v-template', 'useTemplate');
+
 			var parser = this;
 
 			var vforIndex = this.vforIndex++;
@@ -545,6 +547,13 @@
 			$node.def('__context', function () {
 				return func(scope);
 			});
+		},
+		'vtemplate': function($node, fors, expression){
+			var scope = this.$scope;
+			Parser.transAttr($node, 'v-template', 'useTemplate');
+			var template = expression || $node.html();
+			var html = $.template(template, scope) || '';
+			$node.html(html);
 		}
 	};
 
@@ -1027,6 +1036,13 @@
 		exp = exps.join('.');
 
 		return exp;
+	};
+
+	// 转换属性
+	Parser.transAttr = function($node, oldAttr, newAttr){
+		if($node.hasAttr(newAttr)) return;
+		$node.attr(newAttr, $node.attr(oldAttr) || '');
+		$node.removeAttr(oldAttr);
 	};
 
 	//表达式中是否包含别名

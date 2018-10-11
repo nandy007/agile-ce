@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.18.1537433550877 beta
+ *	Version	:	0.4.20.1539240768202 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -162,6 +162,8 @@ module.exports = require("Document");
 			this.vtext.apply(this, args);
 		},
 		'vfor': function ($node, fors, expression) {
+
+			Parser.transAttr($node, 'v-template', 'useTemplate');
 
 			var parser = this;
 
@@ -666,6 +668,13 @@ module.exports = require("Document");
 			$node.def('__context', function () {
 				return func(scope);
 			});
+		},
+		'vtemplate': function($node, fors, expression){
+			var scope = this.$scope;
+			Parser.transAttr($node, 'v-template', 'useTemplate');
+			var template = expression || $node.html();
+			var html = $.template(template, scope) || '';
+			$node.html(html);
 		}
 	};
 
@@ -1148,6 +1157,13 @@ module.exports = require("Document");
 		exp = exps.join('.');
 
 		return exp;
+	};
+
+	// 转换属性
+	Parser.transAttr = function($node, oldAttr, newAttr){
+		if($node.hasAttr(newAttr)) return;
+		$node.attr(newAttr, $node.attr(oldAttr) || '');
+		$node.removeAttr(oldAttr);
 	};
 
 	//表达式中是否包含别名
@@ -3071,6 +3087,9 @@ module.exports = require("File");
 		isInPre : function ($node) {//是否需要预编译
 			return $node.isElement()&&($node.hasAttr('v-if') || $node.hasAttr('v-for') || $node.hasAttr('v-pre'));
 		},
+		useTemplate: function($node){
+			return $node.isElement()&&(!$node.hasAttr('v-for'))&&($node.hasAttr('v-template') || $node.hasAttr('useTemplate'));
+		},
 		hasDirective : function ($node) {//节点是否包含指令属性
 			var nodeAttrs, ret = false;
 			if ($node.isElement() && (nodeAttrs=$node.attrs()).length>0) {
@@ -3165,6 +3184,10 @@ module.exports = require("File");
 		
 		$element.each(function(){
 			var $node = $(this);
+
+			// 若节点使用模板，预先对模板进行注入
+			if(compileUtil.useTemplate($node)) _this.compileTemplate($node, fors);
+
 			if($node.hasAttr('vmignore')) return;
 			//缓存指令节点
 			if (compileUtil.hasDirective($node)) {
@@ -3280,6 +3303,21 @@ module.exports = require("File");
 		}else{
 			$.util.warn('指令 [' + dir + '] 未添加规则!');
 		}
+	};
+
+	/**
+	 * 编译模板节点 {{template}}
+	 * @param   {JQLite}       $node
+	 * @param   {Object}       fors
+	 * @param   {Boolean}      isHold
+	 */
+	cp.compileTemplate = function($node, fors, isHold){
+		var attr = {
+			name: 'v-template',
+			value: $node.attr('v-template')
+		};
+
+		this.compile($node, attr, fors, isHold);
 	};
 
 	/**

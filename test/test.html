@@ -24,9 +24,12 @@
             <li v-on:click="doclick" v-text="test1" v-else=""></li>
             
         </ul> -->
+        <div v-template>
+            <%=a%>
+        </div>
         <ul>
 
-            <li v-for="item in list" tt="1" useTemplate>
+            <li v-for="item in list" tt="1" v-template>
                 <span v-on:click="func.doClick($index)"><%=item.title%><%=a%></span>
             </li>
 
