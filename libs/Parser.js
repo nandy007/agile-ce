@@ -551,7 +551,7 @@
 		'vtemplate': function($node, fors, expression){
 			var scope = this.$scope;
 			Parser.transAttr($node, 'v-template', 'useTemplate');
-			var template = expression || $node.html();
+			var template = $node.attr('useTemplate') || $node.html();
 			var html = $.template(template, scope) || '';
 			$node.html(html);
 		}
@@ -1040,8 +1040,9 @@
 
 	// 转换属性
 	Parser.transAttr = function($node, oldAttr, newAttr){
-		if($node.hasAttr(newAttr)) return;
-		$node.attr(newAttr, $node.attr(oldAttr) || '');
+		if(!$node.hasAttr(newAttr)){
+			$node.attr(newAttr, $node.attr(oldAttr) || '');
+		}
 		$node.removeAttr(oldAttr);
 	};
 
