@@ -312,7 +312,7 @@ v-template指令，用于对子元素使用$.template进行模板预处理，预
 
 $.template模板注入是不可逆数据注入，不支持数据绑定，仅做注入，所以性能和效率比mvvm高，如果v-for内部数据不需要动态改变，或者仅有少量数据需要动态改变，则可以使用此方法以提高性能。
 
-v-template属性可以不设置值，此时模板内容即为v-for内部的innerHTML内容；当设置值的时候，其值为$.template的模板id值，模板id值设置方式如下：
+v-template属性可以不设置值，此时模板内容即为节点内部的innerHTML内容；当设置值的时候，其值为$.template的模板id值，模板id值设置方式如下：
 
 ```javascript
 
