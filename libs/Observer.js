@@ -57,7 +57,7 @@
 
 	var observeUtil = {
 		isNeed: function (val) {
-			return $.isArray(val) || $.util.isObject(val);
+			return $.isArray(val) ? 2 : ($.util.isObject(val) ? 1 : 0);
 		}
 	};
 
@@ -138,8 +138,12 @@
 				}
 
 				// 新值为对象或数组重新监测
-				if (observeUtil.isNeed(newValue)) {
+				var isNeed = observeUtil.isNeed(newValue);
+				if (isNeed) {
+					if(isNeed===1) $.extend(true, oldValue||{},newValue);
+					if(isNeed===2) oldValue.$reset(newValue);
 					ob.observe(newValue, paths);
+					return;
 				}
 
 				if (setter) {
