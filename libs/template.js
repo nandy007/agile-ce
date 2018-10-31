@@ -214,8 +214,10 @@
 		document.dispatchEvent(event);
 	};
 
-	var _template = function(str, data){
-		return _engine.render(str, data).replace(/>\s+([^\s<\w]*)\s+</g, '><');
+	var _template = function(str, data, unCompress){
+		var html = _engine.render(str, data);
+		if(!unCompress) html = html.replace(/>[ \r\n]+</, '><');
+		return html;
 	};
 
 	for(var k in _engine){

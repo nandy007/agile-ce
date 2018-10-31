@@ -813,7 +813,7 @@
 				$tpl = $plate;
 			}
 			tpl = $tpl.html();
-		} 
+		}
 		var html = $.template(tpl, $.extend({}, this.$scope, this.$scope.$alias));
 		$plate.html(html);
 	}
@@ -825,7 +825,7 @@
 	 */
 	pp.setDeepScope = function (fors, isParent) {
 		if (!fors) return;
-		var scope = this.$scope, str$alias = '$alias';
+		var scope = this.$scope, str$alias = '$alias', observer = this.watcher.observer;
 		var alias = fors.alias,
 			access = fors.access,
 			$access = Parser.makePath(access, fors),
@@ -837,11 +837,17 @@
 		if (!isParent) scope[str$alias]['$index'] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
-			var filter$func = new Function('scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret($index, cur$item, $curNode);}else{ return ret; }');
-			
+			var filter$func = new Function('env', 'scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret.call(env, $index, cur$item, $curNode);}else{ return ret; }');
+
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
-			filter$func(scope, $index, scope[str$alias][alias], fors.__$plate);
+			var cur$item = scope[str$alias][alias];
+
+			filter$func({
+				reObserve: function(){
+					observer.observe(cur$item, [$access, $index]);
+				}
+			}, scope, $index, cur$item, fors.__$plate);
 
 			delete fors.filter;
 			delete fors.__$plate;
@@ -1040,10 +1046,10 @@
 
 	// 转换属性
 	Parser.transAttr = function($node, oldAttr, newAttr){
-		if(!$node.hasAttr(newAttr)){
+		if($node.hasAttr(oldAttr)){
 			$node.attr(newAttr, $node.attr(oldAttr) || '');
+			$node.removeAttr(oldAttr);
 		}
-		$node.removeAttr(oldAttr);
 	};
 
 	//表达式中是否包含别名

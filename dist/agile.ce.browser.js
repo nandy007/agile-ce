@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.23.1540866230491 beta
+ *	Version	:	0.4.24.1540974810285 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -897,7 +897,7 @@ module.exports = env;
 				$tpl = $plate;
 			}
 			tpl = $tpl.html();
-		} 
+		}
 		var html = $.template(tpl, $.extend({}, this.$scope, this.$scope.$alias));
 		$plate.html(html);
 	}
@@ -909,7 +909,7 @@ module.exports = env;
 	 */
 	pp.setDeepScope = function (fors, isParent) {
 		if (!fors) return;
-		var scope = this.$scope, str$alias = '$alias';
+		var scope = this.$scope, str$alias = '$alias', observer = this.watcher.observer;
 		var alias = fors.alias,
 			access = fors.access,
 			$access = Parser.makePath(access, fors),
@@ -921,11 +921,17 @@ module.exports = env;
 		if (!isParent) scope[str$alias]['$index'] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
-			var filter$func = new Function('scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret($index, cur$item, $curNode);}else{ return ret; }');
-			
+			var filter$func = new Function('env', 'scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret.call(env, $index, cur$item, $curNode);}else{ return ret; }');
+
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
-			filter$func(scope, $index, scope[str$alias][alias], fors.__$plate);
+			var cur$item = scope[str$alias][alias];
+
+			filter$func({
+				reObserve: function(){
+					observer.observe(cur$item, [$access, $index]);
+				}
+			}, scope, $index, cur$item, fors.__$plate);
 
 			delete fors.filter;
 			delete fors.__$plate;
@@ -1124,10 +1130,10 @@ module.exports = env;
 
 	// 转换属性
 	Parser.transAttr = function($node, oldAttr, newAttr){
-		if(!$node.hasAttr(newAttr)){
+		if($node.hasAttr(oldAttr)){
 			$node.attr(newAttr, $node.attr(oldAttr) || '');
+			$node.removeAttr(oldAttr);
 		}
-		$node.removeAttr(oldAttr);
 	};
 
 	//表达式中是否包含别名
@@ -12479,8 +12485,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*
 		document.dispatchEvent(event);
 	};
 
-	var _template = function(str, data){
-		return _engine.render(str, data).replace(/>\s+([^\s<\w]*)\s+</g, '><');
+	var _template = function(str, data, unCompress){
+		var html = _engine.render(str, data);
+		if(!unCompress) html = html.replace(/>[ \r\n]+</, '><');
+		return html;
 	};
 
 	for(var k in _engine){
