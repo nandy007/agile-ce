@@ -127,6 +127,10 @@ v-filer指令会于v-for指令之前被解释执行。
  
 <code>FuncName</code>为一个函数名，当执行到该指令的时候会调用FuncName(<code>index</code>, <code>item</code>)传参，其中index为当前循环体的索引，item为当前循环体的元素对象。
 
+函数的this对象具有函数：
+
+<code>reObserve()</code>：当在函数内为数组元素增加新的key-value，此时只能单向一次性注入有效，如果希望新的kv能够具有完整mvvm能力可以调用此函数，即重新检测对象变化。
+
 可以通过给item增加一些附加的key-value数据来实现在v-for循环体内定制化取值。比如：
 
 ```html
@@ -143,6 +147,7 @@ var obj = {
     ],
     doFilter : function(index, item){
         item.index = index + 1;
+        this.reObserve(); // 重新检测该对象
     }
 };
 ```
