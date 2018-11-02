@@ -834,12 +834,12 @@
 	};
 
 	pp.getAliasValue = function($access, isFull){
-		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
-		var aliasCache = this.aliasCache || {};
-		if(aliasCache[path]) return aliasCache[path];
-		var func = Parser.makeFunc(path), scope = this.$scope;
-
-		return aliasCache[path] = func(scope);
+		// var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		// var aliasCache = this.aliasCache || {};
+		// if(aliasCache[path]) return aliasCache[path];
+		// var func = Parser.makeFunc(path), scope = this.$scope;
+		var func = this.getAliasFunc($access, isFull), scope = this.$scope;
+		return func(scope);
 	};
 
 	/**

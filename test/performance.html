@@ -18,7 +18,7 @@
         <span v-text="list[0].username"></span>
         <ul>
 
-            <li  v-for="item in list" v-on:click="func.aaa($index)" v-class="{active: item.active}">
+            <li  v-for="item in list" v-on:click="func.aaa($index)">
                 
                     <span>{{item.username+'-'+$index}}</span>
             </li>
@@ -51,38 +51,41 @@
         $('#app').render(obj);
 
         // obj.list.splice(0, 1, {username:3, active: false});
+        
+        // obj.list.$reset([]);
+
+        // obj.list.$reset([{username:3, active: false}]);
 
 
+        // obj.list.unshift({
+        //     username: 4,
+        //     active: true
+        // });
 
-        obj.list.unshift({
-            username: 4,
-            active: true
-        });
+var index = 0, gap = 50, first = 500;
+    var st = setInterval(function(){
+        if(index>gap*first){
+            clearInterval(st);
+            return;
+        }
+        console.log(index);
+        var arr = [], i = index;
+        index = index + first;
+        for(;i<index;i++){
+            arr.push({
+                username: i,
+        //         "avatar_color": "#4BC1ED",
+        // "avatar_text": "田",
+        // "photourl": "https://staging-an.nqsky.com:8303/cas/photodownload?photoid=a723f2f5-fa72-4fcc-9707-94cacd8056d9",
+        // "useruuid": "798cfbb5-6c8b-4eab-aeab-90ce6a181ab3",
+        // "imaccount": "10878"
+            });
+        }
 
-// var index = 0, gap = 50, first = 500;
-//     var st = setInterval(function(){
-//         if(index>gap*first){
-//             clearInterval(st);
-//             return;
-//         }
-//         console.log(index);
-//         var arr = [], i = index;
-//         index = index + first;
-//         for(;i<index;i++){
-//             arr.push({
-//                 username: i,
-//         //         "avatar_color": "#4BC1ED",
-//         // "avatar_text": "田",
-//         // "photourl": "https://staging-an.nqsky.com:8303/cas/photodownload?photoid=a723f2f5-fa72-4fcc-9707-94cacd8056d9",
-//         // "useruuid": "798cfbb5-6c8b-4eab-aeab-90ce6a181ab3",
-//         // "imaccount": "10878"
-//             });
-//         }
-
-//         obj.list.push.apply(obj.list, arr);
+        obj.list.push.apply(obj.list, arr);
             
 
-//     }, 1000);
+    }, 1000);
 
     </script>
 </body>

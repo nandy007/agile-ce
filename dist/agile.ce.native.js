@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.26.1541138843631 beta
+ *	Version	:	0.4.27.1541149053713 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -955,12 +955,12 @@ module.exports = require("Document");
 	};
 
 	pp.getAliasValue = function($access, isFull){
-		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
-		var aliasCache = this.aliasCache || {};
-		if(aliasCache[path]) return aliasCache[path];
-		var func = Parser.makeFunc(path), scope = this.$scope;
-
-		return aliasCache[path] = func(scope);
+		// var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		// var aliasCache = this.aliasCache || {};
+		// if(aliasCache[path]) return aliasCache[path];
+		// var func = Parser.makeFunc(path), scope = this.$scope;
+		var func = this.getAliasFunc($access, isFull), scope = this.$scope;
+		return func(scope);
 	};
 
 	/**
@@ -4215,21 +4215,27 @@ module.exports = require("File");
 	 * @param   {Any}           val     [默认值]
 	 */
 	op.observeObject = function (object, paths, val) {
-		var path = (paths || []).join('.');
 		var prop = paths[paths.length - 1];
 		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
 		var getter = descriptor.get, setter = descriptor.set, ob = this;
 
-		// 已经监听过的对象不再重复监听
-		if(getter&&getter.__o__) return;
+
+
+		// 已经监测过则无需检测， 至更新关键变量
+		if(getter&&getter.__o__) {
+			getter.__o__ = {paths: paths};
+			return;
+		};
 
 		var Getter = function Getter() {
 			return getter ? getter.call(object) : val;
 		};
-		Getter.__o__ = true;
+		Getter.__o__ = {paths: paths};
 
 		var Setter = function Setter(newValue) {
 			var oldValue = getter ? getter.call(object) : val;
+
+			var myPaths = Getter.__o__.paths || [], myPath = (myPaths || []).join('.');
 
 			if (newValue === oldValue) {
 				return;
@@ -4240,7 +4246,7 @@ module.exports = require("File");
 			if (isNeed) {
 				if(isNeed===1) $.extend(true, oldValue||{},newValue);
 				if(isNeed===2) oldValue.$reset(newValue);
-				ob.observe(newValue, paths);
+				ob.observe(newValue, myPaths);
 				return;
 			}
 
@@ -4252,7 +4258,7 @@ module.exports = require("File");
 
 			// 触发变更回调
 			ob.trigger({
-				path: path,
+				path: myPath,
 				oldVal: oldValue,
 				newVal: newValue
 			});
@@ -4342,9 +4348,7 @@ module.exports = require("File");
 
 		rewriteArrayMethodsCallback(array, this.observeIndex,
 			function (item) {
-				// 重新监测，由于是对整个数组重新监听，后续需要优化
-				// _this.observe(item.newArray, paths);
-				// 重新检测，仅对变化部分重新监听，以提高性能
+				// 重新检测，仅对变化部分重新监听，以提高性能，但仍需优化
 				_this.reObserveArray(item, paths);
 
 				item.path = path;
@@ -4355,18 +4359,21 @@ module.exports = require("File");
 	};
 
 	op.reObserveArray = function(item, paths){
-		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start;
+		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start, end;
+
 		switch (method) {
 			case 'push':
 				start = arr.length - args.length;
-			case 'unshift':
-				start = 0;
 				inserted = args;
-				break
+				break;
 			case 'splice':
 				start = args[0];
+				end = args[1];
 				inserted = args.slice(2);
-				break
+				if(inserted&&inserted.length!==end){
+					inserted = null;
+				}
+				break;
 		}
 		if (inserted) { 
 			$.util.each(inserted, function(index, obj){
@@ -4374,6 +4381,8 @@ module.exports = require("File");
 				// _this.observeObject(inserted, ps, obj);
 				_this.observe(obj, ps);
 			});
+		}else{
+			_this.observe(item.newArray, paths);
 		}
 	};
 
