@@ -22,7 +22,7 @@
 			var deps = depsalias.deps;
 			var exps = depsalias.exps;
 
-			var func = new Function('scope', 'try{ return ' + exps.join('') + '; }catch(e){return "";}');
+			var func = this.getAliasFunc(exps.join(''), true);
 
 			var text = func(scope);
 
@@ -59,12 +59,12 @@
 				access = exps[1],
 				$access = Parser.makePath(access, fors);
 
-			var array = Parser.getListScope(scope, $access);
+			// var array = parser.getAliasValue($access);
 
 			var forsCache = {};
 
 			var $listFragment = parser.preCompileVFor($node, function () {
-				return Parser.getListScope(scope, $access);
+				return parser.getAliasValue($access);
 			}, 0, fors, alias, access, forsCache, vforIndex, __filter);
 
 			var isAdapter = $.ui.isJQAdapter($listFragment);
@@ -583,6 +583,9 @@
 
 		this.parserIndex = _parserIndex++;
 
+		// 对象值映射
+		this.aliasCache = {};
+
 		this.initProxy();
 
 		this.init();
@@ -679,7 +682,7 @@
 		var duplex = Parser.formateSubscript(ac.join('.'));
 		var scope = this.$scope;
 
-		var func = new Function('scope', 'return ' + duplex + ';');
+		var func = this.getAliasFunc(duplex, true);
 		duplex = func(scope);
 
 		return {
@@ -819,6 +822,27 @@
 	}
 
 	/**
+	 * 对需要使用new Function获取值的对象进行缓存处理，避免频繁new Function
+	 */
+	pp.getAliasFunc = function($access, isFull){
+		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		var aliasCache = this.aliasCache || {};
+		if(aliasCache[path]) return aliasCache[path];
+		var func = Parser.makeFunc(path);
+
+		return aliasCache[path] = func;
+	};
+
+	pp.getAliasValue = function($access, isFull){
+		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		var aliasCache = this.aliasCache || {};
+		if(aliasCache[path]) return aliasCache[path];
+		var func = Parser.makeFunc(path), scope = this.$scope;
+
+		return aliasCache[path] = func(scope);
+	};
+
+	/**
 	 * 深度设置$alias别名映射
 	 * @param   {Object}     fors          [for别名映射]
 	 * @param   {Object}     isParent      [是否为父节点]
@@ -832,22 +856,26 @@
 			$index = fors.$index,
 			ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
-		var func = new Function('scope', 'return scope.' + Parser.formateSubscript($access) + '[' + $index + '];');
-		scope[str$alias][alias] = func(scope);
+
+		var arr = this.getAliasValue($access);
+		scope[str$alias][alias] = arr[$index];
 		if (!isParent) scope[str$alias]['$index'] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
-			var filter$func = new Function('env', 'scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret.call(env, $index, cur$item, $curNode);}else{ return ret; }');
 
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
 			var cur$item = scope[str$alias][alias];
 
-			filter$func({
-				reObserve: function(){
-					observer.observe(cur$item, [$access, $index]);
-				}
-			}, scope, $index, cur$item, fors.__$plate);
+			var filter$func = this.getAliasFunc(filter$access)(scope);
+			if(typeof filter$func==='function'){
+				filter$func.call({
+					reObserve: function(){
+						observer.observe(cur$item, [$access, $index]);
+					}
+				}, $index, cur$item, fors.__$plate);
+			}
+			
 
 			delete fors.filter;
 			delete fors.__$plate;
@@ -873,7 +901,7 @@
 	pp.destroy = function(){
 		this.vm.$element.__remove_on__(this.parserIndex);
 		this.watcher.destroy();
-		this.$scope = this.watcher = this.updater = null;
+		this.$scope = this.aliasCache = this.watcher = this.updater = null;
 	}
 
 	/**
@@ -1059,14 +1087,6 @@
 		if (exp === fors.alias) return true;
 
 		return this.hasAlias(exp, fors.fors);
-	};
-
-	//为vfor路径获取scope数据
-	Parser.getListScope = function (obj, path) {
-		var func = new Function(
-			'scope', 'return scope.' + Parser.formateSubscript(path) + ';'
-		);
-		return func(obj);
 	};
 
 	//创建fors数据，内容为别名依赖

@@ -125,41 +125,49 @@
 		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
 		var getter = descriptor.get, setter = descriptor.set, ob = this;
 
+		// 已经监听过的对象不再重复监听
+		if(getter&&getter.__o__) return;
+
+		var Getter = function Getter() {
+			return getter ? getter.call(object) : val;
+		};
+		Getter.__o__ = true;
+
+		var Setter = function Setter(newValue) {
+			var oldValue = getter ? getter.call(object) : val;
+
+			if (newValue === oldValue) {
+				return;
+			}
+
+			// 新值为对象或数组重新监测
+			var isNeed = observeUtil.isNeed(newValue);
+			if (isNeed) {
+				if(isNeed===1) $.extend(true, oldValue||{},newValue);
+				if(isNeed===2) oldValue.$reset(newValue);
+				ob.observe(newValue, paths);
+				return;
+			}
+
+			if (setter) {
+				setter.call(object, newValue);
+			} else {
+				val = newValue;
+			}
+
+			// 触发变更回调
+			ob.trigger({
+				path: path,
+				oldVal: oldValue,
+				newVal: newValue
+			});
+
+		};
+
 		// 定义 object[prop] 的 getter 和 setter
 		Object.defineProperty(object, prop, {
-			get: function Getter() {
-				return getter ? getter.call(object) : val;
-			},
-			set: function Setter(newValue) {
-				var oldValue = getter ? getter.call(object) : val;
-
-				if (newValue === oldValue) {
-					return;
-				}
-
-				// 新值为对象或数组重新监测
-				var isNeed = observeUtil.isNeed(newValue);
-				if (isNeed) {
-					if(isNeed===1) $.extend(true, oldValue||{},newValue);
-					if(isNeed===2) oldValue.$reset(newValue);
-					ob.observe(newValue, paths);
-					return;
-				}
-
-				if (setter) {
-					setter.call(object, newValue);
-				} else {
-					val = newValue;
-				}
-
-				// 触发变更回调
-				ob.trigger({
-					path: path,
-					oldVal: oldValue,
-					newVal: newValue
-				});
-
-			}
+			get: Getter,
+			set: Setter
 		});
 
 	};
@@ -192,7 +200,7 @@
 
 					var args = $.util.copyArray(arguments),
 						oldLen = this.length,
-						result = nativeMethod.apply(this, arguments),
+						result = nativeMethod.apply(this, args),
 						newLen = this.length,
 						newArray = this;
 					$.util.each(array.__proto__.cbs, function (index, cb) {
@@ -231,16 +239,46 @@
 			this.observeIndex = OBSERVE_INDEX++;
 		}
 
+		var arrProto = array.__proto__;
+		var arrCbs = arrProto.cbs || {};
+
+		// 已经监听过的数组不再重复监听
+		if(arrCbs[this.observeIndex]) return;
+
 		rewriteArrayMethodsCallback(array, this.observeIndex,
 			function (item) {
-				// 重新监测
-				_this.observe(item.newArray, paths);
+				// 重新监测，由于是对整个数组重新监听，后续需要优化
+				// _this.observe(item.newArray, paths);
+				// 重新检测，仅对变化部分重新监听，以提高性能
+				_this.reObserveArray(item, paths);
 
 				item.path = path;
 
 				// 触发回调
 				_this.trigger(item);
 			});
+	};
+
+	op.reObserveArray = function(item, paths){
+		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start;
+		switch (method) {
+			case 'push':
+				start = arr.length - args.length;
+			case 'unshift':
+				start = 0;
+				inserted = args;
+				break
+			case 'splice':
+				start = args[0];
+				inserted = args.slice(2);
+				break
+		}
+		if (inserted) { 
+			$.util.each(inserted, function(index, obj){
+				var ps = paths.slice(0).concat([start+index])
+				_this.observeObject(inserted, ps, obj);
+			});
+		}
 	};
 
 	// 销毁

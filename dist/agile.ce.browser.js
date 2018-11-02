@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.24.1540974810285 beta
+ *	Version	:	0.4.25.1541131086716 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -106,7 +106,7 @@ module.exports = env;
 			var deps = depsalias.deps;
 			var exps = depsalias.exps;
 
-			var func = new Function('scope', 'try{ return ' + exps.join('') + '; }catch(e){return "";}');
+			var func = this.getAliasFunc(exps.join(''), true);
 
 			var text = func(scope);
 
@@ -143,12 +143,12 @@ module.exports = env;
 				access = exps[1],
 				$access = Parser.makePath(access, fors);
 
-			var array = Parser.getListScope(scope, $access);
+			// var array = parser.getAliasValue($access);
 
 			var forsCache = {};
 
 			var $listFragment = parser.preCompileVFor($node, function () {
-				return Parser.getListScope(scope, $access);
+				return parser.getAliasValue($access);
 			}, 0, fors, alias, access, forsCache, vforIndex, __filter);
 
 			var isAdapter = $.ui.isJQAdapter($listFragment);
@@ -667,6 +667,9 @@ module.exports = env;
 
 		this.parserIndex = _parserIndex++;
 
+		// 对象值映射
+		this.aliasCache = {};
+
 		this.initProxy();
 
 		this.init();
@@ -763,7 +766,7 @@ module.exports = env;
 		var duplex = Parser.formateSubscript(ac.join('.'));
 		var scope = this.$scope;
 
-		var func = new Function('scope', 'return ' + duplex + ';');
+		var func = this.getAliasFunc(duplex, true);
 		duplex = func(scope);
 
 		return {
@@ -903,6 +906,27 @@ module.exports = env;
 	}
 
 	/**
+	 * 对需要使用new Function获取值的对象进行缓存处理，避免频繁new Function
+	 */
+	pp.getAliasFunc = function($access, isFull){
+		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		var aliasCache = this.aliasCache || {};
+		if(aliasCache[path]) return aliasCache[path];
+		var func = Parser.makeFunc(path);
+
+		return aliasCache[path] = func;
+	};
+
+	pp.getAliasValue = function($access, isFull){
+		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		var aliasCache = this.aliasCache || {};
+		if(aliasCache[path]) return aliasCache[path];
+		var func = Parser.makeFunc(path), scope = this.$scope;
+
+		return aliasCache[path] = func(scope);
+	};
+
+	/**
 	 * 深度设置$alias别名映射
 	 * @param   {Object}     fors          [for别名映射]
 	 * @param   {Object}     isParent      [是否为父节点]
@@ -916,22 +940,26 @@ module.exports = env;
 			$index = fors.$index,
 			ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
-		var func = new Function('scope', 'return scope.' + Parser.formateSubscript($access) + '[' + $index + '];');
-		scope[str$alias][alias] = func(scope);
+
+		var arr = this.getAliasValue($access);
+		scope[str$alias][alias] = arr[$index];
 		if (!isParent) scope[str$alias]['$index'] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
-			var filter$func = new Function('env', 'scope', '$index', 'cur$item', '$curNode', 'var ret =  scope.' + Parser.formateSubscript(filter$access) + '; if(typeof ret==="function"){ return ret.call(env, $index, cur$item, $curNode);}else{ return ret; }');
 
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
 			var cur$item = scope[str$alias][alias];
 
-			filter$func({
-				reObserve: function(){
-					observer.observe(cur$item, [$access, $index]);
-				}
-			}, scope, $index, cur$item, fors.__$plate);
+			var filter$func = this.getAliasFunc(filter$access)(scope);
+			if(typeof filter$func==='function'){
+				filter$func.call({
+					reObserve: function(){
+						observer.observe(cur$item, [$access, $index]);
+					}
+				}, $index, cur$item, fors.__$plate);
+			}
+			
 
 			delete fors.filter;
 			delete fors.__$plate;
@@ -957,7 +985,7 @@ module.exports = env;
 	pp.destroy = function(){
 		this.vm.$element.__remove_on__(this.parserIndex);
 		this.watcher.destroy();
-		this.$scope = this.watcher = this.updater = null;
+		this.$scope = this.aliasCache = this.watcher = this.updater = null;
 	}
 
 	/**
@@ -1143,14 +1171,6 @@ module.exports = env;
 		if (exp === fors.alias) return true;
 
 		return this.hasAlias(exp, fors.fors);
-	};
-
-	//为vfor路径获取scope数据
-	Parser.getListScope = function (obj, path) {
-		var func = new Function(
-			'scope', 'return scope.' + Parser.formateSubscript(path) + ';'
-		);
-		return func(obj);
 	};
 
 	//创建fors数据，内容为别名依赖
@@ -12139,41 +12159,49 @@ return jQuery;
 		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
 		var getter = descriptor.get, setter = descriptor.set, ob = this;
 
+		// 已经监听过的对象不再重复监听
+		if(getter&&getter.__o__) return;
+
+		var Getter = function Getter() {
+			return getter ? getter.call(object) : val;
+		};
+		Getter.__o__ = true;
+
+		var Setter = function Setter(newValue) {
+			var oldValue = getter ? getter.call(object) : val;
+
+			if (newValue === oldValue) {
+				return;
+			}
+
+			// 新值为对象或数组重新监测
+			var isNeed = observeUtil.isNeed(newValue);
+			if (isNeed) {
+				if(isNeed===1) $.extend(true, oldValue||{},newValue);
+				if(isNeed===2) oldValue.$reset(newValue);
+				ob.observe(newValue, paths);
+				return;
+			}
+
+			if (setter) {
+				setter.call(object, newValue);
+			} else {
+				val = newValue;
+			}
+
+			// 触发变更回调
+			ob.trigger({
+				path: path,
+				oldVal: oldValue,
+				newVal: newValue
+			});
+
+		};
+
 		// 定义 object[prop] 的 getter 和 setter
 		Object.defineProperty(object, prop, {
-			get: function Getter() {
-				return getter ? getter.call(object) : val;
-			},
-			set: function Setter(newValue) {
-				var oldValue = getter ? getter.call(object) : val;
-
-				if (newValue === oldValue) {
-					return;
-				}
-
-				// 新值为对象或数组重新监测
-				var isNeed = observeUtil.isNeed(newValue);
-				if (isNeed) {
-					if(isNeed===1) $.extend(true, oldValue||{},newValue);
-					if(isNeed===2) oldValue.$reset(newValue);
-					ob.observe(newValue, paths);
-					return;
-				}
-
-				if (setter) {
-					setter.call(object, newValue);
-				} else {
-					val = newValue;
-				}
-
-				// 触发变更回调
-				ob.trigger({
-					path: path,
-					oldVal: oldValue,
-					newVal: newValue
-				});
-
-			}
+			get: Getter,
+			set: Setter
 		});
 
 	};
@@ -12206,7 +12234,7 @@ return jQuery;
 
 					var args = $.util.copyArray(arguments),
 						oldLen = this.length,
-						result = nativeMethod.apply(this, arguments),
+						result = nativeMethod.apply(this, args),
 						newLen = this.length,
 						newArray = this;
 					$.util.each(array.__proto__.cbs, function (index, cb) {
@@ -12245,16 +12273,46 @@ return jQuery;
 			this.observeIndex = OBSERVE_INDEX++;
 		}
 
+		var arrProto = array.__proto__;
+		var arrCbs = arrProto.cbs || {};
+
+		// 已经监听过的数组不再重复监听
+		if(arrCbs[this.observeIndex]) return;
+
 		rewriteArrayMethodsCallback(array, this.observeIndex,
 			function (item) {
-				// 重新监测
-				_this.observe(item.newArray, paths);
+				// 重新监测，由于是对整个数组重新监听，后续需要优化
+				// _this.observe(item.newArray, paths);
+				// 重新检测，仅对变化部分重新监听，以提高性能
+				_this.reObserveArray(item, paths);
 
 				item.path = path;
 
 				// 触发回调
 				_this.trigger(item);
 			});
+	};
+
+	op.reObserveArray = function(item, paths){
+		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start;
+		switch (method) {
+			case 'push':
+				start = arr.length - args.length;
+			case 'unshift':
+				start = 0;
+				inserted = args;
+				break
+			case 'splice':
+				start = args[0];
+				inserted = args.slice(2);
+				break
+		}
+		if (inserted) { 
+			$.util.each(inserted, function(index, obj){
+				var ps = paths.slice(0).concat([start+index])
+				_this.observeObject(inserted, ps, obj);
+			});
+		}
 	};
 
 	// 销毁
