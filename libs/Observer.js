@@ -275,8 +275,9 @@
 		}
 		if (inserted) { 
 			$.util.each(inserted, function(index, obj){
-				var ps = paths.slice(0).concat([start+index])
-				_this.observeObject(inserted, ps, obj);
+				var ps = paths.slice(0).concat([start+index]);
+				// _this.observeObject(inserted, ps, obj);
+				_this.observe(obj, ps);
 			});
 		}
 	};

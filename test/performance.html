@@ -9,7 +9,7 @@
     <script src="../dist/agile.ce.browser.js" charset="UTF-8"></script>
     <style>
         li{background: #ccc;}
-        li.active{background: #ff0000;}
+        li.active{background: #6d6a6a;}
     </style>
 </head>
 
@@ -18,7 +18,7 @@
         <span v-text="list[0].username"></span>
         <ul>
 
-            <li  v-for="item in list" v-on:click="func.aaa">
+            <li  v-for="item in list" v-on:click="func.aaa($index)" v-class="{active: item.active}">
                 
                     <span>{{item.username+'-'+$index}}</span>
             </li>
@@ -30,21 +30,34 @@
         var obj = {
             t: '啊啊啊',
             list: [
-                {username: 1},
-                {username: 2}
-            ]
+                {username: 1, active: true},
+                {username: 2, active: false}
+            ],
+            func: {
+                aaa: function(index){
+                    var tops = obj.list;
+                    for(let i=0, len=tops.length;i<len;i++){
+                        if(i===index){
+                            tops[i].active = true;
+                        }else{
+                            tops[i].active = false;
+                        }
+                    }
+                }
+            }
         };
 
 
         $('#app').render(obj);
 
-        obj.list.splice(0, 1, {username:3});
+        // obj.list.splice(0, 1, {username:3, active: false});
 
 
 
-        // obj.list.unshift({
-        //     username: 2
-        // });
+        obj.list.unshift({
+            username: 4,
+            active: true
+        });
 
 // var index = 0, gap = 50, first = 500;
 //     var st = setInterval(function(){
