@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.27.1541149053713 beta
+ *	Version	:	0.4.28.1541247838712 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1106,11 +1106,14 @@ module.exports = require("Document");
 		var deps = [];
 		var exps = [];
 		// 匹配单引号/双引号包含的常量和+<>==等运算符操作
-		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.]*)/g, function(exp){
+		// expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.]*)/g, function(exp){
+		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.\[\]]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.\[\]]*)/g, function(exp){
+			
 			if (exp!==''&&!Parser.isConst(exp)) {
 				deps.push(Parser.makePath(exp, fors));
 				return Parser.makeAliasPath(exp, fors);
 			}
+				
 			return exp;
 		});
 
@@ -1121,8 +1124,8 @@ module.exports = require("Document");
 
 	//获取指令表达式的真实路径
 	Parser.makePath = function (exp, fors) {
-		var NOT_AVIR_RE = /[^\w\.\[\$]/g
-		exp = exp.replace(NOT_AVIR_RE, '').replace(/\[/g, '.');
+		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g
+		exp = exp.replace(NOT_AVIR_RE, '');
 
 		var exps = exp.split('.');
 
@@ -3867,6 +3870,7 @@ module.exports = require("File");
 
 		//依赖订阅缓存
 		this.$depSub = {};
+		this.$directDepSub = {};
 
 		this.observer = new Observer(model, this);
 	}
@@ -3875,16 +3879,21 @@ module.exports = require("File");
 
 	/**
 	 * watch订阅数据改变回调
-	 * @param   {Object}    depends
-	 * @param   {Function}  callback
+	 * @param   {Object}    options
 	 */
 	wp.change = function(options){
-		var watcher = this;
 		var subs = this.$depSub;
 		var sub = watcherUtil.iterator(options.path.split('.'), subs);
-
-		$.util.each(sub['$']||[], function(i, cb){
+		$.util.each(sub['$']||[], function(i, cb){		
 			cb(options, i);
+		});
+	};
+
+	wp.changeDirect = function(){
+		$.util.each(this.$directDepSub, function(k, arr){		
+			$.util.each(arr, function(i, cb){
+				cb({path: k}, i);
+			});
 		});
 	};
 
@@ -3895,14 +3904,27 @@ module.exports = require("File");
 	 * @param   {Object}    fors
 	 */
 	wp.watch = function (depends, callback, fors) {
-		var parser = this.parser;
+		var parser = this.parser, _this = this;
 		var subs = this.$depSub;
 		$.util.each(depends, function(i, dep){
-			var sub = watcherUtil.iterator(dep.split('.'), subs);
-			sub['$'] = sub['$']||[];
-			sub['$'].push(function(){
-				parser.watchBack(fors, callback, arguments);
-			});
+			// list[0].username   list[0].attrs[1].username
+			var _dep = dep.replace(/\[/, '.').replace(/\]/, '');
+			var isDirect = _dep===dep?false:true;
+			dep = _dep;
+			if(isDirect){
+				_this.$directDepSub[dep] = _this.$directDepSub[dep] || [];
+				_this.$directDepSub[dep].push(function(){
+					parser.watchBack(fors, callback, arguments);
+				});
+			}else{
+				var sub = watcherUtil.iterator(dep.split('.'), subs);
+				sub['$'] = sub['$']||[];
+				
+				sub['$'].push(function(){
+					parser.watchBack(fors, callback, arguments);
+				});
+			}
+			
 		});
 	};
 
@@ -4082,6 +4104,7 @@ module.exports = require("File");
 	wp.destroy = function(){
 		this.observer.destroy();
 		this.$depSub = {};
+		this.$directDepSub = {};
 		this.parser = this.observer = null;
 	}
 
@@ -4168,7 +4191,7 @@ module.exports = require("File");
 		// 子对象路径缓存
 		this.$subs = {};
 
-		this.observe(object);
+		this.observe(object, []);
 	}
 
 	var op = Observer.prototype;
@@ -4179,6 +4202,7 @@ module.exports = require("File");
 	 */
 	op.trigger = function (options) {
 		this.watcher.change(options);
+		this.watcher.changeDirect();
 	};
 
 	/**
@@ -4186,25 +4210,44 @@ module.exports = require("File");
 	 * @param   {Object}  object  [监测的对象]
 	 * @param   {Array}   paths   [访问路径数组]
 	 */
-	op.observe = function (object, paths) {
+	op.observe = function (object, paths, parent) {
 		var isArr = $.isArray(object);
 		if (isArr) {
 			this.observeArray(object, paths);
 		}
 
 		$.util.each(object, function (property, value) {
-			var ps = $.util.copyArray(paths || []);
-			ps.push(property);
+			var ps = paths.slice(0);
+			ps.push({p:property});
 
-			if(!isArr) this.observeObject(object, ps, value);
+			if(!isArr) this.observeObject(object, ps, value, parent);
 
 			if (observeUtil.isNeed(value)) {
-				this.observe(value, ps);
+				this.observe(value, ps, object);
 			}
 
 		}, this);
 
 		return this;
+	};
+
+	op.updateTruePaths = function(paths, obj, parent){
+		var len = paths.length;
+		if(len>2){
+			var lastIndex = len-2, last = paths[lastIndex], p = last.p;
+			if($.util.isNumber(p)){
+				var trueIndex = $.inArray(obj, parent);
+				if(trueIndex>-1) last.p = trueIndex;
+			}
+		}
+	};
+
+	op.formatPaths = function(paths){
+		var ps = [];
+		$.util.each(paths, function(index, path){
+			ps.push(path.p);
+		});
+		return ps;
 	};
 
 
@@ -4214,28 +4257,28 @@ module.exports = require("File");
 	 * @param   {Array}         paths   [访问路径数组]
 	 * @param   {Any}           val     [默认值]
 	 */
-	op.observeObject = function (object, paths, val) {
-		var prop = paths[paths.length - 1];
+	op.observeObject = function (object, paths, val, parent) {
+		var prop = paths[paths.length - 1].p;
 		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
 		var getter = descriptor.get, setter = descriptor.set, ob = this;
 
-
-
 		// 已经监测过则无需检测， 至更新关键变量
 		if(getter&&getter.__o__) {
-			getter.__o__ = {paths: paths};
 			return;
 		};
 
 		var Getter = function Getter() {
 			return getter ? getter.call(object) : val;
 		};
-		Getter.__o__ = {paths: paths};
+		Getter.__o__ = true;
+
 
 		var Setter = function Setter(newValue) {
 			var oldValue = getter ? getter.call(object) : val;
 
-			var myPaths = Getter.__o__.paths || [], myPath = (myPaths || []).join('.');
+			ob.updateTruePaths(paths, object, parent);
+
+			var myPath = ob.formatPaths(paths).join('.');
 
 			if (newValue === oldValue) {
 				return;
@@ -4246,7 +4289,7 @@ module.exports = require("File");
 			if (isNeed) {
 				if(isNeed===1) $.extend(true, oldValue||{},newValue);
 				if(isNeed===2) oldValue.$reset(newValue);
-				ob.observe(newValue, myPaths);
+				ob.observe(newValue, paths, parent);
 				return;
 			}
 
@@ -4310,7 +4353,8 @@ module.exports = require("File");
 							args: args,
 							oldLen: oldLen,
 							newLen: newLen,
-							newArray: newArray
+							newArray: newArray,
+							result: result
 						});
 					});
 					return result;
@@ -4334,7 +4378,7 @@ module.exports = require("File");
 	 */
 	op.observeArray = function (array, paths) {
 
-		var path = (paths || []).join('.'), _this = this;
+		var _this = this;
 
 		if (!this.observeIndex) {
 			this.observeIndex = OBSERVE_INDEX++;
@@ -4351,7 +4395,7 @@ module.exports = require("File");
 				// 重新检测，仅对变化部分重新监听，以提高性能，但仍需优化
 				_this.reObserveArray(item, paths);
 
-				item.path = path;
+				item.path = _this.formatPaths(paths).join('.');
 
 				// 触发回调
 				_this.trigger(item);
@@ -4359,30 +4403,26 @@ module.exports = require("File");
 	};
 
 	op.reObserveArray = function(item, paths){
-		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start, end;
+		var inserted, method = item.method, arr = item.newArray, args = item.args, _this = this, start;
 
 		switch (method) {
 			case 'push':
 				start = arr.length - args.length;
+			case 'unshift':
+				start = 0;
 				inserted = args;
 				break;
 			case 'splice':
 				start = args[0];
-				end = args[1];
 				inserted = args.slice(2);
-				if(inserted&&inserted.length!==end){
-					inserted = null;
-				}
 				break;
 		}
 		if (inserted) { 
 			$.util.each(inserted, function(index, obj){
-				var ps = paths.slice(0).concat([start+index]);
+				var ps = paths.slice(0).concat([{p:start+index}]);
 				// _this.observeObject(inserted, ps, obj);
-				_this.observe(obj, ps);
+				_this.observe(obj, ps, arr);
 			});
-		}else{
-			_this.observe(item.newArray, paths);
 		}
 	};
 

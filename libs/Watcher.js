@@ -37,6 +37,7 @@
 
 		//依赖订阅缓存
 		this.$depSub = {};
+		this.$directDepSub = {};
 
 		this.observer = new Observer(model, this);
 	}
@@ -45,16 +46,21 @@
 
 	/**
 	 * watch订阅数据改变回调
-	 * @param   {Object}    depends
-	 * @param   {Function}  callback
+	 * @param   {Object}    options
 	 */
 	wp.change = function(options){
-		var watcher = this;
 		var subs = this.$depSub;
 		var sub = watcherUtil.iterator(options.path.split('.'), subs);
-
-		$.util.each(sub['$']||[], function(i, cb){
+		$.util.each(sub['$']||[], function(i, cb){		
 			cb(options, i);
+		});
+	};
+
+	wp.changeDirect = function(){
+		$.util.each(this.$directDepSub, function(k, arr){		
+			$.util.each(arr, function(i, cb){
+				cb({path: k}, i);
+			});
 		});
 	};
 
@@ -65,14 +71,27 @@
 	 * @param   {Object}    fors
 	 */
 	wp.watch = function (depends, callback, fors) {
-		var parser = this.parser;
+		var parser = this.parser, _this = this;
 		var subs = this.$depSub;
 		$.util.each(depends, function(i, dep){
-			var sub = watcherUtil.iterator(dep.split('.'), subs);
-			sub['$'] = sub['$']||[];
-			sub['$'].push(function(){
-				parser.watchBack(fors, callback, arguments);
-			});
+			// list[0].username   list[0].attrs[1].username
+			var _dep = dep.replace(/\[/, '.').replace(/\]/, '');
+			var isDirect = _dep===dep?false:true;
+			dep = _dep;
+			if(isDirect){
+				_this.$directDepSub[dep] = _this.$directDepSub[dep] || [];
+				_this.$directDepSub[dep].push(function(){
+					parser.watchBack(fors, callback, arguments);
+				});
+			}else{
+				var sub = watcherUtil.iterator(dep.split('.'), subs);
+				sub['$'] = sub['$']||[];
+				
+				sub['$'].push(function(){
+					parser.watchBack(fors, callback, arguments);
+				});
+			}
+			
 		});
 	};
 
@@ -252,6 +271,7 @@
 	wp.destroy = function(){
 		this.observer.destroy();
 		this.$depSub = {};
+		this.$directDepSub = {};
 		this.parser = this.observer = null;
 	}
 

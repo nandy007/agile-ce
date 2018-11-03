@@ -985,11 +985,14 @@
 		var deps = [];
 		var exps = [];
 		// 匹配单引号/双引号包含的常量和+<>==等运算符操作
-		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.]*)/g, function(exp){
+		// expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.]*)/g, function(exp){
+		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.\[\]]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.\[\]]*)/g, function(exp){
+			
 			if (exp!==''&&!Parser.isConst(exp)) {
 				deps.push(Parser.makePath(exp, fors));
 				return Parser.makeAliasPath(exp, fors);
 			}
+				
 			return exp;
 		});
 
@@ -1000,8 +1003,8 @@
 
 	//获取指令表达式的真实路径
 	Parser.makePath = function (exp, fors) {
-		var NOT_AVIR_RE = /[^\w\.\[\$]/g
-		exp = exp.replace(NOT_AVIR_RE, '').replace(/\[/g, '.');
+		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g
+		exp = exp.replace(NOT_AVIR_RE, '');
 
 		var exps = exp.split('.');
 

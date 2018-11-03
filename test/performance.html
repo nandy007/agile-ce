@@ -15,12 +15,13 @@
 
 <body>
     <div id="app">
-        <span v-text="list[0].username"></span>
+        <span v-text="list[1].username"></span>
         <ul>
 
-            <li  v-for="item in list" v-on:click="func.aaa($index)">
+            <li  v-for="item in list" v-on:click="func.aaa($index)" v-class="{active: item.active}">
                 
-                    <span>{{item.username+'-'+$index}}</span>
+                    <span>{{item.username}}</span>
+                    <span v-for="a in item.arr">{{a.c}}</span>
             </li>
 
         </ul>
@@ -29,9 +30,19 @@
 
         var obj = {
             t: '啊啊啊',
+            a: [
+                {
+                    b: [
+                        {
+                            c: 1
+                        }
+                    ]
+                }
+            ],
             list: [
-                {username: 1, active: true},
-                {username: 2, active: false}
+                {username: 1, active: true, arr: [{c:1}]},
+                {username: 2, active: false, arr: [{c:1}]},
+                {username: 3, active: false, arr: [{c:1}]}
             ],
             func: {
                 aaa: function(index){
@@ -50,6 +61,38 @@
 
         $('#app').render(obj);
 
+        obj.list.shift();
+
+        obj.list.unshift({
+            username: 4,
+            active: true,
+            arr: [
+                {c:2}
+            ]
+        },{
+            username: 5,
+            active: false,
+            arr: [
+                {c:3}
+            ]
+        });
+
+        // obj.a.unshift({
+        //     b: [
+        //         {
+        //             c: 2
+        //         }
+        //     ]
+        // });
+
+        // obj.list.push({
+        //     username: 4,
+        //     active: false,
+        //     arr: [{c:1}]
+        // });
+
+        obj.list[1].arr.unshift({c:6});
+
         // obj.list.splice(0, 1, {username:3, active: false});
         
         // obj.list.$reset([]);
@@ -57,35 +100,47 @@
         // obj.list.$reset([{username:3, active: false}]);
 
 
-        // obj.list.unshift({
+        // obj.list.splice(0, 2, {
         //     username: 4,
-        //     active: true
+        //     active: false
         // });
 
-var index = 0, gap = 50, first = 500;
-    var st = setInterval(function(){
-        if(index>gap*first){
-            clearInterval(st);
-            return;
-        }
-        console.log(index);
-        var arr = [], i = index;
-        index = index + first;
-        for(;i<index;i++){
-            arr.push({
-                username: i,
-        //         "avatar_color": "#4BC1ED",
-        // "avatar_text": "田",
-        // "photourl": "https://staging-an.nqsky.com:8303/cas/photodownload?photoid=a723f2f5-fa72-4fcc-9707-94cacd8056d9",
-        // "useruuid": "798cfbb5-6c8b-4eab-aeab-90ce6a181ab3",
-        // "imaccount": "10878"
-            });
-        }
+        // obj.list.unshift({
+        //     username: 4,
+        //     active: false
+        // });
 
-        obj.list.push.apply(obj.list, arr);
+        // obj.list.shift();
+
+        // obj.list[1].username = 4333
+
+
+        // obj.list[0].username = 333
+
+// var index = 0, gap = 50, first = 500;
+//     var st = setInterval(function(){
+//         if(index>gap*first){
+//             clearInterval(st);
+//             return;
+//         }
+//         console.log(index);
+//         var arr = [], i = index;
+//         index = index + first;
+//         for(;i<index;i++){
+//             arr.push({
+//                 username: i,
+//         //         "avatar_color": "#4BC1ED",
+//         // "avatar_text": "田",
+//         // "photourl": "https://staging-an.nqsky.com:8303/cas/photodownload?photoid=a723f2f5-fa72-4fcc-9707-94cacd8056d9",
+//         // "useruuid": "798cfbb5-6c8b-4eab-aeab-90ce6a181ab3",
+//         // "imaccount": "10878"
+//             });
+//         }
+
+//         obj.list.push.apply(obj.list, arr);
             
 
-    }, 1000);
+//     }, 1000);
 
     </script>
 </body>
