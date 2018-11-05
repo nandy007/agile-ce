@@ -170,7 +170,23 @@
 			var isNeed = observeUtil.isNeed(newValue);
 			if (isNeed) {
 				if(isNeed===1) $.extend(true, oldValue||{},newValue);
-				if(isNeed===2) oldValue.$reset(newValue);
+				if(isNeed===2) {
+					try{
+						oldValue.$reset(newValue);
+					}catch(e){
+						// 如果赋值的为数组，但是初始值不是数组，则需要执行setter
+						if (setter) {
+							setter.call(object, newValue);
+						} else {
+							val = newValue;
+						}
+						ob.trigger({
+							path: myPath,
+							oldVal: oldValue,
+							newVal: newValue
+						});
+					}
+				}
 				ob.observe(newValue, paths, parent);
 				return;
 			}

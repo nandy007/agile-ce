@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.30.1541396649562 beta
+ *	Version	:	0.4.31.1541400227440 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -4324,7 +4324,23 @@ module.exports = require("File");
 			var isNeed = observeUtil.isNeed(newValue);
 			if (isNeed) {
 				if(isNeed===1) $.extend(true, oldValue||{},newValue);
-				if(isNeed===2) oldValue.$reset(newValue);
+				if(isNeed===2) {
+					try{
+						oldValue.$reset(newValue);
+					}catch(e){
+						// 如果赋值的为数组，但是初始值不是数组，则需要执行setter
+						if (setter) {
+							setter.call(object, newValue);
+						} else {
+							val = newValue;
+						}
+						ob.trigger({
+							path: myPath,
+							oldVal: oldValue,
+							newVal: newValue
+						});
+					}
+				}
 				ob.observe(newValue, paths, parent);
 				return;
 			}
