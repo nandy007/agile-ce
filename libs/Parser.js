@@ -541,7 +541,7 @@
 		},
 		'vcontext': function ($node, fors, expression) {
 			var funcStr = Parser.makeAliasPath(expression, fors),
-				func = Parser.makeFunc(funcStr.match(/\([^\)]*\)/) ? funcStr : funcStr + '()'),
+				func = Parser.makeFunc(funcStr.match(/\([^\)]*\)/) ? funcStr : funcStr + '()', true),
 				scope = this.$scope;
 
 			$node.def('__context', function () {
@@ -698,9 +698,14 @@
 	 * @return  {Any}      取决于实际值
 	 */
 	pp.getValue = function (exp, fors) {
-		var args = $.util.copyArray(arguments);
-		args.unshift(this.$scope)
-		return Parser.getValue.apply(Parser, args);
+		var scope = this.$scope;
+		if (arguments.length > 1) {
+			var depsalias = Parser.getDepsAlias(exp, fors);
+			exp = depsalias.exps.join('');
+		}
+		var func = this.getAliasFunc(exp, true);
+		return func(scope);
+		// return Parser.getValue.apply(this, args);
 	};
 
 	/**
@@ -1151,14 +1156,14 @@
 	};
 
 	//根据表达式取值
-	Parser.getValue = function (scope, str, fors) {
-		if (arguments.length > 2) {
-			var depsalias = Parser.getDepsAlias(str, fors);
-			str = depsalias.exps.join('');
-		}
-		var func = this.makeFunc(str);
-		return func(scope);
-	};
+	// Parser.getValue = function (scope, str, fors) {
+	// 	if (arguments.length > 2) {
+	// 		var depsalias = Parser.getDepsAlias(str, fors);
+	// 		str = depsalias.exps.join('');
+	// 	}
+	// 	var func = this.getAliasFunc(str, true);
+	// 	return func(scope);
+	// };
 
 	//如果指令值为数字则强制转换格式为数字
 	Parser.formatValue = function ($node, value) {

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.28.1541247829568 beta
+ *	Version	:	0.4.29.1541395879009 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -625,7 +625,7 @@ module.exports = env;
 		},
 		'vcontext': function ($node, fors, expression) {
 			var funcStr = Parser.makeAliasPath(expression, fors),
-				func = Parser.makeFunc(funcStr.match(/\([^\)]*\)/) ? funcStr : funcStr + '()'),
+				func = Parser.makeFunc(funcStr.match(/\([^\)]*\)/) ? funcStr : funcStr + '()', true),
 				scope = this.$scope;
 
 			$node.def('__context', function () {
@@ -782,9 +782,14 @@ module.exports = env;
 	 * @return  {Any}      取决于实际值
 	 */
 	pp.getValue = function (exp, fors) {
-		var args = $.util.copyArray(arguments);
-		args.unshift(this.$scope)
-		return Parser.getValue.apply(Parser, args);
+		var scope = this.$scope;
+		if (arguments.length > 1) {
+			var depsalias = Parser.getDepsAlias(exp, fors);
+			exp = depsalias.exps.join('');
+		}
+		var func = this.getAliasFunc(exp, true);
+		return func(scope);
+		// return Parser.getValue.apply(this, args);
 	};
 
 	/**
@@ -1235,14 +1240,14 @@ module.exports = env;
 	};
 
 	//根据表达式取值
-	Parser.getValue = function (scope, str, fors) {
-		if (arguments.length > 2) {
-			var depsalias = Parser.getDepsAlias(str, fors);
-			str = depsalias.exps.join('');
-		}
-		var func = this.makeFunc(str);
-		return func(scope);
-	};
+	// Parser.getValue = function (scope, str, fors) {
+	// 	if (arguments.length > 2) {
+	// 		var depsalias = Parser.getDepsAlias(str, fors);
+	// 		str = depsalias.exps.join('');
+	// 	}
+	// 	var func = this.getAliasFunc(str, true);
+	// 	return func(scope);
+	// };
 
 	//如果指令值为数字则强制转换格式为数字
 	Parser.formatValue = function ($node, value) {
@@ -11811,6 +11816,9 @@ return jQuery;
 		this.$depSub = {};
 		this.$directDepSub = {};
 
+		this.swapFuncCache = {};
+		this.delFuncCache = {};
+
 		this.observer = new Observer(model, this);
 	}
 
@@ -11835,6 +11843,20 @@ return jQuery;
 			});
 		});
 	};
+
+	wp.makeSwapFunc = function($access){
+		if(this.swapFuncCache[$access]) return this.swapFuncCache[$access];
+		var prePath = watcherUtil.fomateSubPath($access);
+		var func = new Function('subs', 'tIndex', 'oIndex', 'subs.'+prePath+'[tIndex] = subs.'+prePath+'[oIndex];');
+		return this.swapFuncCache[$access] = func;
+	}
+
+	wp.makeDelFunc = function($access){
+		if(this.delFuncCache[$access]) return this.delFuncCache[$access];
+		var prePath = watcherUtil.fomateSubPath($access);
+		var func  = new Function('subs', 'index', 'delete subs.'+prePath+'[index];');
+		return this.delFuncCache[$access] = func;
+	}
 
 	/**
 	 * 订阅依赖集合的变化回调
@@ -11904,7 +11926,8 @@ return jQuery;
 	wp.updateIndexForPop = function($access, options, cb, handlerFlag){
 		var subs = this.$depSub;
 		var len = options.oldLen;
-		if(handlerFlag) watcherUtil.deleteSub(subs, $access+'.'+(len-1));
+		var delFunc = this.makeDelFunc($access);
+		if(handlerFlag) delFunc(subs, len-1); // watcherUtil.deleteSub(subs, $access+'.'+(len-1));
 	};
 
 	wp.updateIndexForPush = function($access, options, cb, handlerFlag){
@@ -11914,6 +11937,8 @@ return jQuery;
 	wp.updateIndexForShift = function($access, options, cb, handlerFlag){
 		var len = options.oldLen;
 		var subs = this.$depSub;
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
 		for(var i=1;i<len;i++){
 			var ni = i-1,
 				oPath = $access+'.'+i,
@@ -11921,7 +11946,7 @@ return jQuery;
 				oIndexPath = oPath+'.*',
 				nIndexPath = nPath+'.*';
 
-			if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+			if(handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
 
 			cb({
 				path : nIndexPath,
@@ -11930,14 +11955,15 @@ return jQuery;
 			});
 		}
 
-		if(handlerFlag) watcherUtil.deleteSub(subs, $access+'.'+(len-1));
+		if(handlerFlag) delFunc(subs, len-1); //watcherUtil.deleteSub(subs, $access+'.'+(len-1));
 	};
 
 	wp.updateIndexForUnshift = function($access, options, cb, handlerFlag){
 		var len = options.oldLen;
 		var gap = options.newLen-options.oldLen;
 		var subs = this.$depSub;
-
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
 		for(var i=len-1;i>-1;i--){
 			var ni = i+gap,
 				oPath = $access+'.'+i,
@@ -11945,7 +11971,7 @@ return jQuery;
 				oIndexPath = oPath+'.*',
 				nIndexPath = nPath+'.*';
 
-			if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+			if(handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
 
 			cb({
 				path : nIndexPath,
@@ -11956,7 +11982,8 @@ return jQuery;
 
 		if(!handlerFlag) return;
 		for(var i=0;i<gap;i++){
-			watcherUtil.deleteSub(subs, $access+'.'+i);
+			// watcherUtil.deleteSub(subs, $access+'.'+i);
+			delFunc(subs, i);
 		}
 
 	};
@@ -11971,10 +11998,14 @@ return jQuery;
 
 		var subs = this.$depSub;
 
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
+
 		if(options.args.length===1){
 			if(!handlerFlag) return;
 			for(var i=start;i<len;i++){
-				watcherUtil.deleteSub(subs, $access+'.'+i);
+				// watcherUtil.deleteSub(subs, $access+'.'+i);
+				delFunc(subs, i);
 			}
 		}else if(rank===0){
 			var len = options.oldLen;
@@ -11988,7 +12019,7 @@ return jQuery;
 					oIndexPath = oPath+'.*',
 					nIndexPath = nPath+'.*';
 
-				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+				if(handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
 
 				cb({
 					path : nIndexPath,
@@ -11999,7 +12030,8 @@ return jQuery;
 
 			if(!handlerFlag) return;
 			for(var i=start;i<start+gap;i++){
-				watcherUtil.deleteSub(subs, $access+'.'+i);
+				// watcherUtil.deleteSub(subs, $access+'.'+i);
+				delFunc(subs, i);
 			}
 		}else{
 			var pos = start + rank;
@@ -12013,7 +12045,7 @@ return jQuery;
 					oIndexPath = oPath+'.*',
 					nIndexPath = nPath+'.*';
 
-				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+				if(handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
 
 				cb({
 					path : nIndexPath,
@@ -12024,11 +12056,13 @@ return jQuery;
 			if(!handlerFlag) return;
 			if(gap<0){
 				for(var i=len+gap;i<len;i++){
-					watcherUtil.deleteSub(subs, $access+'.'+i);
+					// watcherUtil.deleteSub(subs, $access+'.'+i);
+					delFunc(subs, i);
 				}
 			}else if(gap>0){
 				for(var i=start;i<pos+1;i++){
-					watcherUtil.deleteSub(subs, $access+'.'+i);
+					// watcherUtil.deleteSub(subs, $access+'.'+i);
+					delFunc(subs, i);
 				}
 			}
 
@@ -12044,6 +12078,8 @@ return jQuery;
 		this.observer.destroy();
 		this.$depSub = {};
 		this.$directDepSub = {};
+		this.swapFuncCache = {};
+		this.delFuncCache = {};
 		this.parser = this.observer = null;
 	}
 

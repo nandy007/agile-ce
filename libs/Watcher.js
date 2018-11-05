@@ -39,6 +39,9 @@
 		this.$depSub = {};
 		this.$directDepSub = {};
 
+		this.swapFuncCache = {};
+		this.delFuncCache = {};
+
 		this.observer = new Observer(model, this);
 	}
 
@@ -63,6 +66,20 @@
 			});
 		});
 	};
+
+	wp.makeSwapFunc = function($access){
+		if(this.swapFuncCache[$access]) return this.swapFuncCache[$access];
+		var prePath = watcherUtil.fomateSubPath($access);
+		var func = new Function('subs', 'tIndex', 'oIndex', 'subs.'+prePath+'[tIndex] = subs.'+prePath+'[oIndex];');
+		return this.swapFuncCache[$access] = func;
+	}
+
+	wp.makeDelFunc = function($access){
+		if(this.delFuncCache[$access]) return this.delFuncCache[$access];
+		var prePath = watcherUtil.fomateSubPath($access);
+		var func  = new Function('subs', 'index', 'delete subs.'+prePath+'[index];');
+		return this.delFuncCache[$access] = func;
+	}
 
 	/**
 	 * 订阅依赖集合的变化回调
@@ -132,7 +149,8 @@
 	wp.updateIndexForPop = function($access, options, cb, handlerFlag){
 		var subs = this.$depSub;
 		var len = options.oldLen;
-		if(handlerFlag) watcherUtil.deleteSub(subs, $access+'.'+(len-1));
+		var delFunc = this.makeDelFunc($access);
+		if(handlerFlag) delFunc(subs, len-1); // watcherUtil.deleteSub(subs, $access+'.'+(len-1));
 	};
 
 	wp.updateIndexForPush = function($access, options, cb, handlerFlag){
@@ -142,6 +160,8 @@
 	wp.updateIndexForShift = function($access, options, cb, handlerFlag){
 		var len = options.oldLen;
 		var subs = this.$depSub;
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
 		for(var i=1;i<len;i++){
 			var ni = i-1,
 				oPath = $access+'.'+i,
@@ -149,7 +169,7 @@
 				oIndexPath = oPath+'.*',
 				nIndexPath = nPath+'.*';
 
-			if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+			if(handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
 
 			cb({
 				path : nIndexPath,
@@ -158,14 +178,15 @@
 			});
 		}
 
-		if(handlerFlag) watcherUtil.deleteSub(subs, $access+'.'+(len-1));
+		if(handlerFlag) delFunc(subs, len-1); //watcherUtil.deleteSub(subs, $access+'.'+(len-1));
 	};
 
 	wp.updateIndexForUnshift = function($access, options, cb, handlerFlag){
 		var len = options.oldLen;
 		var gap = options.newLen-options.oldLen;
 		var subs = this.$depSub;
-
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
 		for(var i=len-1;i>-1;i--){
 			var ni = i+gap,
 				oPath = $access+'.'+i,
@@ -173,7 +194,7 @@
 				oIndexPath = oPath+'.*',
 				nIndexPath = nPath+'.*';
 
-			if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+			if(handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
 
 			cb({
 				path : nIndexPath,
@@ -184,7 +205,8 @@
 
 		if(!handlerFlag) return;
 		for(var i=0;i<gap;i++){
-			watcherUtil.deleteSub(subs, $access+'.'+i);
+			// watcherUtil.deleteSub(subs, $access+'.'+i);
+			delFunc(subs, i);
 		}
 
 	};
@@ -199,10 +221,14 @@
 
 		var subs = this.$depSub;
 
+		var swapFunc = this.makeSwapFunc($access);
+		var delFunc = this.makeDelFunc($access);
+
 		if(options.args.length===1){
 			if(!handlerFlag) return;
 			for(var i=start;i<len;i++){
-				watcherUtil.deleteSub(subs, $access+'.'+i);
+				// watcherUtil.deleteSub(subs, $access+'.'+i);
+				delFunc(subs, i);
 			}
 		}else if(rank===0){
 			var len = options.oldLen;
@@ -216,7 +242,7 @@
 					oIndexPath = oPath+'.*',
 					nIndexPath = nPath+'.*';
 
-				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+				if(handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
 
 				cb({
 					path : nIndexPath,
@@ -227,7 +253,8 @@
 
 			if(!handlerFlag) return;
 			for(var i=start;i<start+gap;i++){
-				watcherUtil.deleteSub(subs, $access+'.'+i);
+				// watcherUtil.deleteSub(subs, $access+'.'+i);
+				delFunc(subs, i);
 			}
 		}else{
 			var pos = start + rank;
@@ -241,7 +268,7 @@
 					oIndexPath = oPath+'.*',
 					nIndexPath = nPath+'.*';
 
-				if(handlerFlag) watcherUtil.swapSub(subs, nPath, oPath);
+				if(handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
 
 				cb({
 					path : nIndexPath,
@@ -252,11 +279,13 @@
 			if(!handlerFlag) return;
 			if(gap<0){
 				for(var i=len+gap;i<len;i++){
-					watcherUtil.deleteSub(subs, $access+'.'+i);
+					// watcherUtil.deleteSub(subs, $access+'.'+i);
+					delFunc(subs, i);
 				}
 			}else if(gap>0){
 				for(var i=start;i<pos+1;i++){
-					watcherUtil.deleteSub(subs, $access+'.'+i);
+					// watcherUtil.deleteSub(subs, $access+'.'+i);
+					delFunc(subs, i);
 				}
 			}
 
@@ -272,6 +301,8 @@
 		this.observer.destroy();
 		this.$depSub = {};
 		this.$directDepSub = {};
+		this.swapFuncCache = {};
+		this.delFuncCache = {};
 		this.parser = this.observer = null;
 	}
 
