@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.31.1541400227440 beta
+ *	Version	:	0.4.32.1541759567269 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -494,9 +494,9 @@ module.exports = require("Document");
 		'vmtext': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors);
 
-			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;;
+			// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;;
 
 			updater.updateValue($node, parser.getValue(expression, fors));
 
@@ -506,6 +506,8 @@ module.exports = require("Document");
 			}, fors);
 
 			Parser.bindTextEvent($node, function () {
+				var access = Parser.makeDep(expression, fors);
+				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
 			});
 		},
@@ -514,7 +516,7 @@ module.exports = require("Document");
 
 			var access = Parser.makePath(expression, fors);
 
-			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;
+			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 			var value = parser.getValue(expression, fors);
 
@@ -533,7 +535,11 @@ module.exports = require("Document");
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				if($node.is(':checked')) duplex[field] = Parser.formatValue($node, $node.val());
+				if($node.is(':checked')) {
+					var access = Parser.makeDep(expression, fors);
+					var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+					duplex[field] = Parser.formatValue($node, $node.val());
+				}
 			});
 		},
 		'vmcheckbox': function ($node, fors, expression, dir) {
@@ -542,7 +548,7 @@ module.exports = require("Document");
 
 			var access = Parser.makePath(expression, fors);
 
-			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;
+			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(this.$scope), field = duplexField.field;
 
 			var value = parser.getValue(expression, fors);
 
@@ -564,6 +570,10 @@ module.exports = require("Document");
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+
+				var access = Parser.makeDep(expression, fors);
+				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+
 				value = duplex[field];
 
 				var $this = $(this);
@@ -593,7 +603,7 @@ module.exports = require("Document");
 
 			var access = Parser.makePath(expression, fors);
 
-			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;
+			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 			var multi = $node.hasAttr('multiple');
 
@@ -635,6 +645,8 @@ module.exports = require("Document");
 			});
 
 			Parser.bindChangeEvent($node, function () {
+				var access = Parser.makeDep(expression, fors);
+				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				var selects = Parser.getSelecteds($(this));
 				duplex[field] = multi ? selects : selects[0];
 			});
@@ -644,7 +656,7 @@ module.exports = require("Document");
 
 			var access = Parser.makePath(expression, fors);
 
-			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;
+			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 			updater.updateValue($node, duplex[field]);
 
@@ -654,6 +666,8 @@ module.exports = require("Document");
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+				var access = Parser.makePath(expression, fors);
+				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
 			});
 		},
@@ -804,10 +818,10 @@ module.exports = require("Document");
 		var scope = this.$scope;
 
 		var func = this.getAliasFunc(duplex, true);
-		duplex = func(scope);
+		// duplex = func(scope);
 
 		return {
-			duplex: duplex,
+			duplex: func,
 			field: field
 		}
 	};
@@ -1115,7 +1129,7 @@ module.exports = require("Document");
 		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.\[\]]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.\[\]]*)/g, function(exp){
 			
 			if (exp!==''&&!Parser.isConst(exp)) {
-				deps.push(Parser.makePath(exp, fors));
+				deps.push(Parser.makeDep(exp, fors));
 				return Parser.makeAliasPath(exp, fors);
 			}
 				
@@ -1128,6 +1142,41 @@ module.exports = require("Document");
 	};
 
 	//获取指令表达式的真实路径
+	Parser.makeDep = function (exp, fors) {
+		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g
+		exp = exp.replace(NOT_AVIR_RE, '');
+
+		exp = Parser.deepFindScope(exp, fors);
+
+		return exp;
+	};
+
+	//深度查找指令表达式的别名对应的真实路径
+	Parser.deepFindScope = function (_exp, fors) {
+		if (!fors) return _exp;
+
+		var alias = fors.alias;
+		var access = fors.access;
+		var $index = fors.$index;
+
+		var exps = _exp.split('.');
+
+		var $access =  Parser.deepFindScope(access, fors.fors);
+
+		$.util.each(exps, function (i, exp) {
+			if (exp === '$index') {
+				exps[i] = $access + '.' + fors.$index + '.*';
+			} else {
+				if (alias === exp) {
+					exps[i] = $access + '.' + $index;
+				}
+			}
+		});
+
+		return exps.join('.');
+	};
+
+	//获取指令表达式的别名路径
 	Parser.makePath = function (exp, fors) {
 		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g
 		exp = exp.replace(NOT_AVIR_RE, '');
@@ -1399,7 +1448,7 @@ module.exports = require("Document");
 
 	//转换.num为下标[num]
 	Parser.formateSubscript = function(str){
-		return str.replace(/\.(\d+)/, function(s, s1){
+		return str.replace(/\.(\d+)/g, function(s, s1){
 			return '['+s1+']';
 		});
 	};
@@ -4254,7 +4303,8 @@ module.exports = require("File");
 
 		$.util.each(object, function (property, value) {
 			var ps = paths.slice(0);
-			ps.push({p:property});
+			// ps.push({p:property});
+			ps.push(this.getPObj(value, object, property));
 
 			if(!isArr) this.observeObject(object, ps, value, parent);
 
@@ -4284,6 +4334,14 @@ module.exports = require("File");
 			ps.push(path.p);
 		});
 		return ps;
+	};
+
+	op.getPObj = function(obj, arr, property){
+		var pObj = {};
+		$.util.defObj(pObj, 'p', function(){
+			return $.isArray(arr) ? $.inArray(obj, arr) : property;
+		});
+		return pObj;
 	};
 
 
@@ -4471,7 +4529,8 @@ module.exports = require("File");
 		}
 		if (inserted) { 
 			$.util.each(inserted, function(index, obj){
-				var ps = paths.slice(0).concat([{p:start+index}]);
+				// var ps = paths.slice(0).concat([{p:start+index}]);
+				var ps = paths.slice(0).concat([_this.getPObj(obj, arr)]);
 				// _this.observeObject(inserted, ps, obj);
 				_this.observe(obj, ps, arr);
 			});

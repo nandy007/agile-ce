@@ -24,14 +24,21 @@
             <li v-on:click="doclick" v-text="test1" v-else=""></li>
             
         </ul> -->
-        <div v-template>
-            <%=a%>
-        </div>
+        
         <ul>
 
-            <li v-for="item in list" tt="1" v-template>
-                <span v-on:click="func.doClick($index)"><%=item.title%><%=a%></span>
-            </li>
+            <div v-for="item in list" >
+                <span v-text="item.title+1"></span>
+                <input v-model="item.title"/>
+                <div v-for="item1 in item.arr">
+                    <span v-text="item1.value"></span>
+                    <input v-model="item1.value"/>
+                    
+                </div>
+                <!-- <select v-model="item.sel" number>
+                    <option v-for="item1 in item.arr" v-text="item1.value" v-bind:value="item1.value"></option>
+                </select> -->
+            </div>
 
         </ul>
     </div>
@@ -42,26 +49,30 @@
         var obj = {
             a: 'bbb',
             list: [
-                // {
-                //     title:'1',
-                //     defaultV: '1'
-                // },
-                // {
-                //     title:'2',
-                //     defaultV: '2'
-                // },
-                // {
-                //     title:'3',
-                //     defaultV: '3'
-                // },
-                // {
-                //     title:'4',
-                //     defaultV: '4'
-                // },
-                // {
-                //     title:'5',
-                //     defaultV: '5'
-                // } 
+                {
+                    arr: [
+                        {
+                            value:1
+                        },
+                        {
+                            value:2
+                        }
+                    ],
+                    title: 'title1',
+                    sel: 2
+                },
+                {
+                    arr: [
+                        {
+                            value:3
+                        },
+                        {
+                            value:4
+                        }
+                    ],
+                    title: 'title2',
+                    sel: 2
+                }
             ],
             func: {
                 doClick: function(index){
@@ -73,60 +84,76 @@
         
         
         $('#app').render(obj);
+
+        obj.list.shift();
+        obj.list.push({
+            arr: [
+                {
+                    value: 5
+                }
+            ],
+            title: 'title3'
+        });
+
+        obj.list[1].arr[0].value = 7
+
+        // obj.list[0].arr.shift();
+        // obj.list[0].arr[0].value = 3;
+
         //var n = obj.list.splice(3, 1)[0];
         //obj.list.splice(1, 0 , n);
 
         // console.log($('li[vforIndex="0"]:last').text());
-        var myi = 0;
-        var st = setInterval(function(){
+        // var myi = 0;
+        // var st = setInterval(function(){
             
-            if(myi>1) {
-                clearInterval(st);
-                obj.list.splice(3,1);
-                obj.list.splice(4,1);
-                obj.list.splice(5,1);
-                return;
-            }
+        //     if(myi>1) {
+        //         clearInterval(st);
+        //         obj.list.splice(3,1);
+        //         obj.list.splice(4,1);
+        //         obj.list.splice(5,1);
+        //         return;
+        //     }
 
-            // while(obj.list.length>800){
-            //     obj.list.pop();
-            // }
-            // obj.list.sort(function(x, y){
-            //     return x.title < y.title;
-            // });
+        //     // while(obj.list.length>800){
+        //     //     obj.list.pop();
+        //     // }
+        //     // obj.list.sort(function(x, y){
+        //     //     return x.title < y.title;
+        //     // });
             
-            var arr = [], len = myi+20;
-            for(myi;myi<len;myi++){
-                arr.push({
-                    title: myi,
-                    defaultV: myi
-                });
-            }
-            // console.time(1);
-            obj.list.unshift.apply(obj.list, arr);
-            // console.timeEnd(1);
-            // var item3 = obj.list[3];
-            // var item1 = obj.list[1];
-            // obj.list.$set(1, {
-            //     title: item3.title,
-            //     defaultV: item3.defaultV
-            // });
+        //     var arr = [], len = myi+20;
+        //     for(myi;myi<len;myi++){
+        //         arr.push({
+        //             title: myi,
+        //             defaultV: myi
+        //         });
+        //     }
+        //     // console.time(1);
+        //     obj.list.unshift.apply(obj.list, arr);
+        //     // console.timeEnd(1);
+        //     // var item3 = obj.list[3];
+        //     // var item1 = obj.list[1];
+        //     // obj.list.$set(1, {
+        //     //     title: item3.title,
+        //     //     defaultV: item3.defaultV
+        //     // });
 
-            // obj.list.$set(3, {
-            //     title: item1.title,
-            //     defaultV: item1.defaultV
-            // });
-            // obj.isEdit = false;
-            // obj.list.pop();
-            //obj.val = '3';
-            //obj.test = '1';
-            //obj.isEdit = true;
-            //obj.test = '5';
-                // $('ul li').first().trigger('change', [{
-                //     title:'10',
-                //     defaultV: '1'
-                // }]);
-        }, 1000);
+        //     // obj.list.$set(3, {
+        //     //     title: item1.title,
+        //     //     defaultV: item1.defaultV
+        //     // });
+        //     // obj.isEdit = false;
+        //     // obj.list.pop();
+        //     //obj.val = '3';
+        //     //obj.test = '1';
+        //     //obj.isEdit = true;
+        //     //obj.test = '5';
+        //         // $('ul li').first().trigger('change', [{
+        //         //     title:'10',
+        //         //     defaultV: '1'
+        //         // }]);
+        // }, 1000);
         
         // const $fragment = $.ui.createJQFragment();
 

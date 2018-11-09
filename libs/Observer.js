@@ -100,7 +100,8 @@
 
 		$.util.each(object, function (property, value) {
 			var ps = paths.slice(0);
-			ps.push({p:property});
+			// ps.push({p:property});
+			ps.push(this.getPObj(value, object, property));
 
 			if(!isArr) this.observeObject(object, ps, value, parent);
 
@@ -130,6 +131,14 @@
 			ps.push(path.p);
 		});
 		return ps;
+	};
+
+	op.getPObj = function(obj, arr, property){
+		var pObj = {};
+		$.util.defObj(pObj, 'p', function(){
+			return $.isArray(arr) ? $.inArray(obj, arr) : property;
+		});
+		return pObj;
 	};
 
 
@@ -317,7 +326,8 @@
 		}
 		if (inserted) { 
 			$.util.each(inserted, function(index, obj){
-				var ps = paths.slice(0).concat([{p:start+index}]);
+				// var ps = paths.slice(0).concat([{p:start+index}]);
+				var ps = paths.slice(0).concat([_this.getPObj(obj, arr)]);
 				// _this.observeObject(inserted, ps, obj);
 				_this.observe(obj, ps, arr);
 			});
