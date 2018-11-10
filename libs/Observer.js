@@ -134,9 +134,10 @@
 	};
 
 	op.getPObj = function(obj, arr, property){
+		if(!$.isArray(arr)) return {p: property};
 		var pObj = {};
 		$.util.defObj(pObj, 'p', function(){
-			return $.isArray(arr) ? $.inArray(obj, arr) : property;
+			return $.inArray(obj, arr);
 		});
 		return pObj;
 	};
@@ -167,7 +168,7 @@
 		var Setter = function Setter(newValue) {
 			var oldValue = getter ? getter.call(object) : val;
 
-			ob.updateTruePaths(paths, object, parent);
+			// ob.updateTruePaths(paths, object, parent);
 
 			var myPath = ob.formatPaths(paths).join('.');
 
