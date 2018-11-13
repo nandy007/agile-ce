@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.34.1542114729551 beta
+ *	Version	:	0.4.35.1542125562838 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -178,7 +178,7 @@ module.exports = require("Document");
 			var exps = expression.split(' in '),
 				alias = exps[0],
 				access = exps[1],
-				$access = Parser.makePath(access, fors);
+				$access = Parser.makeDep(access, fors);
 
 			// var array = parser.getAliasValue($access);
 
@@ -993,7 +993,7 @@ module.exports = require("Document");
 		var scope = this.$scope, str$alias = '$alias', observer = this.watcher.observer;
 		var alias = fors.alias,
 			access = fors.access,
-			$access = Parser.makePath(access, fors),
+			$access = Parser.makeDep(access, fors),
 			$index = fors.$index,
 			ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
@@ -1163,6 +1163,8 @@ module.exports = require("Document");
 		var exps = _exp.split('.');
 
 		var $access =  Parser.deepFindScope(access, fors.fors);
+
+		if(_exp===access) return $access;
 
 		$.util.each(exps, function (i, exp) {
 			if (exp === '$index') {

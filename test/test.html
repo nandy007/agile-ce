@@ -15,151 +15,264 @@
 
 <body>
     <div id="app">
-        <!-- <input type="radio" v-model="test" number value="3"/>
-        <input type="radio" v-model="test" number value="4"/>
-        <input type="radio" v-model="test" number value="5"/>
-        <ul>
-            <li v-on:click="doclick" v-text="test" v-if="test===3"></li>
-            <li v-on:click="doclick" v-text="test" v-elseif="test===4"></li>
-            <li v-on:click="doclick" v-text="test1" v-else=""></li>
-            
-        </ul> -->
-        
-        <ul>
-
-            <div v-for="item in list" >
-                <span v-text="item.title+1"></span>
-                <input v-model="item.title"/>
-                <div v-for="item1 in item.arr">
-                    <span v-text="item1.value"></span>
-                    <input v-model="item1.value"/>
-                    
+        <div v-for="itemA in list">
+            <div v-text="itemA.title"></div>
+            <div v-for="itemB in itemA.newList">
+                <div v-text="itemB.name"></div>
+                <div v-for="itemC in itemB.files">
+                    <div v-text="itemC.text" v-on:click="func.test"></div>
+                    <div><input type="text" v-model="itemC.text"/></div>
+                    <div v-for="itemD in itemC.arr">
+                        <div v-text="itemD.t"></div>
+                    </div>
                 </div>
-                <!-- <select v-model="item.sel" number>
-                    <option v-for="item1 in item.arr" v-text="item1.value" v-bind:value="item1.value"></option>
-                </select> -->
             </div>
-
-        </ul>
+        </div>
     </div>
     <script>
-        $('select').on('contentchanged', function(){
-            console.log(111);
-        });
         var obj = {
-            a: 'bbb',
-            list: [
-                {
-                    arr: [
-                        {
-                            value:1
-                        },
-                        {
-                            value:2
-                        }
-                    ],
-                    title: 'title1',
-                    sel: 2
-                },
-                {
-                    arr: [
-                        {
-                            value:3
-                        },
-                        {
-                            value:4
-                        }
-                    ],
-                    title: 'title2',
-                    sel: 2
-                }
-            ],
-            func: {
-                doClick: function(index){
-                    alert(index);
-                }
-            }
-        };
+            func:{
+test:function(){
+    alert(1)
+}
+            },
+ "list": [
+	{
+		"title": "提交用户详细信息",
+		"newList": [
+			{
+				"name": "用户:",
+				"value": "徐依迪",
+				"type": "input"
+			},
+			{
+				"name": "所属部门/工厂:",
+				"value": "信息技术部",
+				"type": "input"
+			},
+			{
+				"name": "登录 ID:",
+				"value": "axu296",
+				"type": "input"
+			},
+			{
+				"name": "移动电话:",
+				"value": "13501994722",
+				"type": "input"
+			},
+			{
+				"name": "电子邮件地址:",
+				"value": "yidi.xu@adient.com",
+				"type": "input"
+			},
+			{
+				"name": "电话:",
+				"value": "68078250",
+				"type": "input"
+			},
+			{
+				"name": "工号:",
+				"value": "82984",
+				"type": "input"
+			},
+			{
+				"name": "职务:",
+				"value": "应用系统工程师",
+				"type": "input"
+			}
+		]
+	},
+	{
+		"title": "事件详细信息",
+		"newList": [
+			{
+				"name": "标题*:",
+				"value": "测试专用1113",
+				"type": "input"
+			},
+			{
+				"name": "详细信息:",
+				"value": "MTEx",
+				"type": "webview"
+			},
+			{
+				"name": "事件OR请求:",
+				"value": "事件(Incident)",
+				"type": "input"
+			},
+			{
+				"name": "补单:",
+				"value": "否(No)",
+				"type": "input"
+			},
+			{
+				"name": "信息安全事件:",
+				"value": "否(No)",
+				"type": "input"
+			},
+			{
+				"name": "类别*:",
+				"value": "Application - AMP - AMP",
+				"type": "input"
+			},
+			{
+				"name": "重要事件:",
+				"value": "否(No)",
+				"type": "input"
+			},
+			{
+				"name": "客户抱怨:",
+				"value": "否(No)",
+				"type": "input"
+			},
+			{
+				"name": "来源:",
+				"value": "",
+				"type": "input"
+			},
+			{
+				"name": "影响:",
+				"value": "中(C)-总部部分职能部门/单一工厂",
+				"type": "input"
+			},
+			{
+				"name": "HPSD 单号:",
+				"value": "222",
+				"type": "input"
+			},
+			{
+				"name": "WFL ID:",
+				"value": "333",
+				"type": "input"
+			},
+			{
+				"name": "紧急性:",
+				"value": "中(C)-部分操作无法进行",
+				"type": "input"
+			},
+			{
+				"name": "WFL类型:",
+				"value": "444",
+				"type": "input"
+			},
+			{
+				"name": "响应级别:",
+				"value": "Application P3(4小时响应2个工作日内解决)",
+				"type": "input"
+			},
+			{
+				"name": "服务范围:",
+				"value": "信息技术部",
+				"type": "input"
+			},
+			{
+				"name": "附件:",
+				"type": "files",
+				"files": [
+					{
+						"text": "20181113105431498_1429imsi.jpg",
+						"href": "/ServiceDesk.WebAccess/ss/Object/GetAttachment.rails?class_name=IncidentManagement.Incident&amp;key=60985953-3b0a-477c-ab4a-fbb351291805&amp;attribute=_Attachment1&amp;attachment_guid=3e1e7cde-9b10-4e67-90e3-fd5d0346325f"
+					}
+				]
+			}
+		]
+	},
+	{
+		"title": "当前分配详细信息",
+		"newList": [
+			{
+				"name": "IT工程师:",
+				"value": "",
+				"type": "input"
+			},
+			{
+				"name": "组:",
+				"value": "帮助台",
+				"type": "input"
+			}
+		]
+	},
+	{
+		"title": "信息",
+		"newList": [
+			{
+				"name": "剩余处理:",
+				"value": "772",
+				"type": "input"
+			},
+			{
+				"name": "未解决?",
+				"value": "假",
+				"type": "input"
+			},
+			{
+				"name": "分配计数:",
+				"value": "1",
+				"type": "input"
+			},
+			{
+				"name": "是否已重新打开?",
+				"value": "假",
+				"type": "input"
+			},
+			{
+				"name": "状态:",
+				"value": "进行中",
+				"type": "input"
+			},
+			{
+				"name": "创建时间:",
+				"value": "2018年11月13日 10:54:54",
+				"type": "input"
+			},
+			{
+				"name": "提交者:",
+				"value": "徐依迪",
+				"type": "input"
+			},
+			{
+				"name": "更新时间:",
+				"value": "2018年11月13日 10:54:54",
+				"type": "input"
+			},
+			{
+				"name": "提交者:",
+				"value": "徐依迪",
+				"type": "input"
+			}
+		]
+	}
+],
+};
 
-        
-        
-        $('#app').render(obj);
+$('#app').render(obj);
 
-        obj.list.shift();
-        obj.list.push({
+obj.list[1].newList.push({
+    "name": "附件1:",
+    "type": "files",
+    "files": [
+        {
+            "text": "e333.jpg",
+            "href": "/ServiceDesk.WebAccess/ss/Object/GetAttachment.rails?class_name=IncidentManagement.Incident&amp;key=60985953-3b0a-477c-ab4a-fbb351291805&amp;attribute=_Attachment1&amp;attachment_guid=3e1e7cde-9b10-4e67-90e3-fd5d0346325f",
             arr: [
                 {
-                    value: 5
+                    t:111
                 }
-            ],
-            title: 'title3'
+            ]
+        }
+    ]
+})
+
+obj.list[1].newList[obj.list[1].newList.length-2].files.shift()
+
+obj.list[1].newList[obj.list[1].newList.length-2].files.unshift({
+            "text": "111.jpg",
+            "href": "/ServiceDesk.WebAccess/ss/Object/GetAttachment.rails?class_name=IncidentManagement.Incident&amp;key=60985953-3b0a-477c-ab4a-fbb351291805&amp;attribute=_Attachment1&amp;attachment_guid=3e1e7cde-9b10-4e67-90e3-fd5d0346325f"
+        },
+        {
+            "text": "222.jpg",
+            "href": "/ServiceDesk.WebAccess/ss/Object/GetAttachment.rails?class_name=IncidentManagement.Incident&amp;key=60985953-3b0a-477c-ab4a-fbb351291805&amp;attribute=_Attachment1&amp;attachment_guid=3e1e7cde-9b10-4e67-90e3-fd5d0346325f"
         });
-
-        obj.list[1].arr[0].value = 7
-
-        // obj.list[0].arr.shift();
-        // obj.list[0].arr[0].value = 3;
-
-        //var n = obj.list.splice(3, 1)[0];
-        //obj.list.splice(1, 0 , n);
-
-        // console.log($('li[vforIndex="0"]:last').text());
-        // var myi = 0;
-        // var st = setInterval(function(){
-            
-        //     if(myi>1) {
-        //         clearInterval(st);
-        //         obj.list.splice(3,1);
-        //         obj.list.splice(4,1);
-        //         obj.list.splice(5,1);
-        //         return;
-        //     }
-
-        //     // while(obj.list.length>800){
-        //     //     obj.list.pop();
-        //     // }
-        //     // obj.list.sort(function(x, y){
-        //     //     return x.title < y.title;
-        //     // });
-            
-        //     var arr = [], len = myi+20;
-        //     for(myi;myi<len;myi++){
-        //         arr.push({
-        //             title: myi,
-        //             defaultV: myi
-        //         });
-        //     }
-        //     // console.time(1);
-        //     obj.list.unshift.apply(obj.list, arr);
-        //     // console.timeEnd(1);
-        //     // var item3 = obj.list[3];
-        //     // var item1 = obj.list[1];
-        //     // obj.list.$set(1, {
-        //     //     title: item3.title,
-        //     //     defaultV: item3.defaultV
-        //     // });
-
-        //     // obj.list.$set(3, {
-        //     //     title: item1.title,
-        //     //     defaultV: item1.defaultV
-        //     // });
-        //     // obj.isEdit = false;
-        //     // obj.list.pop();
-        //     //obj.val = '3';
-        //     //obj.test = '1';
-        //     //obj.isEdit = true;
-        //     //obj.test = '5';
-        //         // $('ul li').first().trigger('change', [{
-        //         //     title:'10',
-        //         //     defaultV: '1'
-        //         // }]);
-        // }, 1000);
-        
-        // const $fragment = $.ui.createJQFragment();
-
-        // $fragment.append($('<div>aaa</div>'));
-
-        // console.log($fragment.children());
 
     </script>
 </body>

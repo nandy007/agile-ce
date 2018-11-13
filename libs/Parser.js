@@ -57,7 +57,7 @@
 			var exps = expression.split(' in '),
 				alias = exps[0],
 				access = exps[1],
-				$access = Parser.makePath(access, fors);
+				$access = Parser.makeDep(access, fors);
 
 			// var array = parser.getAliasValue($access);
 
@@ -872,7 +872,7 @@
 		var scope = this.$scope, str$alias = '$alias', observer = this.watcher.observer;
 		var alias = fors.alias,
 			access = fors.access,
-			$access = Parser.makePath(access, fors),
+			$access = Parser.makeDep(access, fors),
 			$index = fors.$index,
 			ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
@@ -1042,6 +1042,8 @@
 		var exps = _exp.split('.');
 
 		var $access =  Parser.deepFindScope(access, fors.fors);
+
+		if(_exp===access) return $access;
 
 		$.util.each(exps, function (i, exp) {
 			if (exp === '$index') {
