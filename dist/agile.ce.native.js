@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.33.1541829735644 beta
+ *	Version	:	0.4.34.1542114729551 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -685,8 +685,9 @@ module.exports = require("Document");
 		},
 		'vtemplate': function($node, fors, expression){
 			var scope = this.$scope;
-			Parser.transAttr($node, 'v-template', 'useTemplate');
-			var template = $node.attr('useTemplate') || $node.html();
+			// Parser.transAttr($node, 'v-template', 'useTemplate');
+			// var template = $node.attr('useTemplate') || $node.html();
+			var template = expression || $node.html();
 			var html = $.template(template, scope) || '';
 			$node.html(html);
 		}

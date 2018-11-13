@@ -564,8 +564,9 @@
 		},
 		'vtemplate': function($node, fors, expression){
 			var scope = this.$scope;
-			Parser.transAttr($node, 'v-template', 'useTemplate');
-			var template = $node.attr('useTemplate') || $node.html();
+			// Parser.transAttr($node, 'v-template', 'useTemplate');
+			// var template = $node.attr('useTemplate') || $node.html();
+			var template = expression || $node.html();
 			var html = $.template(template, scope) || '';
 			$node.html(html);
 		}
