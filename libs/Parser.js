@@ -567,7 +567,7 @@
 			// Parser.transAttr($node, 'v-template', 'useTemplate');
 			// var template = $node.attr('useTemplate') || $node.html();
 			var template = expression || $node.html();
-			var html = $.template(template, scope) || '';
+			var html = $.template(template, $.extend({}, scope, scope.$alias)) || '';
 			$node.html(html);
 		}
 	};
@@ -837,7 +837,7 @@
 			}
 			tpl = $tpl.html();
 		}
-		var html = $.template(tpl, $.extend({}, this.$scope, this.$scope.$alias));
+		var scope = this.$scope, html = $.template(tpl, $.extend({}, scope, scope.$alias));
 		$plate.html(html);
 	}
 
