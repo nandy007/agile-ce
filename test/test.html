@@ -8,8 +8,8 @@
     <title>Agile CE</title>
     <script src="../dist/agile.ce.browser.js" charset="UTF-8"></script>
     <style>
-        li{background: #ccc;}
-        li.active{background: #ff0000;}
+        a{background: #ccc;}
+        a.active{background: #ff0000;}
     </style>
 </head>
 
@@ -17,22 +17,33 @@
     <div id="app">
         <div v-for="itemA in list">
             <div v-text="itemA.title"></div>
-            <div v-template="ttt">
+            <div v-for="itemB in itemA.arr">
+                <div v-template="ttt">
 
-			</div>
+                </div>
+            </div>
+            
         </div>
     </div>
     <script>
-		$.template.setter('ttt', `<a><%=#itemA.title%></a>`);
+		$.template.setter('ttt', `<a v-class="{active:itemA.active}"><%=#itemB.t%></a>`);
         var obj = {
 			list: [
 				{
-					title: 'title1'
+                    title: 'title1',
+                    active: true,
+                    arr: [
+                        {
+                            t: 'ttt'
+                        }
+                    ]
 				}
 			]
 		};
 
-		$('#app').render(obj);
+        $('#app').render(obj);
+        
+        obj.list[0].active = false;
 
     </script>
 </body>

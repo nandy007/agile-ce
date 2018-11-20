@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.36.1542179957175 beta
+ *	Version	:	0.4.37.1542684025643 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1115,30 +1115,40 @@ module.exports = env;
 		return exp;
 	};
 
+	Parser.findMyFors = function(name, fors){
+		if(!fors) return fors;
+		if(name===fors.alias) return fors;
+		return Parser.findMyFors(name, fors.fors);
+	};
+
 	//深度查找指令表达式的别名对应的真实路径
 	Parser.deepFindScope = function (_exp, fors) {
 		if (!fors) return _exp;
 
-		var alias = fors.alias;
-		var access = fors.access;
-		var $index = fors.$index;
-
 		var exps = _exp.split('.');
 
-		var $access =  Parser.deepFindScope(access, fors.fors);
+		var myFors = Parser.findMyFors(exps[0], fors);
+
+		if(!myFors) myFors = fors;
+
+		var alias = myFors.alias;
+		var access = myFors.access;
+		var $index = myFors.$index;
+
+		var $access = Parser.deepFindScope(access, myFors.fors);
 
 		if(_exp===access) return $access;
 
 		$.util.each(exps, function (i, exp) {
 			if (exp === '$index') {
-				exps[i] = $access + '.' + fors.$index + '.*';
+				exps[i] = $access + '.' + myFors.$index + '.*';
 			} else {
 				if (alias === exp) {
 					exps[i] = $access + '.' + $index;
 				}
 			}
 		});
-
+		if(_exp==='itemA.active') console.log(exps)
 		return exps.join('.');
 	};
 
