@@ -16,34 +16,47 @@
 <body>
     <div id="app">
         <div v-for="itemA in list">
-            <div v-text="itemA.title"></div>
-            <div v-for="itemB in itemA.arr">
-                <div v-template="ttt">
-
-                </div>
+            <div v-for="itemB in itemA" v-filter="doFilter" v-watch="$index">
+                <!-- <span>{{itemB}}</span> -->
+                <!-- <span>{{$index}}</span> -->
+                <!-- <span>{{itemB.c}}</span> -->
+                <span>{{itemB.title}}</span>
             </div>
             
         </div>
     </div>
     <script>
-		$.template.setter('ttt', `<a v-class="{active:itemA.active}"><%=#itemB.t%></a>`);
+		
         var obj = {
+            doFilter: function(index, item, arr, $node){
+                // console.log(index);
+                // $.util.defRec(item, 'title', obj.title[index]);
+                // console.log(111);
+                
+                if(typeof arr[index]==='object'){
+                    item.title = obj.title[index];
+                }else{
+                    arr[index] = {
+                        c: item,
+                        title: obj.title[index]
+                    };
+                    this.reObserve();
+                }
+            },
+            test: 1,
 			list: [
-				{
-                    title: 'title1',
-                    active: true,
-                    arr: [
-                        {
-                            t: 'ttt'
-                        }
-                    ]
-				}
-			]
+                [
+                    'a', 'b', 'c'
+                ]
+            ],
+            title: ['title0', 'title1', 'title2']
 		};
 
         $('#app').render(obj);
+
+        obj.list[0].shift();
+        // obj.list[0].splice(1, 1, '222')
         
-        obj.list[0].active = false;
 
     </script>
 </body>

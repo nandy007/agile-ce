@@ -569,6 +569,14 @@
 			var template = expression || $node.html();
 			var html = $.template(template, $.extend({}, scope, scope.$alias)) || '';
 			$node.html(html);
+		},
+		// 隐式监听
+		'vwatch': function($node, fors, expression, dir){
+			var depsalias = Parser.getDepsAlias(expression, fors);
+			var deps = depsalias.deps;
+			this.watcher.watch(deps, function (options) {
+				// do nothing
+			}, fors);
 		}
 	};
 
@@ -891,9 +899,11 @@
 			if(typeof filter$func==='function'){
 				filter$func.call({
 					reObserve: function(){
-						observer.observe(cur$item, [$access, $index]);
+						var cur$item = arr[$index];
+						var paths = observer.getAllPathFromArr(cur$item, arr, $index);
+						observer.observe(cur$item, paths);
 					}
-				}, $index, cur$item, fors.__$plate);
+				}, $index, cur$item, arr, fors.__$plate);
 			}
 			
 

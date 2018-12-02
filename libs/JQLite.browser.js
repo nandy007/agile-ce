@@ -196,12 +196,16 @@
 			Object.defineProperty(o, String(a), options);
 		},
 		defRec : function (object, property, value) {
-			return Object.defineProperty(object, property, {
-				'value'       : value,
-				'writable'    : true,
-				'enumerable'  : false,
-				'configurable': true
-			});
+			try{
+				return Object.defineProperty(object, property, {
+					'value'       : value,
+					'writable'    : true,
+					'enumerable'  : false,
+					'configurable': true
+				});
+			}catch(e){
+				// console.warn((typeof object)+'类型不能被设置属性');
+			}
 		},
 		copyArray : function(arr){
 			return Array.prototype.slice.call(arr||[], 0);

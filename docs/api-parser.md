@@ -125,7 +125,7 @@ var obj = {
 
 v-filer指令会于v-for指令之前被解释执行。
  
-<code>FuncName</code>为一个函数名，当执行到该指令的时候会调用FuncName(<code>index</code>, <code>item</code>)传参，其中index为当前循环体的索引，item为当前循环体的元素对象。
+<code>FuncName</code>为一个函数名，当执行到该指令的时候会调用FuncName(<code>index</code>, <code>item</code>, <code>arr</code>)传参，其中index为当前循环体的索引，item为当前循环体的元素对象，arr为循环体数组。
 
 函数的this对象具有函数：
 

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.37.1542684032845 beta
+ *	Version	:	0.4.38.1543765714597 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -690,6 +690,14 @@ module.exports = require("Document");
 			var template = expression || $node.html();
 			var html = $.template(template, $.extend({}, scope, scope.$alias)) || '';
 			$node.html(html);
+		},
+		// 隐式监听
+		'vwatch': function($node, fors, expression, dir){
+			var depsalias = Parser.getDepsAlias(expression, fors);
+			var deps = depsalias.deps;
+			this.watcher.watch(deps, function (options) {
+				// do nothing
+			}, fors);
 		}
 	};
 
@@ -1012,9 +1020,11 @@ module.exports = require("Document");
 			if(typeof filter$func==='function'){
 				filter$func.call({
 					reObserve: function(){
-						observer.observe(cur$item, [$access, $index]);
+						var cur$item = arr[$index];
+						var paths = observer.getAllPathFromArr(cur$item, arr, $index);
+						observer.observe(cur$item, paths);
 					}
-				}, $index, cur$item, fors.__$plate);
+				}, $index, cur$item, arr, fors.__$plate);
 			}
 			
 
@@ -2515,12 +2525,16 @@ module.exports = env.JQLite;
 			Object.defineProperty(o, String(a), options);
 		},
 		defRec: function (object, property, value) {
-			return Object.defineProperty(object, property, {
-				'value': value,
-				'writable': true,
-				'enumerable': false,
-				'configurable': true
-			});
+			try{
+				return Object.defineProperty(object, property, {
+					'value'       : value,
+					'writable'    : true,
+					'enumerable'  : false,
+					'configurable': true
+				});
+			}catch(e){
+				// console.warn((typeof object)+'类型不能被设置属性');
+			}
 		},
 		copyArray: function (arr) {
 			return Array.prototype.slice.call(arr || [], 0);
@@ -4349,6 +4363,12 @@ module.exports = require("File");
 		return ps;
 	};
 
+	op.getAllPathFromArr = function(obj, arr, property){
+		var paths = arr.oPaths;
+		var pObj = this.getPObj(obj, arr, property);
+		return paths.concat([pObj]);
+	};
+
 	op.getPObj = function(obj, arr, property){
 		if(!$.isArray(arr)) return {p: property};
 		var pObj = {};
@@ -4510,6 +4530,8 @@ module.exports = require("File");
 
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
+
+		array.oPaths = paths;
 
 		// 已经监听过的数组不再重复监听
 		if(arrCbs[this.observeIndex]) return;

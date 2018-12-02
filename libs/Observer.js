@@ -133,6 +133,12 @@
 		return ps;
 	};
 
+	op.getAllPathFromArr = function(obj, arr, property){
+		var paths = arr.oPaths;
+		var pObj = this.getPObj(obj, arr, property);
+		return paths.concat([pObj]);
+	};
+
 	op.getPObj = function(obj, arr, property){
 		if(!$.isArray(arr)) return {p: property};
 		var pObj = {};
@@ -294,6 +300,8 @@
 
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
+
+		array.oPaths = paths;
 
 		// 已经监听过的数组不再重复监听
 		if(arrCbs[this.observeIndex]) return;
