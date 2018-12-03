@@ -36,6 +36,8 @@
 
 > [v-template](#cid_0_14)
 
+> [v-watch](#cid_0_15)
+
   
 
 
@@ -354,6 +356,16 @@ $.template.setter('contact_orguser', `
 ```
 
 其中template模板注入的数据跟mvvm注入的数据一致。
+
+
+<span id="cid_0_15">**v-watch:evtName="expression"**</span>
+
+隐式监听指令，当监听的表达式有变化的时候会触发evtName，但是evtName不是必须，这时候只是隐式监听，不触发事件。
+
+一般用于用于绑定的属性A的值是通过B属性的值计算得来的，这时候可以为B属性设置隐式监听，然后监听evtName事件在回调中计算A属性的值
+
+可以取代部分原始数据并未使用get/set来改变值的属性，确保不改变数据源
+
 
 <h2 id="cid_1">扩展指令</h2>
 

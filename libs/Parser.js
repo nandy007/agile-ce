@@ -574,8 +574,9 @@
 		'vwatch': function($node, fors, expression, dir){
 			var depsalias = Parser.getDepsAlias(expression, fors);
 			var deps = depsalias.deps;
+			var evtName = dir.split(Parser.dirSplit)[1];
 			this.watcher.watch(deps, function (options) {
-				// do nothing
+				if(evtName) $node.trigger(evtName);
 			}, fors);
 		}
 	};
@@ -1000,9 +1001,9 @@
 		if (content) {
 			var group = content.split(',');
 			$.util.each(group, function (i, s) {
-				var ss = s.split(':');
+				var ss = s.split(Parser.dirSplit);
 				ss[1] = "'" + ss[1].replace(/'/g, '"') + "'";
-				group[i] = ss.join(':');
+				group[i] = ss.join(Parser.dirSplit);
 			});
 			return '{' + group.join(',') + '}';
 		} else {
@@ -1354,6 +1355,8 @@
 			return '['+s1+']';
 		});
 	};
+
+	Parser.dirSplit = ':';
 
 
 	module.exports = Parser;
