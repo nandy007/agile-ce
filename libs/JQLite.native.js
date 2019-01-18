@@ -7,6 +7,24 @@
 			var context, contextFunc = el['__context'];
 			if (contextFunc) context = contextFunc();
 			el.setClassStyle(className, context);
+			this.refresh(el);
+		},
+		setStyle: function(el, styleName, styleValue){
+			el.setStyle(styleName, styleValue);
+			this.refresh(el);
+		},
+		refresh: function(el){
+			var parent = el.getParent();
+			if(parent && parent.refresh){
+				parent.refresh();
+			}else if(el.refresh){
+				el.refresh();
+			}
+		},
+		triggerDomChange: function(el){
+			if(!el) return;
+			el.refresh && el.refresh();
+			el.fire('__domchange__');
 		}
 	};
 	var LISTCBS = {
@@ -174,13 +192,13 @@
 				return el && el.getStyle(args$1);
 			} else if (arguments.length === 2) {
 				this.each(function () {
-					this.setStyle(args$1, args$2);
+					_util.setStyle(this, args$1, args$2);
 				});
 				return this;
 			} else if (jqlite.isPlainObject(args$1)) {
 				this.each(function () {
 					jqlite.each(args$1, function (k, v) {
-						this.setStyle(k, v);
+						_util.setStyle(this, k, v);
 					}, this);
 				});
 				return this;
@@ -261,6 +279,23 @@
 		hasAttr: function (name) {
 			var el = this.length>0&&this[0];
 			return el&&el.hasAttr&&el.hasAttr(name);
+		},
+		height: function(type){
+			var el = this.length>0&&this[0];
+			if(!el) return null;
+			type = type || 'height';
+			try{
+				var size = el.getFrame()[type] || el.getStyle(type);
+				if(size){
+					return Number(size);
+				}
+				return null;
+			}catch(e){
+				return null;
+			}
+		},
+		width: function(){
+			this.height('width');
 		},
 		hasClass: function (className) {
 			var classStr = this.length > 0 && this.domList[0].getClassStyle() || '';
@@ -372,6 +407,7 @@
 		empty: function () {
 			this.each(function () {
 				this.clear();
+				_util.triggerDomChange(this);
 			});
 			return this;
 		},
@@ -380,6 +416,8 @@
 			if (args.length === 0) {
 				this.each(function () {
 					this.remove();
+					var parent = this.getParent();
+					_util.triggerDomChange(parent);
 					return null;
 				});
 			} else {
@@ -388,6 +426,7 @@
 						$child = typeof $child === 'string' ? this.find($child) : jqlite($child);
 						$child.remove();
 					}, this);
+					_util.triggerDomChange(this);
 				});
 			}
 			return this;
@@ -398,6 +437,7 @@
 			if (!parent) return this;
 			jqlite.each($el, function (i, ele) {
 				parent.appendChild(ele);
+				_util.triggerDomChange(parent);
 			});
 			return this;
 		},
@@ -409,6 +449,7 @@
 				$newNode.each(function (j) {
 					if (i === 0) this.domList[j] = this;
 					parent.insertBefore(this, oldNode);
+					_util.triggerDomChange(parent);
 				});
 				oldNode.remove();
 			});
@@ -422,6 +463,7 @@
 					this.appendChild(child);
 				});
 			});
+			_util.triggerDomChange(el);
 			return this;
 		},
 		insertAfter: function (el) {
@@ -435,6 +477,7 @@
 					} else {
 						parent.appendChild(child);
 					}
+					_util.triggerDomChange(parent);
 				});
 			});
 			return this;
@@ -444,8 +487,9 @@
 			this.each(function () {
 				var child = this;
 				$el.each(function () {
-					var target = this;
-					this.getParent().insertBefore(child, target);
+					var target = this, parent = this.getParent();
+					parent.insertBefore(child, target);
+					_util.triggerDomChange(parent);
 				});
 			});
 			return this;
@@ -459,6 +503,7 @@
 					parent.insertBefore(this, target);
 				});
 				target.remove();
+				_util.triggerDomChange(parent);
 			});
 			return this;
 		},
@@ -555,13 +600,15 @@
 		show: function (p) {
 			p = _animateDirectionRefer.formateShowHide(p);
 			this.each(function () {
-				this.show(p);
+				// this.show(p);
+				this.setStyle('display', '');
 			});
 		},
 		hide: function (p) {
 			p = _animateDirectionRefer.formateShowHide(p);
 			this.each(function () {
-				this.hide(p);
+				// this.hide(p);
+				this.setStyle('display', 'none');
 			});
 		},
 		//目前仅针对startAnimator进行封装
@@ -630,15 +677,15 @@
 		get: function (evt) {
 			return _eventRefer[evt] || evt;
 		},
-		dbclick: 'doubleClick',
-		ready: 'loaded',
-		touchstart: 'touchDown',
-		touchmove: 'touchMove',
-		touchend: 'touchUp',
-		mousedown: 'touchDown',
-		mousemove: 'touchMove',
-		mouseup: 'touchUp',
-		scroll: 'scrollChange',
+		// dbclick: 'doubleClick',
+		// ready: 'loaded',
+		// touchstart: 'touchDown',
+		// touchmove: 'touchMove',
+		// touchend: 'touchUp',
+		// mousedown: 'touchDown',
+		// mousemove: 'touchMove',
+		// mouseup: 'touchUp',
+		// scroll: 'scrollChange',
 		input: 'textChanged'
 	};
 
@@ -753,6 +800,17 @@
 		return eles;
 	};
 
+	function getSeletorSplit(str){
+		var reg = /([^ \~\>]+)([ \~\>]?)/g;
+		var arr, group = [];
+		while(arr=reg.exec(str)){
+			var selector = arr[1], flag = arr[2];
+			group.push(selector);
+			if(flag) group.push(flag);
+		}
+		return group;
+	}
+
 	jqlite.parseSelector = function (selector, scope, baseMode) {
 		selector = selector.replace(/['"]/g, '')//去掉'和"引号
 			.replace(/[ ]*([\=\:,>~])[ ]*/g, '$1')//去掉=、:、,、>、~两侧的空格
@@ -767,15 +825,17 @@
 		var rs = [];
 		jqlite.util.each(exeps, function (i, exep) {
 			exep = jqlite.util.trim(exep);
-			var funcStr = 'return ["' + exep.replace(/([ >~])/g, '","$1","') + '"];';
-			var scopes = scope, mode = baseMode || 'all', group = (new Function(funcStr))();
+			// var funcStr = 'return ["' + exep.replace(/([ >~])/g, '","$1","') + '"];';
+			var scopes = scope, mode = baseMode || 'all';
+			// var group = (new Function(funcStr))();
+			var group = getSeletorSplit(exep);
 
 			jqlite.util.each(group, function (j, slts) {
-				if (slts === ' ') {
+				if (slts === ' ') { // 空格代表找后面所有子节点和子孙节点
 					mode = 'all';
-				} else if (slts === '>') {
+				} else if (slts === '>') { // >代表找当前节点的子节点（第一层）
 					mode = 'children';
-				} else if (slts === '~') {
+				} else if (slts === '~') { // ~代表当前节点同级的后续节点
 					mode = 'siblings';
 				} else {
 					var sltArr = [];
@@ -929,6 +989,10 @@
 
 		// Return the modified object
 		return target;
+	};
+
+	jqlite.inArray = function( elem, arr, i ) {
+		return arr == null ? -1 : arr.indexOf.call( arr, elem, i );
 	};
 
 	jqlite.util = {
@@ -1110,6 +1174,7 @@
 				this.appendChild(child);
 			});
 		});
+		_util.triggerDomChange($el[0]);
 		return this;
 	};
 	fo.insertAfter = function (el) {
@@ -1123,7 +1188,7 @@
 				} else {
 					parent.appendChild(child);
 				}
-
+				_util.triggerDomChange(parent);
 			});
 		});
 		return this;
@@ -1133,8 +1198,9 @@
 		this.children().each(function () {
 			var child = this;
 			$el.each(function () {
-				var target = this;
-				this.getParent().insertBefore(child, target);
+				var target = this, parent = this.getParent();
+				parent.insertBefore(child, target);
+				_util.triggerDomChange(parent);
 			});
 		});
 		return this;
@@ -1149,6 +1215,7 @@
 				parent.insertBefore(this, target);
 			});
 			target.remove();
+			_util.triggerDomChange(parent);
 		});
 
 		return this;

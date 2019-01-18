@@ -59,7 +59,14 @@
 	 * @param   {String}      html
 	 */
 	up.updateHTMLContent = function ($node, html) {
-		$node.empty().append($.parseHTML(String(html)));
+		$node.each(function(){
+			if(this.setHtml){
+				this.setHtml(html);
+			}else{
+				this.clear();
+				this.appendChild($.parseHTML(String(html)));
+			}
+		});
 	};
 
 	/**
