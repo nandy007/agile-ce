@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.40.1547797465607 beta
+ *	Version	:	0.4.40.1547797723282 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1660,7 +1660,7 @@ module.exports = env.JQLite;
 			} else {
 				this.each(function () {
 					if(this.setHtml){
-						this.setHtml(html);
+						this.setHtml(content);
 					}else{
 						this.clear();
 						this.appendChild(jqlite.parseHTML(String(content)));

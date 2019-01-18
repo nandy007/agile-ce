@@ -150,7 +150,7 @@
 			} else {
 				this.each(function () {
 					if(this.setHtml){
-						this.setHtml(html);
+						this.setHtml(content);
 					}else{
 						this.clear();
 						this.appendChild(jqlite.parseHTML(String(content)));
