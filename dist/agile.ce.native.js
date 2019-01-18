@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.40.1547781414343 beta
+ *	Version	:	0.4.40.1547797465607 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1654,14 +1654,17 @@ module.exports = env.JQLite;
 			return new JQLite(this.domList[this.domList.length - 1] || []);
 		},
 		html: function () {
-
 			var content = arguments[0], el = this.domList[0];
 			if (arguments.length === 0) {
 				return el && el.getInnerHTML();
 			} else {
 				this.each(function () {
-					this.clear();
-					this.appendChild(document.createElementByXml(content));
+					if(this.setHtml){
+						this.setHtml(html);
+					}else{
+						this.clear();
+						this.appendChild(jqlite.parseHTML(String(content)));
+					}
 				});
 				return this;
 			}
@@ -3600,14 +3603,15 @@ module.exports = require("File");
 	 * @param   {String}      html
 	 */
 	up.updateHTMLContent = function ($node, html) {
-		$node.each(function(){
-			if(this.setHtml){
-				this.setHtml(html);
-			}else{
-				this.clear();
-				this.appendChild($.parseHTML(String(html)));
-			}
-		});
+		// $node.each(function(){
+		// 	if(this.setHtml){
+		// 		this.setHtml(html);
+		// 	}else{
+		// 		this.clear();
+		// 		this.appendChild($.parseHTML(String(html)));
+		// 	}
+		// });
+		$node.html(html);
 	};
 
 	/**

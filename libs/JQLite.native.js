@@ -144,14 +144,17 @@
 			return new JQLite(this.domList[this.domList.length - 1] || []);
 		},
 		html: function () {
-
 			var content = arguments[0], el = this.domList[0];
 			if (arguments.length === 0) {
 				return el && el.getInnerHTML();
 			} else {
 				this.each(function () {
-					this.clear();
-					this.appendChild(document.createElementByXml(content));
+					if(this.setHtml){
+						this.setHtml(html);
+					}else{
+						this.clear();
+						this.appendChild(jqlite.parseHTML(String(content)));
+					}
 				});
 				return this;
 			}

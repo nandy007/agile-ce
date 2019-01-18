@@ -15,6 +15,7 @@
 
 <body>
     <div id="app">
+        <div v-html="html"></div>
         <div v-for="itemA in list">
             <div v-for="itemB in itemA" v-filter="doFilter" v-watch="$index">
                 <!-- <span>{{itemB}}</span> -->
@@ -28,6 +29,7 @@
     <script>
 		
         var obj = {
+            html: '<font color="red">aaa</font>',
             doFilter: function(index, item, arr, $node){
                 // console.log(index);
                 // $.util.defRec(item, 'title', obj.title[index]);
