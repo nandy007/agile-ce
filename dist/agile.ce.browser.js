@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.42.1548037558082 beta
+ *	Version	:	0.4.43.1548038930296 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1475,12 +1475,13 @@ module.exports = env.JQLite;
 	var _$ = window.jQuery||window.$||__webpack_require__(5), JQLite = _$, jqlite = JQLite;
 
 	// 重写attr方法，当属性属性改变触发事件
+	var origin_attr = jqlite.prototype.attr;
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
-		origin_attr.apply(this, args);
-		if(arguments.length===2){
+		if(args.length===2){
 			this.trigger('__attrchanged__', args);
 		}
+		return origin_attr.apply(this, args);
 	};
 
 	jqlite.fn.extend({
@@ -11255,7 +11256,7 @@ return jQuery;
 
 			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
 
-			if(ignoreRoot && !isRoot){
+			if(!ignoreRoot || (ignoreRoot && !isRoot)){
 				//缓存指令节点
 				if (compileUtil.hasDirective($node)) {
 					directiveNodes.push({

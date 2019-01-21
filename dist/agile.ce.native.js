@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.42.1548037564678 beta
+ *	Version	:	0.4.43.1548038936840 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3377,7 +3377,7 @@ module.exports = require("File");
 
 			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
 
-			if(ignoreRoot && !isRoot){
+			if(!ignoreRoot || (ignoreRoot && !isRoot)){
 				//缓存指令节点
 				if (compileUtil.hasDirective($node)) {
 					directiveNodes.push({

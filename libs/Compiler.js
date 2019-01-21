@@ -122,7 +122,7 @@
 
 			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
 
-			if(ignoreRoot && !isRoot){
+			if(!ignoreRoot || (ignoreRoot && !isRoot)){
 				//缓存指令节点
 				if (compileUtil.hasDirective($node)) {
 					directiveNodes.push({

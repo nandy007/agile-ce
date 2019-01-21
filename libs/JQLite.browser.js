@@ -2,12 +2,13 @@
 	var _$ = window.jQuery||window.$||require('./jQuery'), JQLite = _$, jqlite = JQLite;
 
 	// 重写attr方法，当属性属性改变触发事件
+	var origin_attr = jqlite.prototype.attr;
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
-		origin_attr.apply(this, args);
-		if(arguments.length===2){
+		if(args.length===2){
 			this.trigger('__attrchanged__', args);
 		}
+		return origin_attr.apply(this, args);
 	};
 
 	jqlite.fn.extend({
