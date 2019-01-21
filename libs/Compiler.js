@@ -83,6 +83,7 @@
 
 	//初始化
 	cp.init = function () {
+		this.root = this.$element[0];
 		//按步骤编译
 		this.compileSteps(this.$element);
 	};
@@ -118,15 +119,24 @@
 			if(compileUtil.useTemplate($node)) _this.compileTemplate($node, fors);
 
 			if($node.hasAttr('vmignore')) return;
-			//缓存指令节点
-			if (compileUtil.hasDirective($node)) {
-				directiveNodes.push({
-					el : $node,
-					fors : fors
-				});
+
+			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
+
+			if(ignoreRoot && !isRoot){
+				//缓存指令节点
+				if (compileUtil.hasDirective($node)) {
+					directiveNodes.push({
+						el : $node,
+						fors : fors
+					});
+				}
 			}
 
+
 			if(compileUtil.isInPre($node)) return;
+
+			if(ignoreRoot && !isRoot) return;
+
 			//对子节点递归调用
 			_this.walkElement($node.childs(), fors, directiveNodes);
 		});

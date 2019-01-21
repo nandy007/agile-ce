@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.41.1548033510222 beta
+ *	Version	:	0.4.42.1548037564678 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3338,6 +3338,7 @@ module.exports = require("File");
 
 	//初始化
 	cp.init = function () {
+		this.root = this.$element[0];
 		//按步骤编译
 		this.compileSteps(this.$element);
 	};
@@ -3373,15 +3374,24 @@ module.exports = require("File");
 			if(compileUtil.useTemplate($node)) _this.compileTemplate($node, fors);
 
 			if($node.hasAttr('vmignore')) return;
-			//缓存指令节点
-			if (compileUtil.hasDirective($node)) {
-				directiveNodes.push({
-					el : $node,
-					fors : fors
-				});
+
+			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
+
+			if(ignoreRoot && !isRoot){
+				//缓存指令节点
+				if (compileUtil.hasDirective($node)) {
+					directiveNodes.push({
+						el : $node,
+						fors : fors
+					});
+				}
 			}
 
+
 			if(compileUtil.isInPre($node)) return;
+
+			if(ignoreRoot && !isRoot) return;
+
 			//对子节点递归调用
 			_this.walkElement($node.childs(), fors, directiveNodes);
 		});
