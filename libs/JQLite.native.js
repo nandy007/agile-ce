@@ -601,18 +601,20 @@
 			return el.vm = jqlite.vm(this, data);
 		},
 		show: function (p) {
-			p = _animateDirectionRefer.formateShowHide(p);
-			this.each(function () {
-				// this.show(p);
-				this.setStyle('display', '');
-			});
+			// p = _animateDirectionRefer.formateShowHide(p);
+			// this.each(function () {
+			// 	// this.show(p);
+			// 	this.setStyle('display', 'flex');
+			// });
+			this.css('display', 'flex');
 		},
 		hide: function (p) {
-			p = _animateDirectionRefer.formateShowHide(p);
-			this.each(function () {
-				// this.hide(p);
-				this.setStyle('display', 'none');
-			});
+			// p = _animateDirectionRefer.formateShowHide(p);
+			// this.each(function () {
+			// 	// this.hide(p);
+			// 	this.setStyle('display', 'none');
+			// });
+			this.css('display', 'none');
 		},
 		//目前仅针对startAnimator进行封装
 		animate: function (props, duration, easing, complete) {

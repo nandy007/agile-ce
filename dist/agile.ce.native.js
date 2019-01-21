@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.43.1548038936840 beta
+ *	Version	:	0.4.44.1548060728044 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -2111,18 +2111,20 @@ module.exports = env.JQLite;
 			return el.vm = jqlite.vm(this, data);
 		},
 		show: function (p) {
-			p = _animateDirectionRefer.formateShowHide(p);
-			this.each(function () {
-				// this.show(p);
-				this.setStyle('display', '');
-			});
+			// p = _animateDirectionRefer.formateShowHide(p);
+			// this.each(function () {
+			// 	// this.show(p);
+			// 	this.setStyle('display', 'flex');
+			// });
+			this.css('display', 'flex');
 		},
 		hide: function (p) {
-			p = _animateDirectionRefer.formateShowHide(p);
-			this.each(function () {
-				// this.hide(p);
-				this.setStyle('display', 'none');
-			});
+			// p = _animateDirectionRefer.formateShowHide(p);
+			// this.each(function () {
+			// 	// this.hide(p);
+			// 	this.setStyle('display', 'none');
+			// });
+			this.css('display', 'none');
 		},
 		//目前仅针对startAnimator进行封装
 		animate: function (props, duration, easing, complete) {
