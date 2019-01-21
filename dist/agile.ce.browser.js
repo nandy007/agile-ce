@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.40.1547880612833 beta
+ *	Version	:	0.4.41.1548033503336 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1473,6 +1473,15 @@ module.exports = env.JQLite;
 
 (function(){
 	var _$ = window.jQuery||window.$||__webpack_require__(5), JQLite = _$, jqlite = JQLite;
+
+	// 重写attr方法，当属性属性改变触发事件
+	jqlite.prototype.attr = function(){
+		var args = jqlite.util.copyArray(arguments);
+		origin_attr.apply(this, args);
+		if(arguments.length===2){
+			this.trigger('__attrchanged__', args);
+		}
+	};
 
 	jqlite.fn.extend({
 		childs : function(index){

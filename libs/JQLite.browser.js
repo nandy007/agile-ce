@@ -1,6 +1,15 @@
 (function(){
 	var _$ = window.jQuery||window.$||require('./jQuery'), JQLite = _$, jqlite = JQLite;
 
+	// 重写attr方法，当属性属性改变触发事件
+	jqlite.prototype.attr = function(){
+		var args = jqlite.util.copyArray(arguments);
+		origin_attr.apply(this, args);
+		if(arguments.length===2){
+			this.trigger('__attrchanged__', args);
+		}
+	};
+
 	jqlite.fn.extend({
 		childs : function(index){
 			if(jqlite.util.isNumber(index)){
