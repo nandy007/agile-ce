@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.44.1548500136836 beta
+ *	Version	:	0.4.44.1548500917525 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5051,6 +5051,14 @@ var BaseComponent = function () {
             this.__initEvent();
             this.__initProto();
             this.__mvvmRender();
+        }
+    }, {
+        key: 'attrChanged',
+        value: function attrChanged(attrName, attrValue) {
+            if (this.__props && this.__props.indexOf(attrName) > -1) {
+                var prop = this.props[attrName];
+                prop.handler && prop.handler(this.getAttrValue(attrName));
+            }
         }
     }]);
 

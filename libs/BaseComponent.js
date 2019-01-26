@@ -98,6 +98,13 @@ class BaseComponent{
         this.__initProto();
         this.__mvvmRender();
     }
+
+    attrChanged(attrName, attrValue){
+        if(this.__props&&this.__props.indexOf(attrName)>-1){
+            var prop = this.props[attrName];
+            prop.handler && prop.handler(this.getAttrValue(attrName));
+        }
+    };
 }
 
 BaseComponent.wrapperClass = function(MyClass){
