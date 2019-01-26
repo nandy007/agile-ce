@@ -1,6 +1,6 @@
 
 (function () {
-
+	var jqliteUtil = require('./JQLiteUtil');
 	var ui = require('UI'), document = require('Document'), window = require("Window"), Adapter = require("ListAdapter");
 	var _util = {
 		setClass: function (el, className) {
@@ -14,16 +14,18 @@
 			this.refresh(el);
 		},
 		refresh: function(el){
-			var parent = el.getParent();
-			if(parent && parent.refresh){
-				parent.refresh();
-			}else if(el.refresh){
-				el.refresh();
-			}
+			// var parent = el.getParent();
+			// if(parent && parent.refresh){
+			// 	parent.refresh();
+			// }else if(el.refresh){
+			// 	el.refresh();
+			// }
+			document.refresh();
 		},
 		triggerDomChange: function(el){
 			if(!el) return;
-			el.refresh && el.refresh();
+			// el.refresh && el.refresh();
+			this.refresh(el);
 			el.fire('__domchange__');
 		}
 	};
@@ -67,6 +69,14 @@
 
 		//this.data('_event', {index:0}, true);
 	};
+
+	function clearSelector(selector){
+		return selector.replace(/['"]/g, '')//去掉'和"引号
+			.replace(/[ ]*([\=\:,>~])[ ]*/g, '$1')//去掉=、:、,、>、~两侧的空格
+			.replace(/([\[\.])[ ]*/g, '$1')//去掉[和.右侧的空格
+			.replace(/[ ]*\]/g, ']')//去掉]左侧的空格
+			.replace(/[ ]+/g, ' ');//合并多个空格为一个空格
+	}
 
 	JQLite.prototype = {
 		add: function (el) {
@@ -129,6 +139,78 @@
 				if (el = el.getParent && el.getParent()) arr.push(el);
 			});
 			return new JQLite(arr);
+		},
+		closest: function(selector){
+			selector = clearSelector(selector);//合并多个空格为一个空格
+
+			var sltModel = {};
+			selector.replace(/\#([\w\-]+)/, function (s, s1) {
+				sltModel.id = s1
+				return '';
+			})
+				.replace(/\.([\w\-]+)/g, function (s, s1) {
+					sltModel.class = sltModel.class || [];
+					sltModel.class.push(s1);
+					return '';
+				})
+				.replace(/\[([^\]]+)\]/g, function (s, s1) {
+					var attr = s1.split('='), attrName = attr[0], attrValue = attr[1] || '';
+					sltModel.attr = sltModel.attr || [];
+					sltModel.attr.push(attrName);
+					if(attrValue){
+						sltModel['_'+attrName] = sltModel['_'+attrName] || [];
+						sltModel['_'+attrName].push(attrValue);
+					}
+					return '';
+				})
+				.replace(/[\w\-]+/, function (s) {
+					sltModel.tag = sltModel.tag || [];
+					sltModel.tag.push(s);
+					return '';
+				});
+			var $p = this, $target;
+			while(($p = $p.parent()) && $p.length===1 && !$target){
+				if(sltModel.id && $p.attr('id')!==sltModel.id) {
+					continue;
+				}
+				if(sltModel.class){
+					var cls = ($p.attr('class')||'').split(' ');
+					if(cls.length===0) continue;
+					var clsCopy = jqlite.util.copyArray(sltModel.class);
+					var tar;
+					while(tar = clsCopy.pop()){
+						if(cls.indexOf(tar)===-1){
+							break;
+						}
+					}
+					if(tar) continue;
+				}
+				if(sltModel.attr){
+					var attrCopy = jqlite.util.copyArray(sltModel.attr);
+					var attrName;
+					while(attrName = attrCopy.pop()){
+						var attrValue = sltModel['_'+attrName];
+						if(
+							(!attrValue && !$p.hasAttr(attrName))
+							||
+							((attrValue && $p.attr(attrName)!==attrValue))
+						){
+							break;
+						}
+					}
+					if(attrName) continue;
+				}
+				if(sltModel.tag){
+					if($p.trueTag()!=sltModel.tag){
+						continue;
+					}else if(($p[0].trueDom && $p[0].trueDom.getTag())==sltModel.tag){
+						$p = jqlite($p[0].trueDom);
+					}
+				}
+				$target = $p;
+				break;
+			}
+			return $target;
 		},
 		find: function (selector) {
 			var arr = [];
@@ -232,11 +314,12 @@
 						if (val) {
 							this.setFocus();
 						} else {
-							window.hideSip();
+							this.setBlur();
 						}
 					} else if (typeof this[name] === 'function') {
 						this[name](val);
 					} else if(this.setAttr){
+						val = jqliteUtil.stringify(val);
 						this.setAttr(name, val);
 					}
 				});
@@ -511,7 +594,8 @@
 			return this;
 		},
 		clone: function (deep) {
-			return new JQLite((this.length > 0 && this.domList[0].clone(deep)) || []);
+			// 应该实现deep的时候同时拷贝事件，目前尚未实现
+			return new JQLite((this.length > 0 && this.domList[0].clone(true)) || []);
 		},
 		__on__: function (evt, selector, callback) {
 			this.each(function () {
@@ -532,7 +616,7 @@
 			});
 		},
 		on: function (evt, selector, callback) {
-			evt = _eventRefer.get(evt);
+			// evt = _eventRefer.get(evt);
 			if (typeof selector === 'function') {
 				callback = selector;
 				selector = null;
@@ -568,14 +652,14 @@
 		},
 		trigger: function () {
 			var args = arguments;
-			args[0] = _eventRefer.get(args[0]);
+			// args[0] = _eventRefer.get(args[0]);
 			this.each(function () {
 				this.fire.apply(this, args);
 			});
 			return this;
 		},
 		off: function (evt, callback) {
-			evt = _eventRefer.get(evt);
+			// evt = _eventRefer.get(evt);
 			this.each(function () {
 				this.off.call(this, evt, callback);
 			});
@@ -655,6 +739,16 @@
 				});
 
 			});
+		},
+		trueTag: function(){
+			var el = this.length>0&&this[0];
+			if(!el) return '';
+			var tag = ( el.trueDom && el.trueDom.getTag && el.trueDom.getTag() ) || ( el.getTag && el.getTag() );
+			return tag;
+		},
+		tag: function(){
+			var el = this.length>0&&this[0];
+			return el && el.getTag && el.getTag().toLowerCase();
 		}
 	};
 
@@ -682,15 +776,15 @@
 		get: function (evt) {
 			return _eventRefer[evt] || evt;
 		},
-		// dbclick: 'doubleClick',
-		// ready: 'loaded',
-		// touchstart: 'touchDown',
-		// touchmove: 'touchMove',
-		// touchend: 'touchUp',
-		// mousedown: 'touchDown',
-		// mousemove: 'touchMove',
-		// mouseup: 'touchUp',
-		// scroll: 'scrollChange',
+		dbclick: 'doubleClick',
+		ready: 'loaded',
+		touchstart: 'touchDown',
+		touchmove: 'touchMove',
+		touchend: 'touchUp',
+		mousedown: 'touchDown',
+		mousemove: 'touchMove',
+		mouseup: 'touchUp',
+		scroll: 'scrollChange',
 		input: 'textChanged'
 	};
 
@@ -817,11 +911,7 @@
 	}
 
 	jqlite.parseSelector = function (selector, scope, baseMode) {
-		selector = selector.replace(/['"]/g, '')//去掉'和"引号
-			.replace(/[ ]*([\=\:,>~])[ ]*/g, '$1')//去掉=、:、,、>、~两侧的空格
-			.replace(/([\[\.])[ ]*/g, '$1')//去掉[和.右侧的空格
-			.replace(/[ ]*\]/g, ']')//去掉]左侧的空格
-			.replace(/[ ]+/g, ' ');//合并多个空格为一个空格
+		selector = clearSelector(selector);
 		var exeps = selector.split(',');
 		var $scope = jqlite(scope || document), scope = [];
 		$scope.each(function () {
@@ -1249,7 +1339,7 @@
 		var index = ($cell.parent().data('AdapteCell') || $parent.children('cell').length) - 1;
 
 		$parent.data('AdapteCell', index);
-		$parent.def('__'+$cell.attr('id'), $cell.clone(true));
+		$parent.def('__'+$cell.attr('id'), $cell.clone());
 
 		return index === 0;
 	};
@@ -1289,7 +1379,7 @@
 		if(!cbs.getCellId) this.off("getView").on("getView", function(e, position, sectionindex) {
 			array = getter();
 		   	var $copy = getCellClone(getCells(sectionindex)[position][cellType]);
-		    var $temp = $copy.clone(true);
+		    var $temp = $copy.clone();
 			callback.apply(null, [$temp, position, useSection?array[sectionindex]['cells']:array]);
 			jqlite.ui.copyElement(e.target, $temp, true);
 		});
@@ -1616,6 +1706,8 @@
 		var Parser = require('./Parser');
 		Parser.add(rules);
 	};
+
+	jqlite.BaseComponent = require('./BaseComponent');
 
 
 	module.exports = jqlite;

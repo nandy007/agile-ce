@@ -75,10 +75,16 @@ module.exports = {
     module: {
         //加载器配置
         loaders: [
-            { test: /\.css$/, loader: 'style-loader!css-loader' },
-            //{ test: /\.js$/, loader: 'jsx-loader?harmony' },
-            { test: /\.scss$/, loader: 'style!css!sass?sourceMap'},
-            { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'}
+            {
+                test: /\.js$/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        "presets": ["es2015", "react", "stage-3"],
+                        "plugins": [["transform-es2015-arrow-functions"], "transform-object-assign", "transform-async-to-generator"]
+                    }
+                }
+            }
         ]
     },
     externals: {

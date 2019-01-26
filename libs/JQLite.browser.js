@@ -1,14 +1,21 @@
 (function(){
 	var _$ = window.jQuery||window.$||require('./jQuery'), JQLite = _$, jqlite = JQLite;
 
+	var jqliteUtil = require('./JQLiteUtil');
+
 	// 重写attr方法，当属性属性改变触发事件
 	var origin_attr = jqlite.prototype.attr;
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
-		if(args.length===2){
-			this.trigger('__attrchanged__', args);
+		if(typeof args[1]!=='undefined'){
+			args[1] = jqliteUtil.stringify(args[1]);
 		}
-		return origin_attr.apply(this, args);
+		
+		var rs = origin_attr.apply(this, args);
+		if(args.length===2){
+			this.trigger('attrChanged', args[0], this.attr(args[0]));
+		}
+		return rs;
 	};
 
 	jqlite.fn.extend({
@@ -105,6 +112,10 @@
 					$node.off(evt);
 				});
 			});
+		},
+		tag: function(){
+			var el = this.length>0&&this[0];
+			return el && el.tagName.toLowerCase();
 		}
 	});
 
@@ -355,6 +366,8 @@
 		var Parser = require('./Parser');
 		Parser.add(rules);
 	};
+
+	jqlite.BaseComponent = require('./BaseComponent');
 
 	module.exports = jqlite;
 

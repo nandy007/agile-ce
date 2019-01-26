@@ -54,6 +54,39 @@
 		}
 	};
 
+	mp.extend = function(target, source){
+		// for(var k in target){
+		// 	var tObj = target[k], sObj = source[k];
+		// 	if(typeof sObj==='undefined') continue;
+		// 	if(tObj instanceof Array){
+		// 		tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
+		// 	}else if(typeof tObj==='object'){
+		// 		_extend(tObj, sObj);
+		// 	}else{
+		// 		tObj = sObj;
+		// 	}
+		// }
+		for(var k in source){
+			var tObj = target[k], sObj = source[k];
+			if(typeof tObj==='undefined') continue;
+			if(tObj instanceof Array){
+				tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
+			}else if(typeof tObj==='object'){
+				this.extend(tObj, sObj);
+			}else{
+				tObj = sObj;
+			}
+		}
+	};
+
+	/**
+	 * 设置绑定数据
+	 */
+	mp.setData = function(obj){
+		var viewData = this.$data;
+		this.extend(viewData, obj||{});
+	};
+
 	/**
 	 * 获取 mvvm 绑定的数据
 	 */

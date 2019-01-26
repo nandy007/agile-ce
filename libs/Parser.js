@@ -159,15 +159,22 @@
 				var _proxy = function () {
 					var params = $.util.copyArray(arguments);
 					parser.setDeepScope(fors);
+					// var func = (new Function('scope', 'return ' + funcStr + ';'))(scope);
+					var beforeHandler = this['__before'+evt.toLowerCase()];
+					beforeHandler && beforeHandler.apply(this, params);
+					var rs;
 					if (argsStr === '') {
 						var func = (new Function('scope', 'node', 'params', 'return '
 							+ funcStr + '.apply(node, params);'));
-						return func(scope, this, params);
+						rs = func(scope, this, params);
 					} else {
 						var func = (new Function('scope', 'node', '$event', 'params', 'params.unshift(' + argsStr + '); return '
 							+ funcStr + '.apply(node, params);'));
-						return func(scope, this, params.shift(), params);
+						rs = func(scope, this, params.shift(), params);
 					}
+					var afterHandler = this['__after'+evt.toLowerCase()];
+					afterHandler && afterHandler(rs);
+					return rs;
 				};
 
 				$node.each(function () {
@@ -824,7 +831,7 @@
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, alias, access, ni, filter);
-			var $plate = $node.clone(true);//.data('vforIndex', vforIndex);
+			var $plate = $node.clone();//.data('vforIndex', vforIndex);
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 
@@ -1259,31 +1266,35 @@
 	//文本输入框的事件监听处理
 	Parser.bindTextEvent = function ($node, callbacl) {
 
+		var eventRefer = $node[0].__eventRefer || {}; // hook 
+
 		var composeLock;
 
 		// 解决中文输入时 input 事件在未选择词组时的触发问题
 		// https://developer.mozilla.org/zh-CN/docs/Web/Events/compositionstart
-		$node.__on__('compositionstart', function () {
+		$node.__on__(eventRefer.compositionstart || 'compositionstart', function () {
 			composeLock = true;
 		});
-		$node.__on__('compositionend', function () {
+		$node.__on__(eventRefer.compositionend || 'compositionend', function () {
 			composeLock = false;
 		});
 
 		// input 事件(实时触发)
-		$node.__on__('input', function () {
+		$node.__on__(eventRefer.input || 'input', function () {
 			callbacl.apply(this, arguments);
 		});
 
 		// change 事件(失去焦点触发)
-		$node.__on__('blur', function () {
+		$node.__on__(eventRefer.blur || 'blur', function () {
 			callbacl.apply(this, arguments);
 		});
 	};
 
 	//通用change事件监听处理。比如：radio、checkbox、select等
 	Parser.bindChangeEvent = function ($node, callback) {
-		$node.__on__('change', function () {
+		var eventRefer = $node[0].__eventRefer || {}; // hook 
+
+		$node.__on__(eventRefer.change || 'change', function () {
 			callback.apply(this, arguments);
 		});
 	};
