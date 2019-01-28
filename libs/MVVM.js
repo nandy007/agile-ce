@@ -55,26 +55,16 @@
 	};
 
 	mp.extend = function(target, source){
-		// for(var k in target){
-		// 	var tObj = target[k], sObj = source[k];
-		// 	if(typeof sObj==='undefined') continue;
-		// 	if(tObj instanceof Array){
-		// 		tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
-		// 	}else if(typeof tObj==='object'){
-		// 		_extend(tObj, sObj);
-		// 	}else{
-		// 		tObj = sObj;
-		// 	}
-		// }
 		for(var k in source){
 			var tObj = target[k], sObj = source[k];
-			if(typeof tObj==='undefined') continue;
+			var tf = typeof tObj;
+			if( ['undefined', 'function'].indexOf(tf)>-1 ) continue;
 			if(tObj instanceof Array){
-				tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
-			}else if(typeof tObj==='object'){
+				target[k] = sObj instanceof Array ? $.extend(true, [], sObj) : [];
+			}else if(tf==='object'){
 				this.extend(tObj, sObj);
 			}else{
-				tObj = sObj;
+				target[k] = sObj;
 			}
 		}
 	};
@@ -82,7 +72,7 @@
 	/**
 	 * 设置绑定数据
 	 */
-	mp.setData = function(obj){
+	mp.setViewData = function(obj){
 		var viewData = this.$data;
 		this.extend(viewData, obj||{});
 	};

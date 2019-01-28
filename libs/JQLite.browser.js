@@ -116,6 +116,10 @@
 		tag: function(){
 			var el = this.length>0&&this[0];
 			return el && el.tagName.toLowerCase();
+		},
+		getComponent: function(){
+			var el = this.length>0&&this[0];
+			return el && (el.trueDom ? el.trueDom.component : el.component);
 		}
 	});
 
@@ -339,35 +343,7 @@
 		}
 	};
 
-	jqlite.JSON = {
-		parse : function(str){
-			try{
-				return (new Function('try{return '+str+';}catch(e){return null;}'))();
-			}catch(e){
-				return null;
-			}
-		},
-		stringify: function(str){
-			try{
-				return JSON.stringify(str)||'';
-			}catch(e){
-				return '';
-			}
-		}
-	};
-
-	
-	jqlite.vm = function(el, data){
-		var MVVM = require('./MVVM');
-		return new MVVM(el, data);
-	};
-
-	jqlite.vm.addParser = function (rules) {
-		var Parser = require('./Parser');
-		Parser.add(rules);
-	};
-
-	jqlite.BaseComponent = require('./BaseComponent');
+	require('./JQLiteExt')(jqlite);
 
 	module.exports = jqlite;
 

@@ -749,6 +749,10 @@
 		tag: function(){
 			var el = this.length>0&&this[0];
 			return el && el.getTag && el.getTag().toLowerCase();
+		},
+		getComponent: function(){
+			var el = this.length>0&&this[0];
+			return el && (el.trueDom ? el.trueDom.component : el.component);
 		}
 	};
 
@@ -800,7 +804,13 @@
 		_cons = function (type, args) {
 			if (consoleLevel.indexOf(jqlite.util.consoleLevel) < consoleLevel.indexOf(type)) return;
 
-			if (cons) cons[type].apply(cons, args);
+			if (cons) {
+				args = jqlite.util.copyArray(args);
+				var func = cons[type], arg;
+				while(arg=args.shift()){
+					func.call(cons, arg);
+				}
+			}
 		};
 	cons.setFilePath("res:page/log.txt");
 
@@ -1687,27 +1697,8 @@
 		}
 	};
 
-	jqlite.JSON = {
-		parse: function (str) {
-			return JSON.parse(str) || {};
-		},
-		stringify: function (str) {
-			return JSON.stringify(str) || '';
-		}
-	};
 
-
-	jqlite.vm = function (el, data) {
-		var MVVM = require('./MVVM');
-		return new MVVM(el, data);
-	};
-
-	jqlite.vm.addParser = function (rules) {
-		var Parser = require('./Parser');
-		Parser.add(rules);
-	};
-
-	jqlite.BaseComponent = require('./BaseComponent');
+	require('./JQLiteExt')(jqlite);
 
 
 	module.exports = jqlite;

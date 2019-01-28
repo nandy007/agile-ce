@@ -15,15 +15,15 @@
 
 <body>
     <div id="app">
-        <div v-html="html" v-bind:test="html"></div>
+        <!-- <div v-html="html" v-bind:test="html"></div>
         <div v-for="itemA in list">
             <div v-for="itemB in itemA" v-filter="doFilter" v-watch="$index">
-                <!-- <span>{{itemB}}</span> -->
-                <!-- <span>{{$index}}</span> -->
-                <!-- <span>{{itemB.c}}</span> -->
                 <span>{{itemB.title}}</span>
             </div>
             
+        </div> -->
+        <div v-for="item in title">
+            <span>{{item}}</span>
         </div>
     </div>
     <script>
@@ -58,6 +58,8 @@
 
         obj.list[0].shift();
         // obj.list[0].splice(1, 1, '222')
+        obj.title.unshift('ttt')
+        obj.title.splice(1,1)
         
 
     </script>

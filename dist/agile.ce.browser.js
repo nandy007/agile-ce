@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.44.1548500901638 beta
+ *	Version	:	0.4.44.1548654147830 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -90,10 +90,12 @@ module.exports = env;
 "use strict";
 
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 (function () {
 	var $ = __webpack_require__(0).JQLite;
-	var Updater = __webpack_require__(10);
-	var Watcher = __webpack_require__(11);
+	var Updater = __webpack_require__(11);
+	var Watcher = __webpack_require__(12);
 
 	//指令解析规则，可以通过Parser.add方法添加自定义指令处理规则
 	//所有解析规则默认接受四个参数
@@ -256,15 +258,15 @@ module.exports = env;
 					var params = $.util.copyArray(arguments);
 					parser.setDeepScope(fors);
 					// var func = (new Function('scope', 'return ' + funcStr + ';'))(scope);
-					var beforeHandler = this['__before' + evt.toLowerCase()];
-					beforeHandler && beforeHandler.apply(this, params);
+					var beforeHandler = Parser.getEventFilter(this, evt);
+					var me = beforeHandler && beforeHandler.apply(parser.vm.$element, [this].concat(_toConsumableArray(params))) || this;
 					var rs;
 					if (argsStr === '') {
 						var func = new Function('scope', 'node', 'params', 'return ' + funcStr + '.apply(node, params);');
-						rs = func(scope, this, params);
+						rs = func(scope, me, params);
 					} else {
 						var func = new Function('scope', 'node', '$event', 'params', 'params.unshift(' + argsStr + '); return ' + funcStr + '.apply(node, params);');
-						rs = func(scope, this, params.shift(), params);
+						rs = func(scope, me, params.shift(), params);
 					}
 					var afterHandler = this['__after' + evt.toLowerCase()];
 					afterHandler && afterHandler(rs);
@@ -1491,6 +1493,23 @@ module.exports = env;
 
 	Parser.dirSplit = ':';
 
+	var __eventFilter = {
+		default: null
+	};
+	Parser.addEventFilter = function (filters) {
+		for (var k in filters) {
+			__eventFilter[k] = filters[k];
+		}
+	};
+	Parser.getEventFilter = function (el, evtName) {
+		if (!el) return null;
+		evtName = evtName.toLowerCase();
+		if (el['__before' + evtName]) return el['__before' + evtName];
+		if (__eventFilter[evtName]) return __eventFilter[evtName];
+		if (__eventFilter['default']) return __eventFilter['default'];
+		return null;
+	};
+
 	module.exports = Parser;
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(Parser, 'Parser');
@@ -1651,6 +1670,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		tag: function tag() {
 			var el = this.length > 0 && this[0];
 			return el && el.tagName.toLowerCase();
+		},
+		getComponent: function getComponent() {
+			var el = this.length > 0 && this[0];
+			return el && (el.trueDom ? el.trueDom.component : el.component);
 		}
 	});
 
@@ -1876,34 +1899,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 	};
 
-	jqlite.JSON = {
-		parse: function parse(str) {
-			try {
-				return new Function('try{return ' + str + ';}catch(e){return null;}')();
-			} catch (e) {
-				return null;
-			}
-		},
-		stringify: function stringify(str) {
-			try {
-				return JSON.stringify(str) || '';
-			} catch (e) {
-				return '';
-			}
-		}
-	};
-
-	jqlite.vm = function (el, data) {
-		var MVVM = __webpack_require__(8);
-		return new MVVM(el, data);
-	};
-
-	jqlite.vm.addParser = function (rules) {
-		var Parser = __webpack_require__(1);
-		Parser.add(rules);
-	};
-
-	jqlite.BaseComponent = __webpack_require__(13);
+	__webpack_require__(8)(jqlite);
 
 	module.exports = jqlite;
 
@@ -1918,7 +1914,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(jqlite, 'JQLite');
 
-	var _template = __webpack_require__(14);
+	var _template = __webpack_require__(15);
 	jqlite.template = _template;
 })();
 
@@ -10915,11 +10911,46 @@ var util = module.exports = {
 "use strict";
 
 
+module.exports = function (jqlite) {
+	jqlite.JSON = {
+		parse: function parse(str) {
+			return JSON.parse(str) || {};
+		},
+		stringify: function stringify(str) {
+			return JSON.stringify(str) || '';
+		}
+	};
+
+	jqlite.vm = function (el, data) {
+		var MVVM = __webpack_require__(9);
+		return new MVVM(el, data);
+	};
+
+	jqlite.vm.addParser = function (rules) {
+		var Parser = __webpack_require__(1);
+		Parser.add(rules);
+	};
+
+	jqlite.vm.addEventFilter = function (filters) {
+		var Parser = __webpack_require__(1);
+		Parser.addEventFilter(filters);
+	};
+
+	jqlite.BaseComponent = __webpack_require__(14);
+};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 (function () {
 	var $ = __webpack_require__(0).JQLite;
-	var Compiler = __webpack_require__(9);
+	var Compiler = __webpack_require__(10);
 
 	/**
   * MVVM 构造函数入口
@@ -10970,27 +11001,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	};
 
 	mp.extend = function (target, source) {
-		// for(var k in target){
-		// 	var tObj = target[k], sObj = source[k];
-		// 	if(typeof sObj==='undefined') continue;
-		// 	if(tObj instanceof Array){
-		// 		tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
-		// 	}else if(typeof tObj==='object'){
-		// 		_extend(tObj, sObj);
-		// 	}else{
-		// 		tObj = sObj;
-		// 	}
-		// }
 		for (var k in source) {
 			var tObj = target[k],
 			    sObj = source[k];
-			if (typeof tObj === 'undefined') continue;
+			var tf = typeof tObj === 'undefined' ? 'undefined' : _typeof(tObj);
+			if (['undefined', 'function'].indexOf(tf) > -1) continue;
 			if (tObj instanceof Array) {
-				tObj = sObj instanceof Array ? $.extend(true, [], sObj) : [];
-			} else if ((typeof tObj === 'undefined' ? 'undefined' : _typeof(tObj)) === 'object') {
+				target[k] = sObj instanceof Array ? $.extend(true, [], sObj) : [];
+			} else if (tf === 'object') {
 				this.extend(tObj, sObj);
 			} else {
-				tObj = sObj;
+				target[k] = sObj;
 			}
 		}
 	};
@@ -10998,7 +11019,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	/**
   * 设置绑定数据
   */
-	mp.setData = function (obj) {
+	mp.setViewData = function (obj) {
 		var viewData = this.$data;
 		this.extend(viewData, obj || {});
 	};
@@ -11014,7 +11035,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11317,7 +11338,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11790,7 +11811,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11799,7 +11820,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
 
 	var $ = __webpack_require__(0).JQLite;
-	var Observer = __webpack_require__(12);
+	var Observer = __webpack_require__(13);
 
 	var watcherUtil = {
 		iterator: function iterator(deps, subs) {
@@ -12107,7 +12128,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12460,7 +12481,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12496,6 +12517,8 @@ var BaseComponent = function () {
                 root.trueDom = jsDom;
                 this.root = root;
                 this.$root = $(root);
+            } else {
+                this.$root = this.$jsDom;
             }
         }
     }, {
@@ -12520,11 +12543,11 @@ var BaseComponent = function () {
             var _this = this;
 
             if (!this.viewData) return;
-            var $render = this.$root || this.$jsDom;
-            $render.attr('vmignoreroot', 'true').on('__destroy__', function () {
+
+            this.$root.attr('vmignoreroot', 'true').on('__destroy__', function () {
                 _this.$vm.destroy();
             });
-            this.$vm = $render.render(this.viewData);
+            this.$vm = this.$root.render(this.viewData);
         }
     }, {
         key: 'getAttrValue',
@@ -12562,7 +12585,9 @@ var BaseComponent = function () {
         key: 'setData',
         value: function setData(obj) {
             if (!this.$vm) return;
-            this.$vm.setData(obj);
+            this.$vm.setViewData({
+                data: obj
+            });
         }
     }, {
         key: '__initEvent',
@@ -12600,6 +12625,17 @@ var BaseComponent = function () {
                 var prop = this.props[attrName];
                 prop.handler && prop.handler(this.getAttrValue(attrName));
             }
+        }
+    }, {
+        key: 'triggerEvent',
+        value: function triggerEvent(evtName, param) {
+            this.$jsDom.trigger(evtName, [param]);
+        }
+    }, {
+        key: 'selectComponent',
+        value: function selectComponent(selector) {
+            var selectCom = this.$root.find(selector)[0];
+            return selectCom && selectCom.component;
         }
     }]);
 
@@ -12648,7 +12684,7 @@ BaseComponent.wrapperClass = function (MyClass) {
 module.exports = BaseComponent;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

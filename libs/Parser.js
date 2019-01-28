@@ -160,17 +160,17 @@
 					var params = $.util.copyArray(arguments);
 					parser.setDeepScope(fors);
 					// var func = (new Function('scope', 'return ' + funcStr + ';'))(scope);
-					var beforeHandler = this['__before'+evt.toLowerCase()];
-					beforeHandler && beforeHandler.apply(this, params);
+					var beforeHandler = Parser.getEventFilter(this, evt);
+					var me = (beforeHandler && beforeHandler.apply(parser.vm.$element, [this, ...params])) || this;
 					var rs;
 					if (argsStr === '') {
 						var func = (new Function('scope', 'node', 'params', 'return '
 							+ funcStr + '.apply(node, params);'));
-						rs = func(scope, this, params);
+						rs = func(scope, me, params);
 					} else {
 						var func = (new Function('scope', 'node', '$event', 'params', 'params.unshift(' + argsStr + '); return '
 							+ funcStr + '.apply(node, params);'));
-						rs = func(scope, this, params.shift(), params);
+						rs = func(scope, me, params.shift(), params);
 					}
 					var afterHandler = this['__after'+evt.toLowerCase()];
 					afterHandler && afterHandler(rs);
@@ -1368,6 +1368,23 @@
 	};
 
 	Parser.dirSplit = ':';
+
+	var __eventFilter = {
+		default: null
+	};
+	Parser.addEventFilter = function(filters){
+		for(var k in filters){
+			__eventFilter[k] = filters[k];
+		}
+	};
+	Parser.getEventFilter = function(el, evtName){
+		if(!el) return null;
+		evtName = evtName.toLowerCase();
+		if(el['__before'+evtName]) return el['__before'+evtName];
+		if(__eventFilter[evtName]) return __eventFilter[evtName];
+		if(__eventFilter['default']) return __eventFilter['default'];
+		return null;
+	};
 
 
 	module.exports = Parser;

@@ -17,6 +17,8 @@ class BaseComponent{
             root.trueDom = jsDom;
             this.root = root;
             this.$root = $(root);
+        }else{
+            this.$root = this.$jsDom;
         }
     }
 
@@ -37,12 +39,12 @@ class BaseComponent{
 
     __mvvmRender(){
         if(!this.viewData) return;
-        var $render = this.$root || this.$jsDom;
-        $render.attr('vmignoreroot', 'true')
+
+        this.$root.attr('vmignoreroot', 'true')
                 .on('__destroy__', ()=>{
                     this.$vm.destroy();
                 });
-        this.$vm = $render.render(this.viewData);
+        this.$vm = this.$root.render(this.viewData);
     }
 
     getAttrValue(name){
@@ -76,7 +78,9 @@ class BaseComponent{
 
     setData(obj){
         if(!this.$vm) return;
-        this.$vm.setData(obj);
+        this.$vm.setViewData({
+            data: obj
+        });
     }
 
     __initEvent(){
@@ -104,7 +108,16 @@ class BaseComponent{
             var prop = this.props[attrName];
             prop.handler && prop.handler(this.getAttrValue(attrName));
         }
-    };
+    }
+
+    triggerEvent(evtName, param){
+        this.$jsDom.trigger(evtName, [param]);
+    }
+
+    selectComponent(selector){
+        var selectCom = this.$root.find(selector)[0];
+        return selectCom && selectCom.component;
+    }
 }
 
 BaseComponent.wrapperClass = function(MyClass){
