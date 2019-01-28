@@ -23,9 +23,13 @@ class BaseComponent{
         // this.__setThisData();
     }
 
-    __setThisData(){
+    __setThisData(isCreat){
         if(this.data) return;
-        var viewData = this.viewData = this.viewData || {};
+        if(!this.viewData && isCreat){
+            this.viewData = {};
+        }
+        var viewData = this.viewData;
+        if(!viewData) return;
         var pre = this.$.vm.getVMPre().data;
         if(pre){
             this.data = viewData[pre] = viewData[pre] || {};
@@ -51,9 +55,7 @@ class BaseComponent{
         }
 
         // 外部属性
-        if(this.properties){
-            this.__setThisData();
-        }
+        this.__setThisData(this.properties);
         for(var k in (this.properties||{})){
             __props.push(k);
             var prop = this.properties[k];
