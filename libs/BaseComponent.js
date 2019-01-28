@@ -20,17 +20,51 @@ class BaseComponent{
         }else{
             this.$root = this.$jsDom;
         }
+        // this.__setThisData();
+    }
+
+    __setThisData(){
+        if(this.data) return;
+        var viewData = this.viewData = this.viewData || {};
+        var pre = this.$.vm.getVMPre().data;
+        if(pre){
+            this.data = viewData[pre] = viewData[pre] || {};
+        }else{
+            this.data = viewData;
+        }
+    }
+
+    __setViewData(k, v){
+        var data = this.data;
+        data[k] = v;
     }
 
     __initProto(){
-        if(!this.props) return;
+        var _this = this;
         var __props = [];
         this.__props = __props;
-        for(var k in this.props){
+        // 内部属性
+        for(var k in (this.props||{})){
             __props.push(k);
             var prop = this.props[k];
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
+
+        // 外部属性
+        if(this.properties){
+            this.__setThisData();
+        }
+        for(var k in (this.properties||{})){
+            __props.push(k);
+            var prop = this.properties[k];
+            (function(k){
+                _this.__setViewData(k, _this.getAttrValue(k));
+				prop.handler = function(val){
+					_this.__setViewData(k, val);
+				}
+            })(k);
+        }
+        // 内部事件
         for(var k in this.events){
             var event = this.events[k];
             event.handler && event.handler();
@@ -47,8 +81,12 @@ class BaseComponent{
         this.$vm = this.$root.render(this.viewData);
     }
 
+    __getProp(name){
+        return (this.props && this.props[name]) || (this.properties && this.properties[name]);
+    }
+
     getAttrValue(name){
-        var prop = this.props[name], defaultValue = prop.defaultValue, type = (prop.type||'string').toLowerCase();
+        var prop = this.__getProp(name), defaultValue = prop.value, type = prop.type||String; // String, Number, Boolean, Object, Array, null
         if(prop.getValue) return prop.getValue(); // hook
         var attrValue = this.$jsDom.attr(name);
         if(attrValue===null||attrValue===''||attrValue===undefined){
@@ -56,16 +94,16 @@ class BaseComponent{
         }
         var rs = attrValue;
         
-        if(type==='boolean'){
+        if(type===Boolean){
             rs = attrValue==='true'||attrValue===true?true:false;
-        }else if(type==='number'){
+        }else if(type===Number){
             try{
                 var cur = Number(attrValue);
                 rs = typeof cur==='number'?cur:null;
             }catch(e){
                 rs = null;
             }
-        }else if(type==='object'){
+        }else if(type===Object||type===Array){
             try{
                 rs = typeof attrValue!=='object' ? JSON.parse(attrValue) : attrValue;
             }catch(e){
@@ -78,9 +116,7 @@ class BaseComponent{
 
     setData(obj){
         if(!this.$vm) return;
-        this.$vm.setViewData({
-            data: obj
-        });
+        this.$vm.setViewData(obj);
     }
 
     __initEvent(){
@@ -105,7 +141,7 @@ class BaseComponent{
 
     attrChanged(attrName, attrValue){
         if(this.__props&&this.__props.indexOf(attrName)>-1){
-            var prop = this.props[attrName];
+            var prop = this.__getProp(attrName);
             prop.handler && prop.handler(this.getAttrValue(attrName));
         }
     }

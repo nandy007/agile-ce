@@ -1,6 +1,6 @@
 
 module.exports = function(jqlite){
-    jqlite.JSON = {
+  jqlite.JSON = {
 		parse: function (str) {
 			return JSON.parse(str) || {};
 		},
@@ -18,12 +18,21 @@ module.exports = function(jqlite){
 	jqlite.vm.addParser = function (rules) {
 		var Parser = require('./Parser');
 		Parser.add(rules);
-    };
+  };
     
-    jqlite.vm.addEventFilter = function (filters) {
+  jqlite.vm.addEventFilter = function (filters) {
 		var Parser = require('./Parser');
 		Parser.addEventFilter(filters);
-    };
+	};
+	
+	jqlite.vm.setVMPre = function(setting){
+		var Parser = require('./Parser');
+		Parser.setVMPre(setting);
+	};
+	jqlite.vm.getVMPre = function(){
+		var Parser = require('./Parser');
+		return Parser.getVMPre();
+	};
     
-    jqlite.BaseComponent = require('./BaseComponent');
+  jqlite.BaseComponent = require('./BaseComponent');
 };

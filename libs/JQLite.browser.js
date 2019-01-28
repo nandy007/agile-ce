@@ -9,6 +9,7 @@
 		var args = jqlite.util.copyArray(arguments);
 		if(typeof args[1]!=='undefined'){
 			args[1] = jqliteUtil.stringify(args[1]);
+			if(this.attr(args[0])===args[1]) return this;
 		}
 		
 		var rs = origin_attr.apply(this, args);

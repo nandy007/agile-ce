@@ -146,7 +146,7 @@
 			var evts = Parser.parseDir(dir, expression);
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors);
+				var depsAlias = Parser.getDepsAlias(expression, fors, 'method');
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -1019,7 +1019,7 @@
 	};
 
 	// 获取依赖
-	Parser.getDepsAlias = function (expression, fors) {
+	Parser.getDepsAlias = function (expression, fors, type) {
 		var deps = [];
 		var exps = [];
 		// 匹配单引号/双引号包含的常量和+<>==等运算符操作
@@ -1027,8 +1027,8 @@
 		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.\[\]]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.\[\]]*)/g, function(exp){
 			
 			if (exp!==''&&!Parser.isConst(exp)) {
-				deps.push(Parser.makeDep(exp, fors));
-				return Parser.makeAliasPath(exp, fors);
+				deps.push(Parser.makeDep(exp, fors, type));
+				return Parser.makeAliasPath(exp, fors, type);
 			}
 				
 			return exp;
@@ -1040,11 +1040,13 @@
 	};
 
 	//获取指令表达式的真实路径
-	Parser.makeDep = function (exp, fors) {
+	Parser.makeDep = function (exp, fors, type) {
 		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g
 		exp = exp.replace(NOT_AVIR_RE, '');
 
 		exp = Parser.deepFindScope(exp, fors);
+
+		exp = Parser.__addPre(exp, type);
 
 		return exp;
 	};
@@ -1120,7 +1122,7 @@
 	};
 
 	//获取指令表达式的别名路径
-	Parser.makeAliasPath = function (exp, fors) {
+	Parser.makeAliasPath = function (exp, fors, type) {
 		//li.pid==item.pid
 		//$index
 		//obj.title
@@ -1140,7 +1142,7 @@
 			if (Parser.hasAlias(s2, fors)) {
 				return s1 + 'scope.$alias.' + s2;
 			} else {
-				return s1 + 'scope.' + s2;
+				return s1 + 'scope.' + Parser.__addPre(s2, type);
 			}
 		});
 		var exps = exp.split('.');
@@ -1152,6 +1154,8 @@
 
 				if (s === '$index' || Parser.hasAlias(s, fors)) {
 					s = '$alias.' + s;
+				}else{
+					s = Parser.__addPre(s, type);
 				}
 				return 'scope.' + s;
 			});
@@ -1384,6 +1388,21 @@
 		if(__eventFilter[evtName]) return __eventFilter[evtName];
 		if(__eventFilter['default']) return __eventFilter['default'];
 		return null;
+	};
+
+	var __vmPre = {
+		data: '',
+		method: ''
+	};
+	Parser.__addPre = function(exp, type){
+		var pre = (__vmPre&&__vmPre[type||'data']) || '';
+		return (pre? pre+'.' : '') + exp;
+	};
+	Parser.setVMPre = function(setting){
+		__vmPre = setting;
+	};
+	Parser.getVMPre = function(setting){
+		return __vmPre || {};
 	};
 
 

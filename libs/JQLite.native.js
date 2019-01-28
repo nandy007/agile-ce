@@ -320,7 +320,7 @@
 						this[name](val);
 					} else if(this.setAttr){
 						val = jqliteUtil.stringify(val);
-						this.setAttr(name, val);
+						if(this.getAttr(name)!==val) this.setAttr(name, val);
 					}
 				});
 				return this;

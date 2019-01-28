@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.44.1548654147830 beta
+ *	Version	:	0.4.44.1548677415444 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -244,7 +244,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var evts = Parser.parseDir(dir, expression);
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors);
+				var depsAlias = Parser.getDepsAlias(expression, fors, 'method');
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -1144,7 +1144,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	};
 
 	// 获取依赖
-	Parser.getDepsAlias = function (expression, fors) {
+	Parser.getDepsAlias = function (expression, fors, type) {
 		var deps = [];
 		var exps = [];
 		// 匹配单引号/双引号包含的常量和+<>==等运算符操作
@@ -1152,8 +1152,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		expression = expression.replace(/('[^']*')|("[^"]*")|([\w\_\-\$\@\#\.\[\]]*(?!\?|\:|\+{1,2}|\-{1,2}|\*|\/|\%|(={1,3})|\>{1,3}|\<{1,3}|\>\=|\<\=|\&{1,2}|\|{1,2}|\!+)[\w\_\-\$\@\#\.\[\]]*)/g, function (exp) {
 
 			if (exp !== '' && !Parser.isConst(exp)) {
-				deps.push(Parser.makeDep(exp, fors));
-				return Parser.makeAliasPath(exp, fors);
+				deps.push(Parser.makeDep(exp, fors, type));
+				return Parser.makeAliasPath(exp, fors, type);
 			}
 
 			return exp;
@@ -1165,11 +1165,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	};
 
 	//获取指令表达式的真实路径
-	Parser.makeDep = function (exp, fors) {
+	Parser.makeDep = function (exp, fors, type) {
 		var NOT_AVIR_RE = /[^\w\.\[\]\$]/g;
 		exp = exp.replace(NOT_AVIR_RE, '');
 
 		exp = Parser.deepFindScope(exp, fors);
+
+		exp = Parser.__addPre(exp, type);
 
 		return exp;
 	};
@@ -1245,7 +1247,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	};
 
 	//获取指令表达式的别名路径
-	Parser.makeAliasPath = function (exp, fors) {
+	Parser.makeAliasPath = function (exp, fors, type) {
 		//li.pid==item.pid
 		//$index
 		//obj.title
@@ -1265,7 +1267,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			if (Parser.hasAlias(s2, fors)) {
 				return s1 + 'scope.$alias.' + s2;
 			} else {
-				return s1 + 'scope.' + s2;
+				return s1 + 'scope.' + Parser.__addPre(s2, type);
 			}
 		});
 		var exps = exp.split('.');
@@ -1276,6 +1278,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			if (s === '$index' || Parser.hasAlias(s, fors)) {
 				s = '$alias.' + s;
+			} else {
+				s = Parser.__addPre(s, type);
 			}
 			return 'scope.' + s;
 		});
@@ -1510,6 +1514,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		return null;
 	};
 
+	var __vmPre = {
+		data: '',
+		method: ''
+	};
+	Parser.__addPre = function (exp, type) {
+		var pre = __vmPre && __vmPre[type || 'data'] || '';
+		return (pre ? pre + '.' : '') + exp;
+	};
+	Parser.setVMPre = function (setting) {
+		__vmPre = setting;
+	};
+	Parser.getVMPre = function (setting) {
+		return __vmPre || {};
+	};
+
 	module.exports = Parser;
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(Parser, 'Parser');
@@ -1557,6 +1576,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		var args = jqlite.util.copyArray(arguments);
 		if (typeof args[1] !== 'undefined') {
 			args[1] = jqliteUtil.stringify(args[1]);
+			if (this.attr(args[0]) === args[1]) return this;
 		}
 
 		var rs = origin_attr.apply(this, args);
@@ -10936,6 +10956,15 @@ module.exports = function (jqlite) {
 		Parser.addEventFilter(filters);
 	};
 
+	jqlite.vm.setVMPre = function (setting) {
+		var Parser = __webpack_require__(1);
+		Parser.setVMPre(setting);
+	};
+	jqlite.vm.getVMPre = function () {
+		var Parser = __webpack_require__(1);
+		return Parser.getVMPre();
+	};
+
 	jqlite.BaseComponent = __webpack_require__(14);
 };
 
@@ -12520,18 +12549,54 @@ var BaseComponent = function () {
             } else {
                 this.$root = this.$jsDom;
             }
+            // this.__setThisData();
+        }
+    }, {
+        key: '__setThisData',
+        value: function __setThisData() {
+            if (this.data) return;
+            var viewData = this.viewData = this.viewData || {};
+            var pre = this.$.vm.getVMPre().data;
+            if (pre) {
+                this.data = viewData[pre] = viewData[pre] || {};
+            } else {
+                this.data = viewData;
+            }
+        }
+    }, {
+        key: '__setViewData',
+        value: function __setViewData(k, v) {
+            var data = this.data;
+            data[k] = v;
         }
     }, {
         key: '__initProto',
         value: function __initProto() {
-            if (!this.props) return;
+            var _this = this;
             var __props = [];
             this.__props = __props;
-            for (var k in this.props) {
+            // 内部属性
+            for (var k in this.props || {}) {
                 __props.push(k);
                 var prop = this.props[k];
                 prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
             }
+
+            // 外部属性
+            if (this.properties) {
+                this.__setThisData();
+            }
+            for (var k in this.properties || {}) {
+                __props.push(k);
+                var prop = this.properties[k];
+                (function (k) {
+                    _this.__setViewData(k, _this.getAttrValue(k));
+                    prop.handler = function (val) {
+                        _this.__setViewData(k, val);
+                    };
+                })(k);
+            }
+            // 内部事件
             for (var k in this.events) {
                 var event = this.events[k];
                 event.handler && event.handler();
@@ -12540,21 +12605,26 @@ var BaseComponent = function () {
     }, {
         key: '__mvvmRender',
         value: function __mvvmRender() {
-            var _this = this;
+            var _this2 = this;
 
             if (!this.viewData) return;
 
             this.$root.attr('vmignoreroot', 'true').on('__destroy__', function () {
-                _this.$vm.destroy();
+                _this2.$vm.destroy();
             });
             this.$vm = this.$root.render(this.viewData);
         }
     }, {
+        key: '__getProp',
+        value: function __getProp(name) {
+            return this.props && this.props[name] || this.properties && this.properties[name];
+        }
+    }, {
         key: 'getAttrValue',
         value: function getAttrValue(name) {
-            var prop = this.props[name],
-                defaultValue = prop.defaultValue,
-                type = (prop.type || 'string').toLowerCase();
+            var prop = this.__getProp(name),
+                defaultValue = prop.value,
+                type = prop.type || String; // String, Number, Boolean, Object, Array, null
             if (prop.getValue) return prop.getValue(); // hook
             var attrValue = this.$jsDom.attr(name);
             if (attrValue === null || attrValue === '' || attrValue === undefined) {
@@ -12562,16 +12632,16 @@ var BaseComponent = function () {
             }
             var rs = attrValue;
 
-            if (type === 'boolean') {
+            if (type === Boolean) {
                 rs = attrValue === 'true' || attrValue === true ? true : false;
-            } else if (type === 'number') {
+            } else if (type === Number) {
                 try {
                     var cur = Number(attrValue);
                     rs = typeof cur === 'number' ? cur : null;
                 } catch (e) {
                     rs = null;
                 }
-            } else if (type === 'object') {
+            } else if (type === Object || type === Array) {
                 try {
                     rs = (typeof attrValue === 'undefined' ? 'undefined' : _typeof(attrValue)) !== 'object' ? JSON.parse(attrValue) : attrValue;
                 } catch (e) {
@@ -12585,9 +12655,7 @@ var BaseComponent = function () {
         key: 'setData',
         value: function setData(obj) {
             if (!this.$vm) return;
-            this.$vm.setViewData({
-                data: obj
-            });
+            this.$vm.setViewData(obj);
         }
     }, {
         key: '__initEvent',
@@ -12597,7 +12665,7 @@ var BaseComponent = function () {
     }, {
         key: '__attrChangeHandler',
         value: function __attrChangeHandler() {
-            var _this2 = this;
+            var _this3 = this;
 
             if (!this.attrChanged) return;
             this.$jsDom.on('attrChanged', function (e) {
@@ -12605,7 +12673,7 @@ var BaseComponent = function () {
                     args[_key - 1] = arguments[_key];
                 }
 
-                _this2.attrChanged.apply(_this2, args);
+                _this3.attrChanged.apply(_this3, args);
             });
         }
     }, {
@@ -12622,7 +12690,7 @@ var BaseComponent = function () {
         key: 'attrChanged',
         value: function attrChanged(attrName, attrValue) {
             if (this.__props && this.__props.indexOf(attrName) > -1) {
-                var prop = this.props[attrName];
+                var prop = this.__getProp(attrName);
                 prop.handler && prop.handler(this.getAttrValue(attrName));
             }
         }
@@ -12649,10 +12717,10 @@ BaseComponent.wrapperClass = function (MyClass) {
         function Wrapper(el) {
             _classCallCheck(this, Wrapper);
 
-            var _this3 = _possibleConstructorReturn(this, (Wrapper.__proto__ || Object.getPrototypeOf(Wrapper)).call(this, el));
+            var _this4 = _possibleConstructorReturn(this, (Wrapper.__proto__ || Object.getPrototypeOf(Wrapper)).call(this, el));
 
-            _this3.jsDom = el;
-            return _this3;
+            _this4.jsDom = el;
+            return _this4;
         }
 
         return Wrapper;

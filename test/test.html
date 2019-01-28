@@ -22,44 +22,60 @@
             </div>
             
         </div> -->
-        <div v-for="item in title">
-            <span>{{item}}</span>
+        <div>
+            <span v-on:click="click">{{'title:'+a}}</span>
+            <div v-for="item in title">
+                <span>{{item}}</span>
+            </div>
         </div>
     </div>
     <script>
 		
         var obj = {
-            html: '<font color="red">aaa</font>',
-            doFilter: function(index, item, arr, $node){
-                // console.log(index);
-                // $.util.defRec(item, 'title', obj.title[index]);
-                // console.log(111);
+            // html: '<font color="red">aaa</font>',
+            // doFilter: function(index, item, arr, $node){
+            //     // console.log(index);
+            //     // $.util.defRec(item, 'title', obj.title[index]);
+            //     // console.log(111);
                 
-                if(typeof arr[index]==='object'){
-                    item.title = obj.title[index];
-                }else{
-                    arr[index] = {
-                        c: item,
-                        title: obj.title[index]
-                    };
-                    this.reObserve();
-                }
+            //     if(typeof arr[index]==='object'){
+            //         item.title = obj.title[index];
+            //     }else{
+            //         arr[index] = {
+            //             c: item,
+            //             title: obj.title[index]
+            //         };
+            //         this.reObserve();
+            //     }
+            // },
+            // test: 1,
+			// list: [
+            //     [
+            //         'a', 'b', 'c'
+            //     ]
+            // ],
+    
+            click: function(){
+                alert(1)
+
             },
-            test: 1,
-			list: [
-                [
-                    'a', 'b', 'c'
-                ]
-            ],
-            title: ['title0', 'title1', 'title2']
-		};
+            data: {
+                a: 1,
+                title: ['title0', 'title1', 'title2']
+            }
+        };
+        
+        $.vm.setVMPre({
+            data: 'data'
+        });
+
 
         $('#app').render(obj);
 
-        obj.list[0].shift();
+        // obj.list[0].shift();
         // obj.list[0].splice(1, 1, '222')
-        obj.title.unshift('ttt')
-        obj.title.splice(1,1)
+        // obj.title.unshift('ttt')
+        // obj.title.splice(1,1)
         
 
     </script>
