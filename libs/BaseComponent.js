@@ -118,6 +118,8 @@ class BaseComponent{
 
     setData(obj){
         if(!this.$vm) return;
+        var pre = this.$.vm.getVMPre().data;
+        obj = pre ? {data: obj} : obj;
         this.$vm.setViewData(obj);
     }
 
