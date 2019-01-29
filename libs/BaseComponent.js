@@ -87,6 +87,7 @@ class BaseComponent{
         return (this.props && this.props[name]) || (this.properties && this.properties[name]);
     }
 
+    // 获取属性值，基础组件内可调用
     getAttrValue(name){
         var prop = this.__getProp(name), defaultValue = prop.value, type = prop.type||String; // String, Number, Boolean, Object, Array, null
         if(prop.getValue) return prop.getValue(); // hook
@@ -115,7 +116,7 @@ class BaseComponent{
         
         return rs;
     }
-
+    // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
     setData(obj){
         if(!this.$vm) return;
         var pre = this.$.vm.getVMPre().data;
@@ -133,7 +134,7 @@ class BaseComponent{
             this.attrChanged(...args);
         });
     }
-
+    // 组件创建回调函数，基础组件和扩展组件都可调用，对应小程序的loaded
     created(){
         this.__initInnerDom();
         this.initViewData && this.initViewData();
@@ -142,18 +143,18 @@ class BaseComponent{
         this.__initProto();
         this.__mvvmRender();
     }
-
+    // 属性变化回调，基础组件内可调用
     attrChanged(attrName, attrValue){
         if(this.__props&&this.__props.indexOf(attrName)>-1){
             var prop = this.__getProp(attrName);
             prop.handler && prop.handler(this.getAttrValue(attrName));
         }
     }
-
+    // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
     triggerEvent(evtName, param){
         this.$jsDom.trigger(evtName, [param]);
     }
-
+    // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
     selectComponent(selector){
         var selectCom = this.$root.find(selector)[0];
         return selectCom && selectCom.component;
