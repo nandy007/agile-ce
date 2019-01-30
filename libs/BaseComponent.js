@@ -108,7 +108,8 @@ class BaseComponent{
             }
         }else if(type===Object||type===Array){
             try{
-                rs = typeof attrValue!=='object' ? JSON.parse(attrValue) : attrValue;
+                // rs = typeof attrValue!=='object' ? JSON.parse(attrValue) : attrValue;
+                rs = typeof attrValue!=='object' ? (new Function(`try{ return ${attrValue};}catch(e){return null;}`))() : attrValue;
             }catch(e){
                 rs = null;
             }

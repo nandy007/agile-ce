@@ -7,12 +7,17 @@
 	var origin_attr = jqlite.prototype.attr;
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
-		if(typeof args[1]!=='undefined'){
-			args[1] = jqliteUtil.stringify(args[1]);
-			if(this.attr(args[0])===args[1]) return this;
+		var rs;
+		if(args[0]==='disabled'){
+			rs = jqliteUtil.disabledAttrForJquery.apply(this, args)
+		}else{
+			if(typeof args[1]!=='undefined'){
+				args[1] = jqliteUtil.stringify(args[1]);
+				if(this.attr(args[0])===args[1]) return this;
+			}
+			rs = origin_attr.apply(this, args);
 		}
 		
-		var rs = origin_attr.apply(this, args);
 		if(args.length===2){
 			this.trigger('attrChanged', args[0], this.attr(args[0]));
 		}
@@ -343,6 +348,8 @@
 			return $fragment;
 		}
 	};
+
+	jqlite.document = document;
 
 	require('./JQLiteExt')(jqlite);
 

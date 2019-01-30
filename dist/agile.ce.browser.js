@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.46.1548728505141 beta
+ *	Version	:	0.4.47.1548842197561 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1574,12 +1574,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	var origin_attr = jqlite.prototype.attr;
 	jqlite.prototype.attr = function () {
 		var args = jqlite.util.copyArray(arguments);
-		if (typeof args[1] !== 'undefined') {
-			args[1] = jqliteUtil.stringify(args[1]);
-			if (this.attr(args[0]) === args[1]) return this;
+		var rs;
+		if (args[0] === 'disabled') {
+			rs = jqliteUtil.disabledAttrForJquery.apply(this, args);
+		} else {
+			if (typeof args[1] !== 'undefined') {
+				args[1] = jqliteUtil.stringify(args[1]);
+				if (this.attr(args[0]) === args[1]) return this;
+			}
+			rs = origin_attr.apply(this, args);
 		}
 
-		var rs = origin_attr.apply(this, args);
 		if (args.length === 2) {
 			this.trigger('attrChanged', args[0], this.attr(args[0]));
 		}
@@ -1918,6 +1923,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			return $fragment;
 		}
 	};
+
+	jqlite.document = document;
 
 	__webpack_require__(8)(jqlite);
 
@@ -10921,6 +10928,18 @@ var util = module.exports = {
             console.error('json字符串转换对象失败：' + String(val));
         }
         return val;
+    },
+    disabledAttrForJquery: function disabledAttrForJquery(name, val) {
+        if (arguments.length === 1) {
+            var el = this.length > 0 && this[0];
+            return el && el.getAttribute('disabled');
+        } else if (arguments.length === 2) {
+            val = val === 'false' || val === false ? false : true;
+            this.each(function () {
+                val ? this.setAttribute('disabled', val) : this.removeAttribute('disabled');
+            });
+        }
+        return this;
     }
 };
 
@@ -12621,6 +12640,9 @@ var BaseComponent = function () {
         value: function __getProp(name) {
             return this.props && this.props[name] || this.properties && this.properties[name];
         }
+
+        // 获取属性值，基础组件内可调用
+
     }, {
         key: 'getAttrValue',
         value: function getAttrValue(name) {
@@ -12645,7 +12667,8 @@ var BaseComponent = function () {
                 }
             } else if (type === Object || type === Array) {
                 try {
-                    rs = (typeof attrValue === 'undefined' ? 'undefined' : _typeof(attrValue)) !== 'object' ? JSON.parse(attrValue) : attrValue;
+                    // rs = typeof attrValue!=='object' ? JSON.parse(attrValue) : attrValue;
+                    rs = (typeof attrValue === 'undefined' ? 'undefined' : _typeof(attrValue)) !== 'object' ? new Function('try{ return ' + attrValue + ';}catch(e){return null;}')() : attrValue;
                 } catch (e) {
                     rs = null;
                 }
@@ -12653,6 +12676,8 @@ var BaseComponent = function () {
 
             return rs;
         }
+        // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
+
     }, {
         key: 'setData',
         value: function setData(obj) {
@@ -12680,6 +12705,8 @@ var BaseComponent = function () {
                 _this3.attrChanged.apply(_this3, args);
             });
         }
+        // 组件创建回调函数，基础组件和扩展组件都可调用，对应小程序的loaded
+
     }, {
         key: 'created',
         value: function created() {
@@ -12690,6 +12717,8 @@ var BaseComponent = function () {
             this.__initProto();
             this.__mvvmRender();
         }
+        // 属性变化回调，基础组件内可调用
+
     }, {
         key: 'attrChanged',
         value: function attrChanged(attrName, attrValue) {
@@ -12698,11 +12727,15 @@ var BaseComponent = function () {
                 prop.handler && prop.handler(this.getAttrValue(attrName));
             }
         }
+        // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
+
     }, {
         key: 'triggerEvent',
         value: function triggerEvent(evtName, param) {
             this.$jsDom.trigger(evtName, [param]);
         }
+        // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
+
     }, {
         key: 'selectComponent',
         value: function selectComponent(selector) {

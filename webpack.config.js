@@ -94,7 +94,8 @@ module.exports = {
       "ListAdapter": "commonjs ListAdapter",
       "Http": "commonjs Http",
       "File": "commonjs File",
-      "UI": "commonjs UI"
+      "UI": "commonjs UI",
+      "Time": "commonjs Time"
     },
     //其它解决方案配置
     resolve: {

@@ -1,7 +1,7 @@
 
 (function () {
 	var jqliteUtil = require('./JQLiteUtil');
-	var ui = require('UI'), document = require('Document'), window = require("Window"), Adapter = require("ListAdapter");
+	var ui = require('UI'), document = require('Document'), window = require("Window"), Adapter = require("ListAdapter"), time = require('Time');
 	var _util = {
 		setClass: function (el, className) {
 			var context, contextFunc = el['__context'];
@@ -10,23 +10,62 @@
 			this.refresh(el);
 		},
 		setStyle: function(el, styleName, styleValue){
-			el.setStyle(styleName, styleValue);
+			if(styleValue){
+				el.setStyle(styleName, styleValue);
+			}else{
+				el.clearStyle(styleName);
+			}
 			this.refresh(el);
 		},
-		refresh: function(el){
+		refreshQueue: [],
+		timer: null,
+		callRefreshQueue: function(cb){
+			var timeout = document.refreshTimeout || 50;
+			if (document.refreshTimeout===0) {
+				document.refresh();
+				cb && cb();
+				return;
+			} 
+			this.refreshQueue.push(cb);
+			if(_util.timer!==null) {
+				time.clearTimeout(_util.timer);
+				_util.timer = null;
+			}
+			_util.timer = time.setTimeout(function(){
+				_util.doRefreshQueue();
+			}, timeout);
+		},
+		doRefreshQueue: function(){
+			document.refresh();
+			var queue = _util.refreshQueue.splice(0), target;
+			while(target=queue.shift()){
+				if(typeof target==='function') target();
+			}
+		},
+		refresh: function(el, cb){
 			// var parent = el.getParent();
 			// if(parent && parent.refresh){
 			// 	parent.refresh();
 			// }else if(el.refresh){
 			// 	el.refresh();
 			// }
-			document.refresh();
+			if(!document.refreshDelay) this.callRefreshQueue(cb);
 		},
 		triggerDomChange: function(el){
 			if(!el) return;
 			// el.refresh && el.refresh();
 			this.refresh(el);
 			el.fire('__domchange__');
+		},
+		transRerfresh: function(cb, ctx){
+			if(document.refreshDelay){
+				cb.call(ctx);
+				return;
+			}
+			document.refreshDelay = true;
+			cb.call(ctx);
+			delete document.refreshDelay;
+			this.refresh();
 		}
 	};
 	var LISTCBS = {
@@ -230,14 +269,16 @@
 			if (arguments.length === 0) {
 				return el && el.getInnerHTML();
 			} else {
-				this.each(function () {
-					if(this.setHtml){
-						this.setHtml(content);
-					}else{
-						this.clear();
-						this.appendChild(jqlite.parseHTML(String(content)));
-					}
-				});
+				_util.transRerfresh(function(){
+					this.each(function () {
+						if(this.setHtml){
+							this.setHtml(content);
+						}else{
+							this.clear();
+							this.appendChild(jqlite.parseHTML(String(content)));
+						}
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -246,9 +287,11 @@
 			if (arguments.length === 0) {
 				return el && el.getText();
 			} else {
-				this.each(function () {
-					this.setText(content);
-				});
+				_util.transRerfresh(function(){
+					this.each(function () {
+						this.setText(content);
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -276,16 +319,20 @@
 			if (arguments.length === 1 && typeof args$1 === 'string') {
 				return el && el.getStyle(args$1);
 			} else if (arguments.length === 2) {
-				this.each(function () {
-					_util.setStyle(this, args$1, args$2);
-				});
+				_util.transRerfresh(function(){
+					this.each(function () {
+						_util.setStyle(this, args$1, args$2);
+					});
+				}, this);
 				return this;
 			} else if (jqlite.isPlainObject(args$1)) {
-				this.each(function () {
-					jqlite.each(args$1, function (k, v) {
-						_util.setStyle(this, k, v);
-					}, this);
-				});
+				_util.transRerfresh(function(){
+					this.each(function () {
+						jqlite.each(args$1, function (k, v) {
+							_util.setStyle(this, k, v);
+						}, this);
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -1696,6 +1743,8 @@
 			}, content);
 		}
 	};
+
+	jqlite.document = document;
 
 
 	require('./JQLiteExt')(jqlite);

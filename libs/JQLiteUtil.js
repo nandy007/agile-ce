@@ -22,5 +22,17 @@ var util = module.exports = {
             console.error('json字符串转换对象失败：'+String(val));
         }
         return val;
+    },
+    disabledAttrForJquery: function(name, val){
+        if(arguments.length===1){
+            var el = this.length>0 && this[0];
+            return el && el.getAttribute('disabled');
+        }else if(arguments.length===2){
+            val = (val==='false'||val===false) ? false : true;
+            this.each(function(){
+                val ? this.setAttribute('disabled', val) : this.removeAttribute('disabled');
+            });
+        }
+        return this;
     }
 };

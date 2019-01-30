@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.46.1548728520764 beta
+ *	Version	:	0.4.47.1548842215617 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -125,8 +125,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 (function () {
 	var $ = __webpack_require__(0).JQLite;
-	var Updater = __webpack_require__(16);
-	var Watcher = __webpack_require__(17);
+	var Updater = __webpack_require__(17);
+	var Watcher = __webpack_require__(18);
 
 	//指令解析规则，可以通过Parser.add方法添加自定义指令处理规则
 	//所有解析规则默认接受四个参数
@@ -1605,7 +1605,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	var ui = __webpack_require__(7),
 	    document = __webpack_require__(2),
 	    window = __webpack_require__(8),
-	    Adapter = __webpack_require__(9);
+	    Adapter = __webpack_require__(9),
+	    time = __webpack_require__(10);
 	var _util = {
 		setClass: function setClass(el, className) {
 			var context,
@@ -1615,23 +1616,63 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			this.refresh(el);
 		},
 		setStyle: function setStyle(el, styleName, styleValue) {
-			el.setStyle(styleName, styleValue);
+			if (styleValue) {
+				el.setStyle(styleName, styleValue);
+			} else {
+				el.clearStyle(styleName);
+			}
 			this.refresh(el);
 		},
-		refresh: function refresh(el) {
+		refreshQueue: [],
+		timer: null,
+		callRefreshQueue: function callRefreshQueue(cb) {
+			var timeout = document.refreshTimeout || 50;
+			if (document.refreshTimeout === 0) {
+				document.refresh();
+				cb && cb();
+				return;
+			}
+			this.refreshQueue.push(cb);
+			if (_util.timer !== null) {
+				time.clearTimeout(_util.timer);
+				_util.timer = null;
+			}
+			_util.timer = time.setTimeout(function () {
+				_util.doRefreshQueue();
+			}, timeout);
+		},
+		doRefreshQueue: function doRefreshQueue() {
+			document.refresh();
+			var queue = _util.refreshQueue.splice(0),
+			    target;
+			while (target = queue.shift()) {
+				if (typeof target === 'function') target();
+			}
+		},
+		refresh: function refresh(el, cb) {
 			// var parent = el.getParent();
 			// if(parent && parent.refresh){
 			// 	parent.refresh();
 			// }else if(el.refresh){
 			// 	el.refresh();
 			// }
-			document.refresh();
+			if (!document.refreshDelay) this.callRefreshQueue(cb);
 		},
 		triggerDomChange: function triggerDomChange(el) {
 			if (!el) return;
 			// el.refresh && el.refresh();
 			this.refresh(el);
 			el.fire('__domchange__');
+		},
+		transRerfresh: function transRerfresh(cb, ctx) {
+			if (document.refreshDelay) {
+				cb.call(ctx);
+				return;
+			}
+			document.refreshDelay = true;
+			cb.call(ctx);
+			delete document.refreshDelay;
+			this.refresh();
 		}
 	};
 	var LISTCBS = {
@@ -1833,14 +1874,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			if (arguments.length === 0) {
 				return el && el.getInnerHTML();
 			} else {
-				this.each(function () {
-					if (this.setHtml) {
-						this.setHtml(content);
-					} else {
-						this.clear();
-						this.appendChild(jqlite.parseHTML(String(content)));
-					}
-				});
+				_util.transRerfresh(function () {
+					this.each(function () {
+						if (this.setHtml) {
+							this.setHtml(content);
+						} else {
+							this.clear();
+							this.appendChild(jqlite.parseHTML(String(content)));
+						}
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -1850,9 +1893,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			if (arguments.length === 0) {
 				return el && el.getText();
 			} else {
-				this.each(function () {
-					this.setText(content);
-				});
+				_util.transRerfresh(function () {
+					this.each(function () {
+						this.setText(content);
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -1882,16 +1927,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			if (arguments.length === 1 && typeof args$1 === 'string') {
 				return el && el.getStyle(args$1);
 			} else if (arguments.length === 2) {
-				this.each(function () {
-					_util.setStyle(this, args$1, args$2);
-				});
+				_util.transRerfresh(function () {
+					this.each(function () {
+						_util.setStyle(this, args$1, args$2);
+					});
+				}, this);
 				return this;
 			} else if (jqlite.isPlainObject(args$1)) {
-				this.each(function () {
-					jqlite.each(args$1, function (k, v) {
-						_util.setStyle(this, k, v);
-					}, this);
-				});
+				_util.transRerfresh(function () {
+					this.each(function () {
+						jqlite.each(args$1, function (k, v) {
+							_util.setStyle(this, k, v);
+						}, this);
+					});
+				}, this);
 				return this;
 			}
 		},
@@ -2413,7 +2462,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 	var toString = Object.prototype.toString,
 	    _hasOwn = Object.prototype.hasOwnProperty,
-	    cons = __webpack_require__(10),
+	    cons = __webpack_require__(11),
 	    consoleLevel = ['error', 'warn', 'log'],
 	    _cons = function _cons(type, args) {
 		if (consoleLevel.indexOf(jqlite.util.consoleLevel) < consoleLevel.indexOf(type)) return;
@@ -3254,7 +3303,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		};
 	};
 
-	var http = __webpack_require__(11);
+	var http = __webpack_require__(12);
 
 	var go = function go(options, ajax) {
 		var opts = {
@@ -3300,7 +3349,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	};
 
 	jqlite.file = {
-		f: __webpack_require__(12),
+		f: __webpack_require__(13),
 		read: function read(path) {
 			return this.f.readTextFile(path);
 		},
@@ -3311,13 +3360,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 	};
 
-	__webpack_require__(13)(jqlite);
+	jqlite.document = document;
+
+	__webpack_require__(14)(jqlite);
 
 	module.exports = jqlite;
 
 	if (typeof __EXPORTS_DEFINED__ === 'function') __EXPORTS_DEFINED__(jqlite, 'JQLite');
 
-	var _template = __webpack_require__(20);
+	var _template = __webpack_require__(21);
 	_template.hooks('get', function (str) {
 		return jqlite.file.read(str);
 	});
@@ -3358,6 +3409,18 @@ var util = module.exports = {
             console.error('json字符串转换对象失败：' + String(val));
         }
         return val;
+    },
+    disabledAttrForJquery: function disabledAttrForJquery(name, val) {
+        if (arguments.length === 1) {
+            var el = this.length > 0 && this[0];
+            return el && el.getAttribute('disabled');
+        } else if (arguments.length === 2) {
+            val = val === 'false' || val === false ? false : true;
+            this.each(function () {
+                val ? this.setAttribute('disabled', val) : this.removeAttribute('disabled');
+            });
+        }
+        return this;
     }
 };
 
@@ -3383,22 +3446,28 @@ module.exports = require("ListAdapter");
 /* 10 */
 /***/ (function(module, exports) {
 
-module.exports = require("Console");
+module.exports = require("Time");
 
 /***/ }),
 /* 11 */
 /***/ (function(module, exports) {
 
-module.exports = require("Http");
+module.exports = require("Console");
 
 /***/ }),
 /* 12 */
 /***/ (function(module, exports) {
 
-module.exports = require("File");
+module.exports = require("Http");
 
 /***/ }),
 /* 13 */
+/***/ (function(module, exports) {
+
+module.exports = require("File");
+
+/***/ }),
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3415,7 +3484,7 @@ module.exports = function (jqlite) {
 	};
 
 	jqlite.vm = function (el, data) {
-		var MVVM = __webpack_require__(14);
+		var MVVM = __webpack_require__(15);
 		return new MVVM(el, data);
 	};
 
@@ -3438,11 +3507,11 @@ module.exports = function (jqlite) {
 		return Parser.getVMPre();
 	};
 
-	jqlite.BaseComponent = __webpack_require__(19);
+	jqlite.BaseComponent = __webpack_require__(20);
 };
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3452,7 +3521,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 (function () {
 	var $ = __webpack_require__(0).JQLite;
-	var Compiler = __webpack_require__(15);
+	var Compiler = __webpack_require__(16);
 
 	/**
   * MVVM 构造函数入口
@@ -3537,7 +3606,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3840,7 +3909,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4313,7 +4382,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4322,7 +4391,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 (function () {
 
 	var $ = __webpack_require__(0).JQLite;
-	var Observer = __webpack_require__(18);
+	var Observer = __webpack_require__(19);
 
 	var watcherUtil = {
 		iterator: function iterator(deps, subs) {
@@ -4630,7 +4699,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4983,7 +5052,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 })();
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5094,6 +5163,9 @@ var BaseComponent = function () {
         value: function __getProp(name) {
             return this.props && this.props[name] || this.properties && this.properties[name];
         }
+
+        // 获取属性值，基础组件内可调用
+
     }, {
         key: 'getAttrValue',
         value: function getAttrValue(name) {
@@ -5118,7 +5190,8 @@ var BaseComponent = function () {
                 }
             } else if (type === Object || type === Array) {
                 try {
-                    rs = (typeof attrValue === 'undefined' ? 'undefined' : _typeof(attrValue)) !== 'object' ? JSON.parse(attrValue) : attrValue;
+                    // rs = typeof attrValue!=='object' ? JSON.parse(attrValue) : attrValue;
+                    rs = (typeof attrValue === 'undefined' ? 'undefined' : _typeof(attrValue)) !== 'object' ? new Function('try{ return ' + attrValue + ';}catch(e){return null;}')() : attrValue;
                 } catch (e) {
                     rs = null;
                 }
@@ -5126,6 +5199,8 @@ var BaseComponent = function () {
 
             return rs;
         }
+        // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
+
     }, {
         key: 'setData',
         value: function setData(obj) {
@@ -5153,6 +5228,8 @@ var BaseComponent = function () {
                 _this3.attrChanged.apply(_this3, args);
             });
         }
+        // 组件创建回调函数，基础组件和扩展组件都可调用，对应小程序的loaded
+
     }, {
         key: 'created',
         value: function created() {
@@ -5163,6 +5240,8 @@ var BaseComponent = function () {
             this.__initProto();
             this.__mvvmRender();
         }
+        // 属性变化回调，基础组件内可调用
+
     }, {
         key: 'attrChanged',
         value: function attrChanged(attrName, attrValue) {
@@ -5171,11 +5250,15 @@ var BaseComponent = function () {
                 prop.handler && prop.handler(this.getAttrValue(attrName));
             }
         }
+        // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
+
     }, {
         key: 'triggerEvent',
         value: function triggerEvent(evtName, param) {
             this.$jsDom.trigger(evtName, [param]);
         }
+        // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
+
     }, {
         key: 'selectComponent',
         value: function selectComponent(selector) {
@@ -5229,7 +5312,7 @@ BaseComponent.wrapperClass = function (MyClass) {
 module.exports = BaseComponent;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
