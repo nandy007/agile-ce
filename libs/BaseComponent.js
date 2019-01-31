@@ -69,7 +69,7 @@ class BaseComponent{
         // 内部事件
         for(var k in this.events){
             var event = this.events[k];
-            event.handler && event.handler();
+            event.init ? event.init() : (event.handler && event.handler());
         }
     }
 
@@ -153,7 +153,7 @@ class BaseComponent{
     }
     // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
     triggerEvent(evtName, param){
-        this.$jsDom.trigger(evtName, [param]);
+        this.$jsDom.triggerHandler(evtName, [param]);
     }
     // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
     selectComponent(selector){
@@ -191,6 +191,7 @@ BaseComponent.wrapperClass = function(MyClass){
             cp[k] = bp[k];
         }
     }
+
     return Wrapper;
 };
 

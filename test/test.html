@@ -63,7 +63,7 @@
             data: {
                 a: 1,
                 title: ['title0', 'title1', 'title2'],
-                disabled: true
+                disabled: false
             }
         };
         
@@ -74,13 +74,12 @@
         
 
         $('#app').render(obj);
-        obj.data.disabled = false;
+        obj.data.disabled = true;
 
         // obj.list[0].shift();
         // obj.list[0].splice(1, 1, '222')
         // obj.title.unshift('ttt')
         // obj.title.splice(1,1)
-        
 
     </script>
 </body>

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.47.1548842197561 beta
+ *	Version	:	0.4.48.1548926815790 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1586,7 +1586,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 
 		if (args.length === 2) {
-			this.trigger('attrChanged', args[0], this.attr(args[0]));
+			this.triggerHandler('attrChanged', args[0], this.attr(args[0]));
 		}
 		return rs;
 	};
@@ -12620,7 +12620,7 @@ var BaseComponent = function () {
             // 内部事件
             for (var k in this.events) {
                 var event = this.events[k];
-                event.handler && event.handler();
+                event.init ? event.init() : event.handler && event.handler();
             }
         }
     }, {
@@ -12732,7 +12732,7 @@ var BaseComponent = function () {
     }, {
         key: 'triggerEvent',
         value: function triggerEvent(evtName, param) {
-            this.$jsDom.trigger(evtName, [param]);
+            this.$jsDom.triggerHandler(evtName, [param]);
         }
         // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
 
@@ -12783,6 +12783,7 @@ BaseComponent.wrapperClass = function (MyClass) {
             cp[k] = bp[k];
         }
     }
+
     return Wrapper;
 };
 

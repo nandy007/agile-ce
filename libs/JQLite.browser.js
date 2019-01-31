@@ -19,7 +19,7 @@
 		}
 		
 		if(args.length===2){
-			this.trigger('attrChanged', args[0], this.attr(args[0]));
+			this.triggerHandler('attrChanged', args[0], this.attr(args[0]));
 		}
 		return rs;
 	};
