@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.48.1548926831784 beta
+ *	Version	:	0.4.49.1548940561398 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5121,12 +5121,6 @@ var BaseComponent = function () {
             var _this = this;
             var __props = [];
             this.__props = __props;
-            // 内部属性
-            for (var k in this.props || {}) {
-                __props.push(k);
-                var prop = this.props[k];
-                prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
-            }
 
             // 外部属性
             this.__setThisData(this.properties);
@@ -5140,6 +5134,14 @@ var BaseComponent = function () {
                     };
                 })(k);
             }
+
+            // 内部属性
+            for (var k in this.props || {}) {
+                __props.push(k);
+                var prop = this.props[k];
+                prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
+            }
+
             // 内部事件
             for (var k in this.events) {
                 var event = this.events[k];
@@ -5204,10 +5206,18 @@ var BaseComponent = function () {
     }, {
         key: 'setData',
         value: function setData(obj) {
-            if (!this.$vm) return;
             var pre = this.$.vm.getVMPre().data;
-            obj = pre ? { data: obj } : obj;
-            this.$vm.setViewData(obj);
+            var nObj = {};
+            if (pre) {
+                nObj[pre] = obj;
+            } else {
+                nObj = obj;
+            }
+            if (!this.$vm) {
+                this.$.extend(true, this.viewData, nObj);
+            } else {
+                this.$vm.setViewData(nObj);
+            }
         }
     }, {
         key: '__initEvent',
