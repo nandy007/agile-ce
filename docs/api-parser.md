@@ -69,11 +69,20 @@
 
 <span id="cid_0_2">**v-for="item in variable"**</span>
 
+其形式可以有两种：
+
+<code>v-for="item in variable"</code> 和 <code>v-for="item,index in variable"</code>
+
+
 用于循环显示一组数据。其中：
 
 <code>variable</code>必须是一个数组；
 
 <code>item</code>是循环体中数组元素的别名变量，在循环体内使用数组元素都可以通过item来调用。所有的vfor的别名变量不可相同。
+
+<code>index</code>是循环体中索引值别名变量，如果没有则默认为$index。所有的vfor的索引别名变量不可相同，一旦相同，后面的覆盖前面，即内层的索引生效。
+
+还可以对循环体元素设置for-index指定别名，规则跟index相同。
 
 v-for指令所在的元素（包含）会不断被复制并顺序绑定变量对应的数组元素。
 

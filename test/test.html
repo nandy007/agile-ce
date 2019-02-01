@@ -15,20 +15,21 @@
 
 <body>
     <div id="app">
-        <input type="text" v-bind:disabled="disabled">
-        <!-- <div v-html="html" v-bind:test="html"></div>
-        <div v-for="itemA in list">
-            <div v-for="itemB in itemA" v-filter="doFilter" v-watch="$index">
-                <span>{{itemB.title}}</span>
+        <!-- <input type="text" v-bind:disabled="disabled"> -->
+        <!-- <div v-html="html" v-bind:test="html"></div> -->
+        <div v-for="(itemA) in list" for-index="aindex">
+            <div v-for="itemB,bindex in itemA"  v-on:click="ttt" v-bind:data-aa="bindex">
+                <span>{{aindex}}-{{bindex}}</span>
             </div>
             
-        </div> -->
-        <div>
+        </div>
+        <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div>
+        <!-- <div>
             <span v-on:click="click">{{'title:'+a}}</span>
             <div v-for="item in title">
-                <span>{{item}}</span>
+                <span>{{item}}{{$index}}</span>
             </div>
-        </div>
+        </div> -->
     </div>
     <script>
 		
@@ -55,6 +56,10 @@
             //         'a', 'b', 'c'
             //     ]
             // ],
+
+            ttt: function(e){
+                console.log(e.currentTarget.dataset)
+            },
     
             click: function(){
                 alert(1)
@@ -63,7 +68,12 @@
             data: {
                 a: 1,
                 title: ['title0', 'title1', 'title2'],
-                disabled: false
+                disabled: false,
+                list: [
+                    [
+                        'a', 'b', 'c'
+                    ]
+                ],
             }
         };
         
@@ -74,12 +84,16 @@
         
 
         $('#app').render(obj);
-        obj.data.disabled = true;
+        // obj.data.disabled = true;
 
-        // obj.list[0].shift();
+        // obj.data.title.push('333')
+
+        obj.data.list[0].shift();
         // obj.list[0].splice(1, 1, '222')
         // obj.title.unshift('ttt')
         // obj.title.splice(1,1)
+
+        console.log($('#aaa').data('test'), obj.data.list)
 
     </script>
 </body>

@@ -337,7 +337,12 @@
 			}
 		},
 		attr: function () {
-			var name = arguments[0], val = arguments[1], el = this.domList[0];
+			var name = arguments[0]||'', val = arguments[1], el = this.domList[0];
+			if(name.indexOf('data-')===0){
+				var args = jqlite.util.copyArray(arguments);
+				args[0] = name.replace('data-', '');
+				return this.data.apply(this, args);
+			}
 			if (arguments.length === 0) {
 				return el && (function () {
 					var arr = [];
@@ -470,15 +475,21 @@
 			return this;
 		},
 		data: function (name, val, type) {
-			name = 'data-' + name;
+			// name = 'data-' + name;
 			if (arguments.length > 1) {
+				val = jqlite.isPlainObject(val) ? JSON.stringify(val) : String(val);
 				this.each(function () {
-					if (type === true && !jqlite.isEmptyObject(this[name])) return;
-					jqlite.util.defRec(this, name, jqlite.isPlainObject(val) ? JSON.stringify(val) : String(val));
+					var _dataset = this.dataset;
+					if (type === true && !jqlite.isEmptyObject(_dataset && _dataset[name])) return;
+					if (!_dataset) {
+						_dataset = this.dataset = {};
+					}
+					_dataset[name] = val;
 				});
 				return this;
 			} else {
-				var rs = (this.domList.length > 0 && this.domList[0][name]) || '';
+				var el = this.domList.length > 0 && this.domList[0];
+				var _dataset = el && el.dataset, rs = (_dataset && _dataset[name])||'';
 				try {
 					return JSON.parse(rs);
 				} catch (e) {

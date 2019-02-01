@@ -52,20 +52,19 @@
 
 			var __filter = $node.data('__filter');
 
-			expression = expression.replace(/[ ]+/g, ' ');
+			var parseSer = this.parseForExp(expression);
 
-			var exps = expression.split(' in '),
-				alias = exps[0],
-				access = exps[1],
-				$access = Parser.makeDep(access, fors);
-
-			// var array = parser.getAliasValue($access);
+			var alias = parseSer.alias,
+				indexAlias = parseSer.indexAlias || $node.attr('for-index') || '$index',
+				access = parseSer.access,
+				$access = Parser.makeDep(access, fors),
+				aliasGroup = {alias:alias, indexAlias:indexAlias};
 
 			var forsCache = {};
 
 			var $listFragment = parser.preCompileVFor($node, function () {
 				return parser.getAliasValue($access);
-			}, 0, fors, alias, access, forsCache, vforIndex, __filter);
+			}, 0, fors, aliasGroup, access, forsCache, vforIndex, __filter);
 
 			var isAdapter = $.ui.isJQAdapter($listFragment);
 
@@ -128,7 +127,7 @@
 						var baseIndex = Parser.getBaseIndex(options);
 						$listFragment = parser.preCompileVFor($node, function () {
 							return arr;
-						}, baseIndex, fors, alias, access, forsCache, vforIndex, __filter);
+						}, baseIndex, fors, aliasGroup, access, forsCache, vforIndex, __filter);
 					}
 					
 					return {
@@ -624,6 +623,25 @@
 
 	var pp = Parser.prototype;
 
+	pp.parseForExp = function(expression){
+		expression = expression.replace(/[ ]+/g, ' ');
+
+		var exps = expression.split(' in '),
+			aliasGroup = (exps[0]||'').replace(/[ ]+/g, ''),
+			access = (exps[1]||'').replace(/[ ]+/g, '');
+			// $access = Parser.makeDep(access, fors);
+		if(aliasGroup.indexOf('(')===0){
+			aliasGroup = aliasGroup.substring(1, aliasGroup.length-1);
+		}
+		aliasGroup = aliasGroup.split(',');
+		var alias = aliasGroup[0], indexAlias = aliasGroup[1];
+		return {
+			alias: alias,
+			indexAlias: indexAlias,
+			access: access
+		};
+	};
+
 	pp.initProxy = function(){
 		var parser = this;
 		this._getProxy = function (type) {
@@ -759,14 +777,14 @@
 	 * @param   {Function}   getter          [循环数组数据获取函数]
 	 * @param   {Number}     baseIndex     [起始索引]
 	 * @param   {Object}     fors          [for别名映射]
-	 * @param   {String}     alias         [for指令别名]
+	 * @param   {Object}     aliasGroup    [for指令别名组]
 	 * @param   {String}     access        [节点路径]
 	 * @param   {Object}     forsCache     [fors数据缓存]
 	 * @param   {Number}     vforIndex     [for索引]
 	 * @param   {filter}     filter        [过滤器]
 	 * 
 	 */
-	pp.preCompileVFor = function ($node, getter, baseIndex, fors, alias, access, forsCache, vforIndex, filter) {
+	pp.preCompileVFor = function ($node, getter, baseIndex, fors, aliasGroup, access, forsCache, vforIndex, filter) {
 
 		var parser = this, vm = this.vm;
 
@@ -779,7 +797,7 @@
 			if (!$adapter.setCell($node)) return $adapter;
 			//初始化adpater事件监听
 			$adapter.initEvent($parent, $node, getter, function ($plate, position, newArr) {
-				parser.buildAdapterList($plate, newArr, position, fors, alias, access, forsCache, vforIndex, true, filter);
+				parser.buildAdapterList($plate, newArr, position, fors, aliasGroup, access, forsCache, vforIndex, true, filter);
 			});
 			//刷新适配器
 			$.ui.refreshDom($adapter);
@@ -787,7 +805,7 @@
 			return $adapter;
 		}
 
-		return parser.buildList($node, getter(), baseIndex, fors, alias, access, forsCache, vforIndex, false, filter);
+		return parser.buildList($node, getter(), baseIndex, fors, aliasGroup, access, forsCache, vforIndex, false, filter);
 	};
 
 	/**
@@ -797,17 +815,17 @@
 	 * @param   {Array}      array         [循环数组数据]
 	 * @param   {Number}     position      [当前处理数据索引]
 	 * @param   {Object}     fors          [for别名映射]
-	 * @param   {String}     alias         [for指令别名]
+	 * @param   {Object}     aliasGroup    [for指令别名组]
 	 * @param   {String}     access        [节点路径]
 	 * @param   {Object}     forsCache     [fors数据缓存]
 	 * @param   {Number}     vforIndex     [for索引]
 	 * @param   {ignor}      ignor         [是否忽略]
 	 * @param   {filter}     filter        [过滤器]
 	 */
-	pp.buildAdapterList = function ($node, array, position, fors, alias, access, forsCache, vforIndex, ignor, filter) {
-		var cFors = forsCache[position] = Parser.createFors(fors, alias, access, position, filter, ignor);
+	pp.buildAdapterList = function ($node, array, position, fors, aliasGroup, access, forsCache, vforIndex, ignor, filter) {
+		var cFors = forsCache[position] = Parser.createFors(fors, aliasGroup, access, position, filter, ignor);
 		// $node.data('vforIndex', vforIndex);
-		this.$scope['$alias'][alias] = array[position];
+		this.$scope['$alias'][aliasGroup.alias] = array[position];
 		this.vm.compileSteps($node, cFors, true);
 	};
 
@@ -818,19 +836,19 @@
 	 * @param   {Array}      array         [循环数组数据]
 	 * @param   {Number}     baseIndex     [起始索引]
 	 * @param   {Object}     fors          [for别名映射]
-	 * @param   {String}     alias         [for指令别名]
+	 * @param   {Object}     aliasGroup    [for指令别名组]
 	 * @param   {String}     access        [节点路径]
 	 * @param   {Object}     forsCache     [fors数据缓存]
 	 * @param   {Number}     vforIndex     [for索引]
 	 * @param   {ignor}      ignor         [是否忽略]
 	 * @param   {filter}     filter        [过滤器]
 	 */
-	pp.buildList = function ($node, array, baseIndex, fors, alias, access, forsCache, vforIndex, ignor, filter) {
+	pp.buildList = function ($node, array, baseIndex, fors, aliasGroup, access, forsCache, vforIndex, ignor, filter) {
 		var $listFragment = $.ui.createJQFragment();
 
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
-			var cFors = forsCache[ni] = Parser.createFors(fors, alias, access, ni, filter);
+			var cFors = forsCache[ni] = Parser.createFors(fors, aliasGroup, access, ni, filter);
 			var $plate = $node.clone();//.data('vforIndex', vforIndex);
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
@@ -886,7 +904,8 @@
 	pp.setDeepScope = function (fors, isParent) {
 		if (!fors) return;
 		var scope = this.$scope, str$alias = '$alias', observer = this.watcher.observer;
-		var alias = fors.alias,
+		var alias = Parser.getAlias(fors),
+			indexAlias = Parser.getIndexAlias(fors),
 			access = fors.access,
 			$access = Parser.makeDep(access, fors),
 			$index = fors.$index,
@@ -895,7 +914,8 @@
 
 		var arr = this.getAliasValue($access);
 		scope[str$alias][alias] = arr[$index];
-		if (!isParent) scope[str$alias]['$index'] = $index;
+		// if (!isParent) scope[str$alias]['$index'] = $index;
+		if (!isParent) scope[str$alias][indexAlias] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makePath(fors.filter, fors);
 
@@ -1053,7 +1073,7 @@
 
 	Parser.findMyFors = function(name, fors){
 		if(!fors) return fors;
-		if(name===fors.alias) return fors;
+		if(name===Parser.getAlias(fors)) return fors;
 		return Parser.findMyFors(name, fors.fors);
 	};
 
@@ -1067,7 +1087,8 @@
 
 		if(!myFors) myFors = fors;
 
-		var alias = myFors.alias;
+		var alias = Parser.getAlias(myFors);
+		var indexAlias = Parser.getIndexAlias(myFors);
 		var access = myFors.access;
 		var $index = myFors.$index;
 
@@ -1076,7 +1097,7 @@
 		if(_exp===access) return $access;
 
 		$.util.each(exps, function (i, exp) {
-			if (exp === '$index') {
+			if (exp === indexAlias) {
 				exps[i] = $access + '.' + myFors.$index + '.*';
 			} else {
 				if (alias === exp) {
@@ -1084,7 +1105,6 @@
 				}
 			}
 		});
-		if(_exp==='itemA.active') console.log(exps)
 		return exps.join('.');
 	};
 
@@ -1095,8 +1115,10 @@
 
 		var exps = exp.split('.');
 
+		var indexAlias = Parser.getIndexAlias(fors);
+
 		$.util.each(exps, function (i, exp) {
-			if (exp === '$index') {
+			if (exp === indexAlias) {
 				exps[i] = fors.access + '.' + fors.$index + '.*';
 			} else {
 				exps[i] = Parser.findScope(exp, fors);
@@ -1110,7 +1132,7 @@
 	Parser.findScope = function (exp, fors) {
 		if (!fors) return exp;
 
-		var alias = fors.alias;
+		var alias = Parser.getAlias(fors);
 		var access = fors.access;
 		var $index = fors.$index;
 
@@ -1127,6 +1149,7 @@
 		//$index
 		//obj.title
 		//$index>0
+		var indexes = Parser.getIndexAliasArr(fors);
 		exp = exp.replace(/([^\w \.\$'"\/])[ ]*([\w]+)/g, function (s, s1, s2) {
 
 			s = s1 + s2;
@@ -1135,7 +1158,7 @@
 				return s;
 			}
 
-			if (s === '$index') {
+			if ( indexes.indexOf(s) > -1 ) {
 				return 'scope.$alias.' + s;
 			}
 
@@ -1152,7 +1175,7 @@
 					return s;
 				}
 
-				if (s === '$index' || Parser.hasAlias(s, fors)) {
+				if ( indexes.indexOf(s) > -1 || Parser.hasAlias(s, fors)) {
 					s = '$alias.' + s;
 				}else{
 					s = Parser.__addPre(s, type);
@@ -1172,25 +1195,43 @@
 		}
 	};
 
+	Parser.getAlias = function(fors){
+		var aliasGroup = fors && fors.aliasGroup;
+		if(!aliasGroup) return '';
+		return aliasGroup.alias;
+	};
+	Parser.getIndexAlias = function(fors){
+		var aliasGroup = fors && fors.aliasGroup;
+		if(!aliasGroup) return '';
+		return aliasGroup.indexAlias;
+	};
+	Parser.getIndexAliasArr = function (fors, arr) {
+		arr = arr || [];
+		var aliasGroup = fors && fors.aliasGroup;
+		if (!aliasGroup) return arr;
+		arr.push(aliasGroup.indexAlias);
+		return Parser.getIndexAliasArr(fors.fors, arr);
+	};
+
 	//表达式中是否包含别名
 	Parser.hasAlias = function (exp, fors) {
 		if (!fors) return false;
 
-		if (exp === fors.alias) return true;
+		if (exp === Parser.getAlias(fors)) return true;
 
 		return this.hasAlias(exp, fors.fors);
 	};
 
 	//创建fors数据，内容为别名依赖
-	Parser.createFors = function (fors, alias, access, index, filter, ignor) {
+	Parser.createFors = function (fors, aliasGroup, access, index, filter, ignor) {
 		return {
-			alias: alias,
+			aliasGroup: aliasGroup,
 			access: access,
 			fors: fors,
 			$index: index,
 			filter: filter,
 			ignor: ignor
-		}
+		};
 	};
 
 	//为数组操作获取要操作的基础索引号
