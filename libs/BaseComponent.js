@@ -73,6 +73,20 @@ class BaseComponent{
             var prop = this.props[k];
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
+
+        // 外部方法挂载
+        for(var k in (this.methods || {})){
+            var method = this.methods[k];
+            if(typeof method!=='function') continue;
+            (function(ctx, k){
+                var oldFunc = ctx[k];
+                ctx[k] = function(){
+                    oldFunc && oldFunc.apply(ctx, arguments);
+                    return method.apply(ctx, arguments);
+                };
+            })(this, k);
+        }
+
     }
 
     __mvvmRender(){
