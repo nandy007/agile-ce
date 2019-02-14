@@ -475,21 +475,16 @@
 			return this;
 		},
 		data: function (name, val, type) {
-			// name = 'data-' + name;
+			var fullname = 'data-' + name;
 			if (arguments.length > 1) {
 				val = jqlite.isPlainObject(val) ? JSON.stringify(val) : String(val);
 				this.each(function () {
-					var _dataset = this.dataset;
-					if (type === true && !jqlite.isEmptyObject(_dataset && _dataset[name])) return;
-					if (!_dataset) {
-						_dataset = this.dataset = {};
-					}
-					_dataset[name] = val;
+					this.setAttr(fullname, val);
 				});
 				return this;
 			} else {
 				var el = this.domList.length > 0 && this.domList[0];
-				var _dataset = el && el.dataset, rs = (_dataset && _dataset[name])||'';
+				var rs = (el && el.getAttr(fullname)) || '';
 				try {
 					return JSON.parse(rs);
 				} catch (e) {

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.51.1550048630324 beta
+ *	Version	:	0.4.52.1550129462836 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -2128,22 +2128,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			return this;
 		},
 		data: function data(name, val, type) {
-			// name = 'data-' + name;
+			var fullname = 'data-' + name;
 			if (arguments.length > 1) {
 				val = jqlite.isPlainObject(val) ? JSON.stringify(val) : String(val);
 				this.each(function () {
-					var _dataset = this.dataset;
-					if (type === true && !jqlite.isEmptyObject(_dataset && _dataset[name])) return;
-					if (!_dataset) {
-						_dataset = this.dataset = {};
-					}
-					_dataset[name] = val;
+					this.setAttr(fullname, val);
 				});
 				return this;
 			} else {
 				var el = this.domList.length > 0 && this.domList[0];
-				var _dataset = el && el.dataset,
-				    rs = _dataset && _dataset[name] || '';
+				var rs = el && el.getAttr(fullname) || '';
 				try {
 					return JSON.parse(rs);
 				} catch (e) {
