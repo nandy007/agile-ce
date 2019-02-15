@@ -30,7 +30,7 @@ class BaseComponent{
         }
         var viewData = this.viewData;
         if(!viewData) return;
-        var pre = this.$.vm.getVMPre().data;
+        var pre = this.__getVmPre();
         if(pre){
             this.data = viewData[pre] = viewData[pre] || {};
         }else{
@@ -141,9 +141,12 @@ class BaseComponent{
         
         return rs;
     }
+    __getVmPre(){
+        return this.viewData && this.viewData.data ? 'data' : this.$.vm.getVMPre().data;
+    }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
     setData(obj){
-        var pre = this.$vm ? this.$vm.getVMPre() : this.$.vm.getVMPre().data;
+        var pre = this.__getVmPre();
 		var nObj = {};
 		if(pre){
 			nObj[pre] = obj;
