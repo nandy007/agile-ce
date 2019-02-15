@@ -84,5 +84,12 @@
 		return this.$data;
 	};
 
+	/**
+	 * 获取vm前缀
+	 */
+	mp.getVMPre = function(type){
+		return this.vm.parser.getVmPre(type);
+	};
+
 	module.exports = MVVM;
 })();
