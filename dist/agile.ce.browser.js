@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.52.1550129448926 beta
+ *	Version	:	0.4.52.1550192628475 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -113,7 +113,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			var scope = this.$scope;
 
-			var depsalias = Parser.getDepsAlias(expression, fors);
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
 			var deps = depsalias.deps;
 			var exps = depsalias.exps;
 
@@ -154,7 +154,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var alias = parseSer.alias,
 			    indexAlias = parseSer.indexAlias || $node.attr('for-index') || '$index',
 			    access = parseSer.access,
-			    $access = Parser.makeDep(access, fors),
+			    $access = Parser.makeDep(access, fors, parser.getVmPre()),
 			    aliasGroup = { alias: alias, indexAlias: indexAlias };
 
 			var forsCache = {};
@@ -243,7 +243,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var evts = Parser.parseDir(dir, expression);
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors, 'method');
+				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -299,7 +299,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 					return;
 				}
 
-				var depsAlias = Parser.getDepsAlias(exp, fors);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
 
 				exp = depsAlias.exps.join('.');
 
@@ -334,7 +334,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
 			$.util.each($style, function (style, exp) {
-				var depsAlias = Parser.getDepsAlias(exp, fors);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
 				updater.updateStyle($node, style, parser.getValue(exp, fors));
 
 				var deps = depsAlias.deps;
@@ -369,7 +369,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 				updater.updateClass($node, cName, parser.getValue(exp, fors));
 
-				var deps = Parser.getDepsAlias(exp, fors).deps;
+				var deps = Parser.getDepsAlias(exp, fors, parser.getVmPre()).deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateClass($node, cName, parser.getValue(exp, fors));
@@ -385,7 +385,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 
-			var deps = Parser.getDepsAlias(expression, fors).deps;
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
 
 			parser.watcher.watch(deps, function (options) {
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
@@ -435,7 +435,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				parser.$mutexGroup.append($node);
 			}
 
-			var deps = Parser.getDepsAlias(expression, fors).deps;
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
 
 			parser.watcher.watch(deps, function (options) {
 				$node.def('__isrender', parser.getValue(expression, fors));
@@ -480,7 +480,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;;
 
@@ -492,7 +492,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindTextEvent($node, function () {
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
@@ -527,7 +527,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			Parser.bindChangeEvent($node, function () {
 				if ($node.is(':checked')) {
-					var access = Parser.makeDep(expression, fors);
+					var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					var duplexField = parser.getDuplexField(access),
 					    duplex = duplexField.duplex(parser.$scope),
 					    field = duplexField.field;
@@ -567,7 +567,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			Parser.bindChangeEvent($node, function () {
 
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
@@ -646,7 +646,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			});
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
@@ -701,7 +701,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		},
 		// 隐式监听
 		'vwatch': function vwatch($node, fors, expression, dir) {
-			var depsalias = Parser.getDepsAlias(expression, fors);
+			var depsalias = Parser.getDepsAlias(expression, fors, this.getVmPre());
 			var deps = depsalias.deps;
 			var evtName = dir.split(Parser.dirSplit)[1];
 			this.watcher.watch(deps, function (options) {
@@ -741,10 +741,27 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 		this.initProxy();
 
+		this.initVmPre();
+
 		this.init();
 	};
 
 	var pp = Parser.prototype;
+
+	pp.initVmPre = function () {
+		var model = this.vm.$data;
+		this.vmPre = {
+			data: model.data ? 'data' : '',
+			method: model.methods ? 'methods' : ''
+		};
+	};
+
+	pp.getVmPre = function (type) {
+		type = type || 'data';
+		var vmPre = Parser.getVmPre();
+		var rs = this.vmPre[type] || vmPre[type] || '';
+		return rs;
+	};
 
 	pp.parseForExp = function (expression) {
 		expression = expression.replace(/[ ]+/g, ' ');
@@ -870,7 +887,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	pp.getValue = function (exp, fors) {
 		var scope = this.$scope;
 		if (arguments.length > 1) {
-			var depsalias = Parser.getDepsAlias(exp, fors);
+			var depsalias = Parser.getDepsAlias(exp, fors, this.getVmPre());
 			exp = depsalias.exps.join('');
 		}
 		var func = this.getAliasFunc(exp, true);
@@ -1033,7 +1050,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		var alias = Parser.getAlias(fors),
 		    indexAlias = Parser.getIndexAlias(fors),
 		    access = fors.access,
-		    $access = Parser.makeDep(access, fors),
+		    $access = Parser.makeDep(access, fors, this.getVmPre()),
 		    $index = fors.$index,
 		    ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
@@ -1560,14 +1577,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		data: '',
 		method: ''
 	};
-	Parser.__addPre = function (exp, type) {
-		var pre = __vmPre && __vmPre[type || 'data'] || '';
+	Parser.__addPre = function (exp, pre) {
+		// var pre = (__vmPre&&__vmPre[type||'data']) || '';
 		return (pre ? pre + '.' : '') + exp;
 	};
 	Parser.setVMPre = function (setting) {
 		__vmPre = setting;
 	};
-	Parser.getVMPre = function (setting) {
+	Parser.getVmPre = function (setting) {
 		return __vmPre || {};
 	};
 
@@ -12667,9 +12684,18 @@ var BaseComponent = function () {
                 prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
             }
 
+            // 内部方法挂载
+            this.__wrapperMethod(this.methods);
+
             // 外部方法挂载
-            for (var k in this.methods || {}) {
-                var method = this.methods[k];
+            var viewData = this.viewData || {};
+            this.__wrapperMethod(viewData.methods);
+        }
+    }, {
+        key: '__wrapperMethod',
+        value: function __wrapperMethod(methods) {
+            for (var k in methods || {}) {
+                var method = methods[k];
                 if (typeof method !== 'function') continue;
                 (function (ctx, k) {
                     var oldFunc = ctx[k];
@@ -12850,6 +12876,43 @@ BaseComponent.wrapperClass = function (MyClass) {
     }
 
     return Wrapper;
+};
+
+function _structure(options) {
+    var $ = __webpack_require__(0).JQLite;
+    var json = $.extend(true, {}, options);
+    // var methods = json.methods; delete json.methods;
+    var properties = json.properties;delete json.properties;
+    var events = json.events;delete json.events;
+    var props = json.props;delete json.props;
+    var viewData = $.isEmptyObject(json) ? properties ? {} : null : json;
+
+    return {
+        // methods: methods,
+        properties: properties,
+        events: events,
+        props: props,
+        viewData: viewData
+    };
+}
+
+BaseComponent.createClass = function (options) {
+    var json = _structure(options);
+
+    function MyPage(jsDom) {}
+
+    MyPage.prototype = {
+        initViewData: function initViewData() {
+            if (json.viewData) this.viewData = json.viewData;
+        },
+        initProto: function initProto() {
+            // if(json.methods) this.methods = json.methods;
+            if (json.properties) this.properties = json.properties;
+            if (json.props) this.props = json.props;
+            if (json.events) this.events = json.events;
+        }
+    };
+    return MyPage;
 };
 
 module.exports = BaseComponent;

@@ -74,9 +74,18 @@ class BaseComponent{
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
 
+        // 内部方法挂载
+        this.__wrapperMethod(this.methods);
+
         // 外部方法挂载
-        for(var k in (this.methods || {})){
-            var method = this.methods[k];
+        var viewData = this.viewData || {};
+        this.__wrapperMethod(viewData.methods);
+
+    }
+
+    __wrapperMethod(methods){
+        for(var k in (methods || {})){
+            var method = methods[k];
             if(typeof method!=='function') continue;
             (function(ctx, k){
                 var oldFunc = ctx[k];
@@ -86,7 +95,6 @@ class BaseComponent{
                 };
             })(this, k);
         }
-
     }
 
     __mvvmRender(){
@@ -217,6 +225,46 @@ BaseComponent.wrapperClass = function(MyClass){
     }
 
     return Wrapper;
+};
+
+
+function _structure(options){
+    var $ = require('./env').JQLite;
+    var json = $.extend(true, {}, options);
+    // var methods = json.methods; delete json.methods;
+    var properties = json.properties; delete json.properties;
+    var events = json.events; delete json.events;
+    var props = json.props; delete json.props;
+    var viewData = $.isEmptyObject(json) ? (properties ? {} : null ) : json;
+
+    return {
+        // methods: methods,
+        properties: properties,
+        events: events,
+        props: props,
+        viewData: viewData 
+    };
+}
+
+
+BaseComponent.createClass = function(options){
+    var json = _structure(options);
+    
+    function MyPage(jsDom){
+    }
+
+    MyPage.prototype = {
+        initViewData: function(){
+            if(json.viewData) this.viewData = json.viewData;
+        },
+        initProto: function(){
+            // if(json.methods) this.methods = json.methods;
+            if(json.properties) this.properties = json.properties;
+            if(json.props) this.props = json.props;
+            if(json.events) this.events = json.events;
+        }
+    };
+    return MyPage;
 };
 
 module.exports = BaseComponent;

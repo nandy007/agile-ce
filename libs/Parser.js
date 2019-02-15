@@ -18,7 +18,7 @@
 
 			var scope = this.$scope;
 
-			var depsalias = Parser.getDepsAlias(expression, fors);
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
 			var deps = depsalias.deps;
 			var exps = depsalias.exps;
 
@@ -57,7 +57,7 @@
 			var alias = parseSer.alias,
 				indexAlias = parseSer.indexAlias || $node.attr('for-index') || '$index',
 				access = parseSer.access,
-				$access = Parser.makeDep(access, fors),
+				$access = Parser.makeDep(access, fors, parser.getVmPre()),
 				aliasGroup = {alias:alias, indexAlias:indexAlias};
 
 			var forsCache = {};
@@ -145,7 +145,7 @@
 			var evts = Parser.parseDir(dir, expression);
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors, 'method');
+				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -202,7 +202,7 @@
 					return;
 				}
 
-				var depsAlias = Parser.getDepsAlias(exp, fors);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
 
 				exp = depsAlias.exps.join('.');
 
@@ -236,7 +236,7 @@
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
 			$.util.each($style, function (style, exp) {
-				var depsAlias = Parser.getDepsAlias(exp, fors);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
 				updater.updateStyle($node, style, parser.getValue(exp, fors));
 
 				var deps = depsAlias.deps;
@@ -270,7 +270,7 @@
 
 				updater.updateClass($node, cName, parser.getValue(exp, fors));
 
-				var deps = Parser.getDepsAlias(exp, fors).deps;
+				var deps = Parser.getDepsAlias(exp, fors, parser.getVmPre()).deps;
 
 				parser.watcher.watch(deps, function (options) {
 					updater.updateClass($node, cName, parser.getValue(exp, fors));
@@ -287,7 +287,7 @@
 
 			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 
-			var deps = Parser.getDepsAlias(expression, fors).deps;
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
 
 			parser.watcher.watch(deps, function (options) {
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
@@ -337,7 +337,7 @@
 
 			
 
-			var deps = Parser.getDepsAlias(expression, fors).deps;
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
 
 			parser.watcher.watch(deps, function (options) {
 				$node.def('__isrender', parser.getValue(expression, fors));
@@ -379,7 +379,7 @@
 		'vmtext': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;;
 
@@ -391,7 +391,7 @@
 			}, fors);
 
 			Parser.bindTextEvent($node, function () {
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
 			});
@@ -421,7 +421,7 @@
 
 			Parser.bindChangeEvent($node, function () {
 				if($node.is(':checked')) {
-					var access = Parser.makeDep(expression, fors);
+					var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
 				}
@@ -456,7 +456,7 @@
 
 			Parser.bindChangeEvent($node, function () {
 
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 				value = duplex[field];
@@ -530,7 +530,7 @@
 			});
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				var selects = Parser.getSelecteds($(this));
 				duplex[field] = multi ? selects : selects[0];
@@ -578,7 +578,7 @@
 		},
 		// 隐式监听
 		'vwatch': function($node, fors, expression, dir){
-			var depsalias = Parser.getDepsAlias(expression, fors);
+			var depsalias = Parser.getDepsAlias(expression, fors, this.getVmPre());
 			var deps = depsalias.deps;
 			var evtName = dir.split(Parser.dirSplit)[1];
 			this.watcher.watch(deps, function (options) {
@@ -618,10 +618,27 @@
 
 		this.initProxy();
 
+		this.initVmPre();
+
 		this.init();
 	};
 
 	var pp = Parser.prototype;
+
+	pp.initVmPre = function(){
+		var model = this.vm.$data;
+		this.vmPre = {
+			data: model.data ? 'data' : '',
+			method: model.methods ? 'methods' : ''
+		};
+	};
+
+	pp.getVmPre = function(type){
+		type = type || 'data';
+		var vmPre = Parser.getVmPre();
+		var rs = this.vmPre[type] || vmPre[type] || '';
+		return rs;
+	};
 
 	pp.parseForExp = function(expression){
 		expression = expression.replace(/[ ]+/g, ' ');
@@ -749,7 +766,7 @@
 	pp.getValue = function (exp, fors) {
 		var scope = this.$scope;
 		if (arguments.length > 1) {
-			var depsalias = Parser.getDepsAlias(exp, fors);
+			var depsalias = Parser.getDepsAlias(exp, fors, this.getVmPre());
 			exp = depsalias.exps.join('');
 		}
 		var func = this.getAliasFunc(exp, true);
@@ -907,7 +924,7 @@
 		var alias = Parser.getAlias(fors),
 			indexAlias = Parser.getIndexAlias(fors),
 			access = fors.access,
-			$access = Parser.makeDep(access, fors),
+			$access = Parser.makeDep(access, fors, this.getVmPre()),
 			$index = fors.$index,
 			ignor = fors.ignor;
 		if (ignor) return this.setDeepScope(fors.fors);
@@ -1435,14 +1452,14 @@
 		data: '',
 		method: ''
 	};
-	Parser.__addPre = function(exp, type){
-		var pre = (__vmPre&&__vmPre[type||'data']) || '';
+	Parser.__addPre = function(exp, pre){
+		// var pre = (__vmPre&&__vmPre[type||'data']) || '';
 		return (pre? pre+'.' : '') + exp;
 	};
 	Parser.setVMPre = function(setting){
 		__vmPre = setting;
 	};
-	Parser.getVMPre = function(setting){
+	Parser.getVmPre = function(setting){
 		return __vmPre || {};
 	};
 
