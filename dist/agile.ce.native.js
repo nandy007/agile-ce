@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.57.1550218052657 beta
+ *	Version	:	0.4.58.1550222520101 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5431,21 +5431,48 @@ function _structure(options) {
     var props = json.props;delete json.props;
     var viewData = $.isEmptyObject(json) ? properties ? {} : null : json;
 
-    return {
+    var json = {
         // methods: methods,
         properties: properties,
         events: events,
         props: props,
-        viewData: viewData
+        viewData: viewData,
+        lifecycle: {}
     };
+    var lifecycleFuncs = BaseComponent.lifecycleFuncs.slice(0),
+        funcName;
+    while (funcName = lifecycleFuncs.shift()) {
+        _setLifecycleFunc(json, funcName);
+    }
+
+    return json;
 }
 
-BaseComponent.createClass = function (options) {
+function _setLifecycleFunc(json, funcName) {
+    var func = json.viewData && json.viewData[funcName] || json.methods && json.methods[funcName];
+    json.lifecycle[funcName] = func;
+}
+
+BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide'];
+
+BaseComponent.createClass = function (options, fullTag) {
     var json = _structure(options);
 
     function MyPage(jsDom) {}
 
     MyPage.prototype = {
+        created: function created() {
+            var $jsDom = this.$jsDom,
+                comp = this;
+
+            $jsDom.on('enter', function () {
+                json.lifecycle.onShow && json.lifecycle.onShow.call(comp);
+            });
+            $jsDom.on('leave', function () {
+                json.lifecycle.onHide && json.lifecycle.onHide.call(comp);
+            });
+            json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
+        },
         initViewData: function initViewData() {
             if (json.viewData) this.viewData = json.viewData;
         },
@@ -5456,6 +5483,9 @@ BaseComponent.createClass = function (options) {
             if (json.events) this.events = json.events;
         }
     };
+
+    if (fullTag) MyPage.fullTag = fullTag;
+
     return MyPage;
 };
 

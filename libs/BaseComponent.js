@@ -237,23 +237,47 @@ function _structure(options){
     var props = json.props; delete json.props;
     var viewData = $.isEmptyObject(json) ? (properties ? {} : null ) : json;
 
-    return {
+    var json = {
         // methods: methods,
         properties: properties,
         events: events,
         props: props,
-        viewData: viewData 
+        viewData: viewData,
+        lifecycle: {}
     };
+    var lifecycleFuncs = BaseComponent.lifecycleFuncs.slice(0), funcName;
+    while(funcName = lifecycleFuncs.shift()){
+        _setLifecycleFunc(json, funcName);
+    }
+
+    return json;
 }
 
+function _setLifecycleFunc(json, funcName){
+    var func = (json.viewData && json.viewData[funcName]) || (json.methods && json.methods[funcName]);
+    json.lifecycle[funcName] = func;
+}
 
-BaseComponent.createClass = function(options){
+BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide'];
+
+BaseComponent.createClass = function(options, fullTag){
     var json = _structure(options);
     
     function MyPage(jsDom){
     }
 
     MyPage.prototype = {
+        created: function(){
+            var $jsDom = this.$jsDom, comp = this;
+
+            $jsDom.on('enter', function(){
+                json.lifecycle.onShow && json.lifecycle.onShow.call(comp);
+            });
+            $jsDom.on('leave', function(){
+                json.lifecycle.onHide && json.lifecycle.onHide.call(comp);
+            });
+            json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
+        },
         initViewData: function(){
             if(json.viewData) this.viewData = json.viewData;
         },
@@ -264,6 +288,9 @@ BaseComponent.createClass = function(options){
             if(json.events) this.events = json.events;
         }
     };
+
+    if(fullTag) MyPage.fullTag = fullTag;
+
     return MyPage;
 };
 
