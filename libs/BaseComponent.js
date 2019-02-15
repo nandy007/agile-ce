@@ -143,7 +143,7 @@ class BaseComponent{
     }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
     setData(obj){
-        var pre = this.$vm.getVMPre();
+        var pre = this.$vm ? this.$vm.getVMPre() : this.$.vm.getVMPre().data;
 		var nObj = {};
 		if(pre){
 			nObj[pre] = obj;
