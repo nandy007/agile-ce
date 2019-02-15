@@ -635,7 +635,7 @@
 
 	pp.getVmPre = function(type){
 		type = type || 'data';
-		var vmPre = Parser.getVmPre();
+		var vmPre = Parser.getVMPre();
 		var rs = this.vmPre[type] || vmPre[type] || '';
 		return rs;
 	};
@@ -1459,7 +1459,7 @@
 	Parser.setVMPre = function(setting){
 		__vmPre = setting;
 	};
-	Parser.getVmPre = function(setting){
+	Parser.getVMPre = function(setting){
 		return __vmPre || {};
 	};
 

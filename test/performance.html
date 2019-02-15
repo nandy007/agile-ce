@@ -18,7 +18,7 @@
         <span v-text="l[1].username"></span>
         <ul>
 
-            <li  v-for="item in list" v-on:click="func.aaa($index)">
+            <li  v-for="item in list" v-on:click="func.aaa($index)" v-class="{active:item.active}">
                 
                     <span>{{item.username}}</span>
                     <!-- <span v-for="a in item.arr">{{a.c}}</span> -->

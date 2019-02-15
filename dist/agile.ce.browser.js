@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.52.1550192628475 beta
+ *	Version	:	0.4.53.1550199753036 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -758,7 +758,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	pp.getVmPre = function (type) {
 		type = type || 'data';
-		var vmPre = Parser.getVmPre();
+		var vmPre = Parser.getVMPre();
 		var rs = this.vmPre[type] || vmPre[type] || '';
 		return rs;
 	};
@@ -1584,7 +1584,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	Parser.setVMPre = function (setting) {
 		__vmPre = setting;
 	};
-	Parser.getVmPre = function (setting) {
+	Parser.getVMPre = function (setting) {
 		return __vmPre || {};
 	};
 
