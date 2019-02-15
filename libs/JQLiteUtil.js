@@ -26,12 +26,20 @@ var util = module.exports = {
     booleanAttrForJquery: function(name, val){
         if(arguments.length===1){
             var el = this.length>0 && this[0];
-            return el && el.getAttribute(name);
+            if(!el) return '';
+            var rs = this.prop(name);
+            if(typeof rs==='undefined'){
+                rs = el.getAttribute(name);
+            }
+            if(rs===''||rs===undefined||rs===null||rs==='false'){
+                rs = false;
+            }
+            return !!rs;
         }else if(arguments.length===2){
-            val = (val==='false'||val===false) ? false : true;
             this.each(function(){
-                val ? this.setAttribute(name, val) : this.removeAttribute(name);
+                this.setAttribute(name, val);
             });
+            return this.prop(name, val);
         }
         return this;
     }
