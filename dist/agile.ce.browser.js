@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.55.1550209478290 beta
+ *	Version	:	0.4.56.1550212341640 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1634,8 +1634,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	jqlite.prototype.attr = function () {
 		var args = jqlite.util.copyArray(arguments);
 		var rs;
-		if (args[0] === 'disabled') {
-			rs = jqliteUtil.disabledAttrForJquery.apply(this, args);
+		if (['disabled', 'checked', 'selected'].indexOf(args[0]) > -1) {
+			rs = jqliteUtil.booleanAttrForJquery.apply(this, args);
 		} else {
 			if (typeof args[1] !== 'undefined') {
 				args[1] = jqliteUtil.stringify(args[1]);
@@ -10988,14 +10988,14 @@ var util = module.exports = {
         }
         return val;
     },
-    disabledAttrForJquery: function disabledAttrForJquery(name, val) {
+    booleanAttrForJquery: function booleanAttrForJquery(name, val) {
         if (arguments.length === 1) {
             var el = this.length > 0 && this[0];
-            return el && el.getAttribute('disabled');
+            return el && el.getAttribute(name);
         } else if (arguments.length === 2) {
             val = val === 'false' || val === false ? false : true;
             this.each(function () {
-                val ? this.setAttribute('disabled', val) : this.removeAttribute('disabled');
+                val ? this.setAttribute(name, val) : this.removeAttribute(name);
             });
         }
         return this;

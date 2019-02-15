@@ -8,8 +8,8 @@
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
 		var rs;
-		if(args[0]==='disabled'){
-			rs = jqliteUtil.disabledAttrForJquery.apply(this, args)
+		if(['disabled', 'checked', 'selected'].indexOf(args[0])>-1){
+			rs = jqliteUtil.booleanAttrForJquery.apply(this, args)
 		}else{
 			if(typeof args[1]!=='undefined'){
 				args[1] = jqliteUtil.stringify(args[1]);

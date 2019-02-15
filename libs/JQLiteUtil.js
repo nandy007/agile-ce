@@ -23,14 +23,14 @@ var util = module.exports = {
         }
         return val;
     },
-    disabledAttrForJquery: function(name, val){
+    booleanAttrForJquery: function(name, val){
         if(arguments.length===1){
             var el = this.length>0 && this[0];
-            return el && el.getAttribute('disabled');
+            return el && el.getAttribute(name);
         }else if(arguments.length===2){
             val = (val==='false'||val===false) ? false : true;
             this.each(function(){
-                val ? this.setAttribute('disabled', val) : this.removeAttribute('disabled');
+                val ? this.setAttribute(name, val) : this.removeAttribute(name);
             });
         }
         return this;
