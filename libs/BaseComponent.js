@@ -264,14 +264,15 @@ function _setLifecycleFunc(json, funcName){
 BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide'];
 
 BaseComponent.createClass = function(options, fullTag){
-    var json = _structure(options);
+    // var json = _structure(options);
     
     function MyPage(jsDom){
+        this.__json = _structure(options);
     }
 
     MyPage.prototype = {
         created: function(){
-            var $jsDom = this.$jsDom, comp = this;
+            var $jsDom = this.$jsDom, comp = this, json = this.__json;
 
             $jsDom.on('enter', function(){
                 json.lifecycle.onShow && json.lifecycle.onShow.call(comp);
@@ -282,9 +283,11 @@ BaseComponent.createClass = function(options, fullTag){
             json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
         },
         initViewData: function(){
+            const json = this.__json;
             if(json.viewData) this.viewData = json.viewData;
         },
         initProto: function(){
+            const json = this.__json;
             // if(json.methods) this.methods = json.methods;
             if(json.properties) this.properties = json.properties;
             if(json.props) this.props = json.props;

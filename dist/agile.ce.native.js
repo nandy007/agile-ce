@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.59.1550225761098 beta
+ *	Version	:	0.4.60.1550653557751 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5461,14 +5461,17 @@ function _setLifecycleFunc(json, funcName) {
 BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide'];
 
 BaseComponent.createClass = function (options, fullTag) {
-    var json = _structure(options);
+    // var json = _structure(options);
 
-    function MyPage(jsDom) {}
+    function MyPage(jsDom) {
+        this.__json = _structure(options);
+    }
 
     MyPage.prototype = {
         created: function created() {
             var $jsDom = this.$jsDom,
-                comp = this;
+                comp = this,
+                json = this.__json;
 
             $jsDom.on('enter', function () {
                 json.lifecycle.onShow && json.lifecycle.onShow.call(comp);
@@ -5479,9 +5482,11 @@ BaseComponent.createClass = function (options, fullTag) {
             json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
         },
         initViewData: function initViewData() {
+            var json = this.__json;
             if (json.viewData) this.viewData = json.viewData;
         },
         initProto: function initProto() {
+            var json = this.__json;
             // if(json.methods) this.methods = json.methods;
             if (json.properties) this.properties = json.properties;
             if (json.props) this.props = json.props;
