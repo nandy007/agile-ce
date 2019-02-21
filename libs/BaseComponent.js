@@ -43,6 +43,45 @@ class BaseComponent{
         data[k] = v;
     }
 
+    __addCommProps(){
+        var props = this.props;
+        if(!props) props = this.props = {};
+        var $jsDom = this.$jsDom, comp = this;
+        var commProps = {
+            hidden: {
+                type: Boolean,
+                handler: function(val){
+                    $jsDom[val?'show':'hide']();
+                },
+                init: function(){
+                    if($jsDom.hasAttr('hidden')) this.handler(comp.getAttrValue('hidden'));
+                }
+            },
+            slotClass: {
+                type: String,
+                lastVal: null,
+                handler: function(val){
+                    var $slot = $jsDom.find('#slot').first();
+                    if(this.lastVal){
+                        $jsDom.removeClass(this.lastVal);
+                        $slot.removeClass(this.lastVal);
+                    }
+                    if(val){
+                        $jsDom.addClass(val);
+                        $slot.addClass(val);
+                    }
+                    this.lastVal = val;
+                },
+                init: function(){
+                    if($jsDom.hasAttr('slotClass')) this.handler(comp.getAttrValue('slotClass'));
+                }
+            }
+        };
+        for(var k in commProps){
+            if(!props[k]) props[k] = commProps[k];
+        }
+    }
+
     __initProto(){
         var _this = this;
         var __props = [];
@@ -175,6 +214,7 @@ class BaseComponent{
         this.__initInnerDom();
         this.initViewData && this.initViewData();
         this.initProto && this.initProto();
+        this.__addCommProps();
         this.__initEvent();
         this.__initProto();
         this.__mvvmRender();
@@ -182,8 +222,9 @@ class BaseComponent{
     // 属性变化回调，基础组件内可调用
     attrChanged(attrName, attrValue){
         if(this.__props&&this.__props.indexOf(attrName)>-1){
-            var prop = this.__getProp(attrName);
-            prop.handler && prop.handler(this.getAttrValue(attrName));
+            var prop = this.__getProp(attrName), val = this.getAttrValue(attrName);
+            prop.handler && prop.handler(val);
+            prop.observer && prop.observer.call(this, val);
         }
     }
     // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
@@ -194,6 +235,14 @@ class BaseComponent{
     selectComponent(selector){
         var selectCom = this.$root.find(selector)[0];
         return selectCom && selectCom.component;
+    }
+    selectAllComponents(selector){
+        var selectCom = this.$root.find(selector), rs = [];
+        selectCom.each(function(){
+            var curComp = selectCom && selectCom.component;
+            if(curComp) rs.push(curComp);
+        });
+        return rs;
     }
 }
 

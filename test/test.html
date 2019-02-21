@@ -10,6 +10,12 @@
     <style>
         a{background: #ccc;}
         a.active{background: #ff0000;}
+        .red{
+            color: red;
+        }
+        .bg{
+            background-color: blue;
+        }
     </style>
 </head>
 
@@ -23,6 +29,7 @@
             </div>
             
         </div>
+        <div v-bind:style="myclass">aaaaaaa</div>
         <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div>
         <!-- <div>
             <span v-on:click="click">{{'title:'+a}}</span>
@@ -74,6 +81,7 @@
                         'a', 'b', 'c'
                     ]
                 ],
+                myclass: 'color:red;'
             }
         };
         
@@ -92,7 +100,10 @@
         // obj.list[0].splice(1, 1, '222')
         // obj.title.unshift('ttt')
         // obj.title.splice(1,1)
-
+        
+        setTimeout(function(){
+            obj.data.myclass = 'color:blue;background-color:red;';
+        }, 1000);
         console.log($('#aaa').data('test'), obj.data.list)
 
     </script>

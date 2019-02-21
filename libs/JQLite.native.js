@@ -357,7 +357,13 @@
 			} else if (arguments.length > 1) {
 				this.each(function () {
 					if (name === 'class') {
-						_util.setClass(this, val);
+						_util.setClassStyle(this, val);
+					}else if(name === 'style'){
+						var ss = (val||'').split(';');
+						jqlite.util.each(ss, function(i, sStr){
+							var kvs = sStr.split(':'), k = (kvs[0] || '').trim(), v = (kvs[1] || '').trim();
+							if(k) this.setStyle(k, v);
+						}, this);
 					} else if (name === 'adapter') {
 						this.setAdapter(val instanceof JQLite ? val[0] : val);
 					} else if (name === 'checked' || name === 'selected') {
@@ -382,6 +388,8 @@
 				try {
 					if (name === 'class') {
 						ret = el.getClassStyle();
+					}else if(name === 'style'){
+						ret = el.getAttr('style');
 					} else if (name === 'id') {
 						ret = el.getId();
 					} else if (name === 'adapter') {
@@ -708,6 +716,16 @@
 			// args[0] = _eventRefer.get(args[0]);
 			this.each(function () {
 				this.fire.apply(this, args);
+			});
+			return this;
+		},
+		triggerHandler: function () {
+			var args = Array.prototype.slice.call(arguments), evtName = args.shift();
+			this.each(function(){
+				var eventarr = this.getOn(evtName) || [];
+				jqlite.util.each(eventarr, function(i, func){
+					func.apply(this, args.slice(0));
+				}, this);
 			});
 			return this;
 		},

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.60.1550653557751 beta
+ *	Version	:	0.4.61.1550751181666 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -326,8 +326,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			$.util.each(attrs, function (attr, exp) {
 				exp = $.util.trim(exp);
 				if (attr === 'class' || attr === 'style') {
-					parser['v' + attr]($node, fors, exp);
-					return;
+					var rsType = parser['v' + attr]($node, fors, exp);
+					if (!rsType) return;
 				}
 
 				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
@@ -353,14 +353,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			//v-style="string"写法，如：v-style="imgStyle"
 			if ($.util.isString($style)) {
 
-				var styles = Parser.formatJData(parser.getValue($style, fors)),
-				    access = Parser.makePath($style, fors);
+				// var styles = Parser.formatJData(parser.getValue($style, fors)),
+				// 	access = Parser.makePath($style, fors);
 
-				updater.updateStyle($node, styles);
+				// updater.updateStyle($node, styles);
 
-				parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
+				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
 
-				return;
+				return true;
 			}
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
@@ -384,15 +384,15 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			//v-class="string"写法，如：v-class="testClass"
 			if ($.util.isString($class)) {
 
-				var oldClass = Parser.formatJData(parser.getValue($class, fors));
+				// var oldClass = Parser.formatJData(parser.getValue($class, fors));
 
-				var access = Parser.makePath($class, fors);
+				// var access = Parser.makePath($class, fors);
 
-				updater.updateClass($node, oldClass);
+				// updater.updateClass($node, oldClass);
 
-				parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
+				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
 
-				return;
+				return true;
 			}
 
 			//v-class="json"写法，如：v-class="{colorred:cls.colorRed, colorgreen:cls.colorGreen, font30:cls.font30, font60:cls.font60}"
@@ -840,7 +840,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 					__directiveDef[dir] = expression;
 				}
 				parser.setDeepScope(fors);
-				rule.apply(parser, arguments);
+				return rule.apply(parser, arguments);
 			};
 		});
 	};
@@ -2026,7 +2026,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			} else if (arguments.length > 1) {
 				this.each(function () {
 					if (name === 'class') {
-						_util.setClass(this, val);
+						_util.setClassStyle(this, val);
+					} else if (name === 'style') {
+						var ss = (val || '').split(';');
+						jqlite.util.each(ss, function (i, sStr) {
+							var kvs = sStr.split(':'),
+							    k = (kvs[0] || '').trim(),
+							    v = (kvs[1] || '').trim();
+							if (k) this.setStyle(k, v);
+						}, this);
 					} else if (name === 'adapter') {
 						this.setAdapter(val instanceof JQLite ? val[0] : val);
 					} else if (name === 'checked' || name === 'selected') {
@@ -2051,6 +2059,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				try {
 					if (name === 'class') {
 						ret = el.getClassStyle();
+					} else if (name === 'style') {
+						ret = el.getAttr('style');
 					} else if (name === 'id') {
 						ret = el.getId();
 					} else if (name === 'adapter') {
@@ -2384,6 +2394,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			// args[0] = _eventRefer.get(args[0]);
 			this.each(function () {
 				this.fire.apply(this, args);
+			});
+			return this;
+		},
+		triggerHandler: function triggerHandler() {
+			var args = Array.prototype.slice.call(arguments),
+			    evtName = args.shift();
+			this.each(function () {
+				var eventarr = this.getOn(evtName) || [];
+				jqlite.util.each(eventarr, function (i, func) {
+					func.apply(this, args.slice(0));
+				}, this);
 			});
 			return this;
 		},
@@ -5196,6 +5217,47 @@ var BaseComponent = function () {
             data[k] = v;
         }
     }, {
+        key: '__addCommProps',
+        value: function __addCommProps() {
+            var props = this.props;
+            if (!props) props = this.props = {};
+            var $jsDom = this.$jsDom,
+                comp = this;
+            var commProps = {
+                hidden: {
+                    type: Boolean,
+                    handler: function handler(val) {
+                        $jsDom[val ? 'show' : 'hide']();
+                    },
+                    init: function init() {
+                        if ($jsDom.hasAttr('hidden')) this.handler(comp.getAttrValue('hidden'));
+                    }
+                },
+                slotClass: {
+                    type: String,
+                    lastVal: null,
+                    handler: function handler(val) {
+                        var $slot = $jsDom.find('#slot').first();
+                        if (this.lastVal) {
+                            $jsDom.removeClass(this.lastVal);
+                            $slot.removeClass(this.lastVal);
+                        }
+                        if (val) {
+                            $jsDom.addClass(val);
+                            $slot.addClass(val);
+                        }
+                        this.lastVal = val;
+                    },
+                    init: function init() {
+                        if ($jsDom.hasAttr('slotClass')) this.handler(comp.getAttrValue('slotClass'));
+                    }
+                }
+            };
+            for (var k in commProps) {
+                if (!props[k]) props[k] = commProps[k];
+            }
+        }
+    }, {
         key: '__initProto',
         value: function __initProto() {
             var _this = this;
@@ -5353,6 +5415,7 @@ var BaseComponent = function () {
             this.__initInnerDom();
             this.initViewData && this.initViewData();
             this.initProto && this.initProto();
+            this.__addCommProps();
             this.__initEvent();
             this.__initProto();
             this.__mvvmRender();
@@ -5363,8 +5426,10 @@ var BaseComponent = function () {
         key: 'attrChanged',
         value: function attrChanged(attrName, attrValue) {
             if (this.__props && this.__props.indexOf(attrName) > -1) {
-                var prop = this.__getProp(attrName);
-                prop.handler && prop.handler(this.getAttrValue(attrName));
+                var prop = this.__getProp(attrName),
+                    val = this.getAttrValue(attrName);
+                prop.handler && prop.handler(val);
+                prop.observer && prop.observer.call(this, val);
             }
         }
         // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
@@ -5381,6 +5446,17 @@ var BaseComponent = function () {
         value: function selectComponent(selector) {
             var selectCom = this.$root.find(selector)[0];
             return selectCom && selectCom.component;
+        }
+    }, {
+        key: 'selectAllComponents',
+        value: function selectAllComponents(selector) {
+            var selectCom = this.$root.find(selector),
+                rs = [];
+            selectCom.each(function () {
+                var curComp = selectCom && selectCom.component;
+                if (curComp) rs.push(curComp);
+            });
+            return rs;
         }
     }]);
 

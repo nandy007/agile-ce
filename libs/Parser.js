@@ -198,8 +198,8 @@
 			$.util.each(attrs, function (attr, exp) {
 				exp = $.util.trim(exp);
 				if (attr === 'class' || attr === 'style') {
-					parser['v' + attr]($node, fors, exp);
-					return;
+					var rsType = parser['v' + attr]($node, fors, exp);
+					if(!rsType) return;
 				}
 
 				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
@@ -224,14 +224,14 @@
 			//v-style="string"写法，如：v-style="imgStyle"
 			if ($.util.isString($style)) {
 
-				var styles = Parser.formatJData(parser.getValue($style, fors)),
-					access = Parser.makePath($style, fors);
+				// var styles = Parser.formatJData(parser.getValue($style, fors)),
+				// 	access = Parser.makePath($style, fors);
 
-				updater.updateStyle($node, styles);
+				// updater.updateStyle($node, styles);
 
-				parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
+				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
 
-				return;
+				return true;
 			}
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
@@ -254,15 +254,15 @@
 			//v-class="string"写法，如：v-class="testClass"
 			if ($.util.isString($class)) {
 
-				var oldClass = Parser.formatJData(parser.getValue($class, fors));
+				// var oldClass = Parser.formatJData(parser.getValue($class, fors));
 
-				var access = Parser.makePath($class, fors);
+				// var access = Parser.makePath($class, fors);
 
-				updater.updateClass($node, oldClass);
+				// updater.updateClass($node, oldClass);
 
-				parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
+				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
 
-				return;
+				return true;
 			}
 
 			//v-class="json"写法，如：v-class="{colorred:cls.colorRed, colorgreen:cls.colorGreen, font30:cls.font30, font60:cls.font60}"
@@ -686,7 +686,7 @@
 					__directiveDef[dir] = expression;
 				}
 				parser.setDeepScope(fors);
-				rule.apply(parser, arguments);
+				return rule.apply(parser, arguments);
 			};
 		});
 	};
