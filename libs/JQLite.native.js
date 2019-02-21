@@ -452,6 +452,7 @@
 				var classStr = (this.getClassStyle() || '').trim();
 				if (!classStr) {
 					_util.setClass(this, className);
+					return;
 				}
 
 				var cns = [], classStr = ' ' + classStr + ' ';

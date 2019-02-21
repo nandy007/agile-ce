@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.61.1550751181666 beta
+ *	Version	:	0.4.61.1550753187546 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -2123,6 +2123,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				var classStr = (this.getClassStyle() || '').trim();
 				if (!classStr) {
 					_util.setClass(this, className);
+					return;
 				}
 
 				var cns = [],
@@ -5237,14 +5238,14 @@ var BaseComponent = function () {
                     type: String,
                     lastVal: null,
                     handler: function handler(val) {
-                        var $slot = $jsDom.find('#slot').first();
+                        var $slot = comp.getSlotWrapper && comp.getSlotWrapper();
                         if (this.lastVal) {
                             $jsDom.removeClass(this.lastVal);
-                            $slot.removeClass(this.lastVal);
+                            $slot && $slot.removeClass(this.lastVal);
                         }
                         if (val) {
                             $jsDom.addClass(val);
-                            $slot.addClass(val);
+                            $slot && $slot.addClass(val);
                         }
                         this.lastVal = val;
                     },

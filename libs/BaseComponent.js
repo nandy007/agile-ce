@@ -61,14 +61,14 @@ class BaseComponent{
                 type: String,
                 lastVal: null,
                 handler: function(val){
-                    var $slot = $jsDom.find('#slot').first();
+                    var $slot = comp.getSlotWrapper && comp.getSlotWrapper();
                     if(this.lastVal){
                         $jsDom.removeClass(this.lastVal);
-                        $slot.removeClass(this.lastVal);
+                        $slot && $slot.removeClass(this.lastVal);
                     }
                     if(val){
                         $jsDom.addClass(val);
-                        $slot.addClass(val);
+                        $slot && $slot.addClass(val);
                     }
                     this.lastVal = val;
                 },
