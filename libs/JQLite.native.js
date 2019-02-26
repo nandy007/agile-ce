@@ -404,10 +404,10 @@
 					} else if (typeof el[name] === 'function') {
 						ret = el[name]();
 					} else {
-						ret = el.getAttr(name);
+						ret = el.getAttr && el.getAttr(name);
 					}
 				} catch (e) {
-					$.util.error(e);
+					jqlite.util.error(e);
 				}
 
 				return ret || '';

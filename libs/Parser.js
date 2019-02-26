@@ -198,8 +198,8 @@
 			$.util.each(attrs, function (attr, exp) {
 				exp = $.util.trim(exp);
 				if (attr === 'class' || attr === 'style') {
-					var rsType = parser['v' + attr]($node, fors, exp);
-					if(!rsType) return;
+					parser['v' + attr]($node, fors, exp);
+					return;
 				}
 
 				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
@@ -224,14 +224,34 @@
 			//v-style="string"写法，如：v-style="imgStyle"
 			if ($.util.isString($style)) {
 
-				// var styles = Parser.formatJData(parser.getValue($style, fors)),
-				// 	access = Parser.makePath($style, fors);
+				var styles = Parser.formatJData(parser.getValue($style, fors));
+				    // access = Parser.makePath($style, fors);
 
-				// updater.updateStyle($node, styles);
+				updater.updateStyle($node, styles);
 
 				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
 
-				return true;
+				var exp = $.util.trim(expression);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
+				var deps = depsAlias.deps;
+
+				parser.watcher.watch(deps, function (options) {
+					var newStyles = Parser.formatJData(parser.getValue($style, fors));
+					// updater.updateAttribute($node, attr, parser.getValue(exp, fors));
+					$.util.each(styles, function(k, v){
+						$node.css(k, '');
+					});
+
+					styles = newStyles;
+
+					updater.updateStyle($node, newStyles);
+
+				}, fors);
+
+				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
+
+				return;
 			}
 
 			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
@@ -254,15 +274,34 @@
 			//v-class="string"写法，如：v-class="testClass"
 			if ($.util.isString($class)) {
 
-				// var oldClass = Parser.formatJData(parser.getValue($class, fors));
+				var oldClass = Parser.formatJData(parser.getValue($class, fors));
 
 				// var access = Parser.makePath($class, fors);
 
-				// updater.updateClass($node, oldClass);
+				updater.updateClass($node, oldClass);
+
+				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
+				var exp = $.util.trim(expression);
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
+				var deps = depsAlias.deps;
+
+				parser.watcher.watch(deps, function (options) {
+					var newClass = Parser.formatJData(parser.getValue($class, fors));
+					// updater.updateAttribute($node, attr, parser.getValue(exp, fors));
+					$.util.each(oldClass, function(k, v){
+						$node.removeClass(k);
+					});
+
+					oldClass = newClass;
+
+					updater.updateClass($node, newClass);
+
+				}, fors);
 
 				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
 
-				return true;
+				return;
 			}
 
 			//v-class="json"写法，如：v-class="{colorred:cls.colorRed, colorgreen:cls.colorGreen, font30:cls.font30, font60:cls.font60}"
@@ -626,6 +665,7 @@
 	var pp = Parser.prototype;
 
 	pp.initVmPre = function(){
+		if(!Parser.hasVMPre()) return;
 		var model = this.vm.$data;
 		this.vmPre = {
 			data: model.data ? 'data' : '',
@@ -634,6 +674,7 @@
 	};
 
 	pp.getVmPre = function(type){
+		if(!Parser.hasVMPre()) return '';
 		type = type || 'data';
 		var vmPre = Parser.getVMPre();
 		var rs = this.vmPre[type] || vmPre[type] || '';
@@ -1448,10 +1489,11 @@
 		return null;
 	};
 
-	var __vmPre = {
-		data: '',
-		method: ''
-	};
+	// var __vmPre = {
+	// 	data: '',
+	// 	method: ''
+	// };
+	var __vmPre;
 	Parser.__addPre = function(exp, pre){
 		// var pre = (__vmPre&&__vmPre[type||'data']) || '';
 		return (pre? pre+'.' : '') + exp;
@@ -1459,8 +1501,11 @@
 	Parser.setVMPre = function(setting){
 		__vmPre = setting;
 	};
-	Parser.getVMPre = function(setting){
+	Parser.getVMPre = function(){
 		return __vmPre || {};
+	};
+	Parser.hasVMPre = function(){
+		return !!__vmPre;
 	};
 
 

@@ -35,6 +35,13 @@
 		},
 		isTheDirective : function(type, dir){//是否为指定指令
 			return dir === type;
+		},
+		getSlotParent: function(el){
+			var soltParent = el.soltParent;
+			if(soltParent && soltParent.soltParent){
+				return this.getSlotParent(soltParent);
+			}
+			return soltParent;
 		}
 	};
 
@@ -49,7 +56,7 @@
 
 		var compiler = this;
 
-		var $element = $(element);
+		var $element = $(element), element = $element[0];
 
 		// $element.on('DOMNodeRemoved', function(){
 		// 	compiler.destroy();
@@ -65,6 +72,7 @@
 
 		//缓存根节点
 		this.$element = $element;
+		this.slotParent = element.isComponent ? element.slotParent : null;
 
 		//数据模型对象
 		this.$data = model;
@@ -120,7 +128,24 @@
 
 			if($node.hasAttr('vmignore')) return;
 
-			var ignoreRoot = $node.hasAttr('vmignoreroot'), isRoot = _this.root===this;
+			var isRoot = _this.root===this;
+
+			if(!isRoot && this.isSlotParent) return;
+
+			if(this.isComponent && !isRoot){
+				//缓存指令节点
+				if (compileUtil.hasDirective($node)) {
+					directiveNodes.push({
+						el : $node,
+						fors : fors
+					});
+				}
+				//对slot子节点递归调用
+				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
+				return;
+			}
+
+			var ignoreRoot = $node.hasAttr('vmignoreroot');
 
 			if(!ignoreRoot || (ignoreRoot && !isRoot)){
 				//缓存指令节点

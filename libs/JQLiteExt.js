@@ -1,11 +1,25 @@
 
 module.exports = function(jqlite){
   jqlite.JSON = {
-		parse: function (str) {
-			return JSON.parse(str) || {};
+		stringify: function(json){
+			try{
+				return typeof json==='object' ? JSON.stringify(json) : json;
+			}catch(e){
+				console.error('json数据转换字符串失败：'+String(json));
+			}
+			return json;
 		},
-		stringify: function (str) {
-			return JSON.stringify(str) || '';
+		parse: function(val){
+			try{
+				return JSON.parse(val);
+			}catch(e){
+				val = new Function(`return ${val};`)();
+				if(typeof val!=='object') {
+					console.error('json字符串转换对象失败：'+String(val));
+					return null;
+				};
+			}
+			return val;
 		}
 	};
 

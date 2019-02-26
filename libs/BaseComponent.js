@@ -10,6 +10,8 @@ class BaseComponent{
     __initInnerDom(){
         var jsDom = this.jsDom, $ = require('./env').JQLite;
         jsDom.component = this;
+        jsDom.isComponent = true;
+        if(jsDom.slotParent) jsDom.slotParent.isSlotParent = true;
         this.$ = $;
         this.$jsDom = $(jsDom);
         var root = jsDom.getRootElement && jsDom.getRootElement();
@@ -63,11 +65,11 @@ class BaseComponent{
                 handler: function(val){
                     var $slot = comp.getSlotWrapper && comp.getSlotWrapper();
                     if(this.lastVal){
-                        $jsDom.removeClass(this.lastVal);
+                        // $jsDom.removeClass(this.lastVal);
                         $slot && $slot.removeClass(this.lastVal);
                     }
                     if(val){
-                        $jsDom.addClass(val);
+                        // $jsDom.addClass(val);
                         $slot && $slot.addClass(val);
                     }
                     this.lastVal = val;
@@ -139,7 +141,7 @@ class BaseComponent{
     __mvvmRender(){
         if(!this.viewData) return;
 
-        this.$root.attr('vmignoreroot', 'true')
+        this.$root//.attr('vmignoreroot', 'true')
                 .on('__destroy__', ()=>{
                     this.$vm.destroy();
                 });

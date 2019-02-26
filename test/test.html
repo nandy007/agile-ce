@@ -29,7 +29,7 @@
             </div>
             
         </div>
-        <div v-bind:style="myclass">aaaaaaa</div>
+        <div v-bind:style="mystyle">aaaaaaa</div>
         <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div>
         <!-- <div>
             <span v-on:click="click">{{'title:'+a}}</span>
@@ -39,7 +39,10 @@
         </div> -->
     </div>
     <script>
-		
+		$.vm.setVMPre({
+            data: 'data',
+            method: ''
+        });
         var obj = {
             // html: '<font color="red">aaa</font>',
             // doFilter: function(index, item, arr, $node){
@@ -81,7 +84,8 @@
                         'a', 'b', 'c'
                     ]
                 ],
-                myclass: 'color:red;'
+                myclass: 'red',
+                mystyle: 'color:red;'
             }
         };
         
@@ -102,7 +106,8 @@
         // obj.title.splice(1,1)
         
         setTimeout(function(){
-            obj.data.myclass = 'color:blue;background-color:red;';
+            obj.data.myclass = 'bg';
+            obj.data.mystyle = 'background-color:blue;'
         }, 1000);
         console.log($('#aaa').data('test'), obj.data.list)
 
