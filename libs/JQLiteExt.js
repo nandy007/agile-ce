@@ -34,9 +34,9 @@ module.exports = function(jqlite){
 		Parser.add(rules);
   };
     
-  jqlite.vm.addEventFilter = function (filters) {
+  jqlite.vm.addEventFilter = function (filters, type) {
 		var Parser = require('./Parser');
-		Parser.addEventFilter(filters);
+		Parser.addEventFilter(filters, type);
 	};
 	
 	jqlite.vm.setVMPre = function(setting){

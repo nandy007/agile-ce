@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.61.1551172626277 beta
+ *	Version	:	0.4.62.1551336542728 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -236,11 +236,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				__modelInit && __modelInit();
 			});
 		},
-		'von': function von($node, fors, expression, dir, isOnce) {
+		'von': function von($node, fors, expression, dir, opts) {
 			var parser = this;
 			var vm = this.vm,
 			    scope = this.$scope;
 			var evts = Parser.parseDir(dir, expression);
+			opts = opts || {};
+			var isOnce = opts.isOnce,
+			    isCatch = opts.isCatch;
 
 			$.util.each(evts, function (evt, func) {
 				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
@@ -267,9 +270,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 						var func = new Function('scope', 'node', '$event', 'params', 'params.unshift(' + argsStr + '); return ' + funcStr + '.apply(node, params);');
 						rs = func(scope, me, params.shift(), params);
 					}
-					var afterHandler = this['__after' + evt.toLowerCase()];
-					afterHandler && afterHandler(rs);
-					return rs;
+					var afterHandler = Parser.getEventFilter(this, evt, 'after');
+					return afterHandler ? afterHandler.apply(parser.vm.$element, [rs, isCatch, this].concat(_toConsumableArray(params))) : rs;
 				};
 
 				$node.each(function () {
@@ -283,7 +285,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		},
 		'vone': function vone($node, fors, expression, dir) {
 			var args = $.util.copyArray(arguments);
-			args.push(true);
+			args.push({
+				isOnce: true
+			});
+			this.von.apply(this, args);
+		},
+		'vcatch': function vcatch($node, fors, expression, dir) {
+			var args = $.util.copyArray(arguments);
+			args.push({
+				isCatch: true
+			});
 			this.von.apply(this, args);
 		},
 		'vbind': function vbind($node, fors, expression, dir) {
@@ -1596,19 +1607,26 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	Parser.dirSplit = ':';
 
 	var __eventFilter = {
-		default: null
-	};
-	Parser.addEventFilter = function (filters) {
-		for (var k in filters) {
-			__eventFilter[k] = filters[k];
+		before: {
+			default: null
+		},
+		after: {
+			default: null
 		}
 	};
-	Parser.getEventFilter = function (el, evtName) {
+	Parser.addEventFilter = function (filters, type) {
+		type = type || 'before';
+		for (var k in filters) {
+			__eventFilter[type][k] = filters[k];
+		}
+	};
+	Parser.getEventFilter = function (el, evtName, type) {
 		if (!el) return null;
 		evtName = evtName.toLowerCase();
-		if (el['__before' + evtName]) return el['__before' + evtName];
-		if (__eventFilter[evtName]) return __eventFilter[evtName];
-		if (__eventFilter['default']) return __eventFilter['default'];
+		type = type || 'before';
+		if (el['__' + type + evtName]) return el['__' + type + evtName];
+		if (__eventFilter[type][evtName]) return __eventFilter[type][evtName];
+		if (__eventFilter[type]['default']) return __eventFilter[type]['default'];
 		return null;
 	};
 
@@ -11096,9 +11114,9 @@ module.exports = function (jqlite) {
 		Parser.add(rules);
 	};
 
-	jqlite.vm.addEventFilter = function (filters) {
+	jqlite.vm.addEventFilter = function (filters, type) {
 		var Parser = __webpack_require__(1);
-		Parser.addEventFilter(filters);
+		Parser.addEventFilter(filters, type);
 	};
 
 	jqlite.vm.setVMPre = function (setting) {
@@ -11368,6 +11386,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 						fors: fors
 					});
 				}
+				if (compileUtil.isInPre($node)) return;
 				//对slot子节点递归调用
 				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
 				return;

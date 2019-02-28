@@ -140,6 +140,7 @@
 						fors : fors
 					});
 				}
+				if(compileUtil.isInPre($node)) return;
 				//对slot子节点递归调用
 				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
 				return;

@@ -139,10 +139,12 @@
 				__modelInit && __modelInit();
 			});
 		},
-		'von': function ($node, fors, expression, dir, isOnce) {
+		'von': function ($node, fors, expression, dir, opts) {
 			var parser = this;
 			var vm = this.vm, scope = this.$scope;
 			var evts = Parser.parseDir(dir, expression);
+			opts = opts || {};
+			var isOnce = opts.isOnce, isCatch = opts.isCatch;
 
 			$.util.each(evts, function (evt, func) {
 				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
@@ -171,9 +173,8 @@
 							+ funcStr + '.apply(node, params);'));
 						rs = func(scope, me, params.shift(), params);
 					}
-					var afterHandler = this['__after'+evt.toLowerCase()];
-					afterHandler && afterHandler(rs);
-					return rs;
+					var afterHandler = Parser.getEventFilter(this, evt, 'after');
+					return afterHandler ? afterHandler.apply(parser.vm.$element, [rs, isCatch, this, ...params]) : rs;
 				};
 
 				$node.each(function () {
@@ -187,7 +188,16 @@
 		},
 		'vone': function ($node, fors, expression, dir) {
 			var args = $.util.copyArray(arguments);
-			args.push(true);
+			args.push({
+				isOnce: true
+			});
+			this.von.apply(this, args);
+		},
+		'vcatch': function($node, fors, expression, dir){
+			var args = $.util.copyArray(arguments);
+			args.push({
+				isCatch: true
+			});
 			this.von.apply(this, args);
 		},
 		'vbind': function ($node, fors, expression, dir) {
@@ -1473,19 +1483,26 @@
 	Parser.dirSplit = ':';
 
 	var __eventFilter = {
-		default: null
-	};
-	Parser.addEventFilter = function(filters){
-		for(var k in filters){
-			__eventFilter[k] = filters[k];
+		before: {
+			default: null
+		},
+		after: {
+			default: null
 		}
 	};
-	Parser.getEventFilter = function(el, evtName){
+	Parser.addEventFilter = function(filters, type){
+		type = type || 'before';
+		for(var k in filters){
+			__eventFilter[type][k] = filters[k];
+		}
+	};
+	Parser.getEventFilter = function(el, evtName, type){
 		if(!el) return null;
 		evtName = evtName.toLowerCase();
-		if(el['__before'+evtName]) return el['__before'+evtName];
-		if(__eventFilter[evtName]) return __eventFilter[evtName];
-		if(__eventFilter['default']) return __eventFilter['default'];
+		type = type || 'before';
+		if(el['__'+type+evtName]) return el['__'+type+evtName];
+		if(__eventFilter[type][evtName]) return __eventFilter[type][evtName];
+		if(__eventFilter[type]['default']) return __eventFilter[type]['default'];
 		return null;
 	};
 
