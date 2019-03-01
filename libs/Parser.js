@@ -76,7 +76,7 @@
 				directiveUtil.commonHandler.call(this, {
 					$node: $node,
 					fors: fors,
-					expression: '{{'+obj+'}}',
+					expression: directiveUtil.wrapperDir(obj),
 					cb: function (rs) {
 						cb(rs);
 					}
@@ -90,12 +90,15 @@
 				directiveUtil.commonHandler.call(this, {
 					$node: $node,
 					fors: fors,
-					expression: '{{'+exp+'}}',
+					expression: directiveUtil.wrapperDir(exp),
 					cb: function (rs) {
 						cb(rs, k);
 					}
 				});
 			}, this);
+		},
+		wrapperDir: function(exp){
+			return '{{' + exp + '}}';
 		}
 	};
 
@@ -116,7 +119,7 @@
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
-				expression: '{{' + expression + '}}',
+				expression: directiveUtil.wrapperDir(expression),
 				cb: function(rs){
 					updater[updateFunc]($node, rs);
 				}
