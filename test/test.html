@@ -13,8 +13,14 @@
         .red{
             color: red;
         }
+        .blue{
+            color: blue;
+        }
         .bg{
             background-color: blue;
+        }
+        .active:after{
+            content: '--';
         }
     </style>
 </head>
@@ -23,20 +29,25 @@
     <div id="app">
         <!-- <input type="text" v-bind:disabled="disabled"> -->
         <!-- <div v-html="html" v-bind:test="html"></div> -->
-        <div v-for="(itemA) in list" for-index="aindex">
+        <!-- <div v-for="(itemA) in list" for-index="aindex">
             <div v-for="itemB,bindex in itemA"  v-on:click="ttt" v-bind:data-aa="bindex">
                 <span>{{aindex}}-{{bindex}}</span>
             </div>
             
-        </div>
-        <div v-bind:style="mystyle">aaaaaaa</div>
-        <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div>
+        </div> -->
+        <!-- <div  v-bind:style="{ color: myclass, fontSize: fontSize + 'px' }">aaaaaaa</div> -->
+        <!-- <div v-xstyle="background-color:{{isRed?'red':'blue'}}">bbbbbbb</div> -->
+        <!-- <div>{{a}}</div> -->
+        <!-- <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div> -->
         <!-- <div>
             <span v-on:click="click">{{'title:'+a}}</span>
             <div v-for="item in title">
                 <span>{{item}}{{$index}}</span>
-            </div>
+            </div> v-bind:class="{active:item.isActive}"
         </div> -->
+        <div v-for="item in ls">
+            <div v-class="item.myclass">ddd</div>
+        </div>
     </div>
     <script>
 		$.vm.setVMPre({
@@ -84,6 +95,14 @@
                         'a', 'b', 'c'
                     ]
                 ],
+                ls: [
+                    {
+                        myclass: 'red',
+                        isActive: true
+                    }
+                ],
+                isRed: false,
+                fontSize: 40,
                 myclass: 'red',
                 mystyle: 'color:red;'
             }
@@ -106,8 +125,11 @@
         // obj.title.splice(1,1)
         
         setTimeout(function(){
-            obj.data.myclass = 'bg';
+            obj.data.isRed = true;
+            obj.data.myclass = 'blue';
             obj.data.mystyle = 'background-color:blue;'
+            obj.data.a = 333;
+            obj.data.fontSize = 13;
         }, 1000);
         console.log($('#aaa').data('test'), obj.data.list)
 

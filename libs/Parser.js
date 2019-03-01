@@ -3,6 +3,102 @@
 	var Updater = require('./Updater');
 	var Watcher = require('./Watcher');
 
+	var directiveUtil = {
+		commonHandler: function(opts){ // call by parser
+			var $node = opts.$node, fors = opts.fors, expression = opts.expression, cb = opts.cb;
+			var parser = this;
+			var scope = this.$scope;
+
+			var expressions = [];
+			expression.replace(/\{\{([^\}]+)\}\}/g, function(s, s1){
+				expressions.push($.util.trim(s1));
+			});
+			$.util.each(expressions, function(i, exp){
+				var depsalias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+				var deps = depsalias.deps;
+				var exps = depsalias.exps;
+
+				var func = this.getAliasFunc(exps.join(''), true);
+
+				cb(func(scope));
+
+				this.watcher.watch(deps, function (options) {
+
+					cb(func(scope));
+
+				}, fors);
+			}, this);
+		},
+		formatStyle: function formatStyle(exp) {
+			if(typeof exp==='object') return exp;
+			var exps = exp.split(';'),
+			    styles = {};
+			$.util.each(exps, function (i, style) {
+				var ss = style.split(':'),
+				    k = $.util.trim(ss.shift()),
+				    v = $.util.trim(ss.join(':'));
+				if (k && v) styles[k] = v;
+			});
+			
+			return styles;
+		},
+		formatDirJson: function(expression){
+			var ps = expression.split('');
+			if (ps.shift() === '{' && ps.pop() === '}') {
+				expression = ps.join('');
+				
+				ps = expression.split(',');
+				var json = {};
+				$.util.each(ps, function (i, kv) {
+					var kvs = kv.split(':'),
+					    k = $.util.trim(kvs.shift()||'').replace(/['"]/g, ''),
+						v = $.util.trim(kvs.join(':') || '');
+					if (k && v) json[k] = v;
+				});
+				return json;
+			}
+
+			return expression;
+		},
+		jsonDirHandler: function jsonDirHandler(opts) {
+			// call by parser
+			var $node = opts.$node,
+			    fors = opts.fors,
+			    expression = opts.expression,
+			    cb = opts.cb;
+			var parser = this;
+
+			var obj = directiveUtil.formatDirJson(expression);
+
+			//v-style="string"写法，如：v-style="imgStyle"
+			if ($.util.isString(obj)) {
+
+				directiveUtil.commonHandler.call(this, {
+					$node: $node,
+					fors: fors,
+					expression: '{{'+obj+'}}',
+					cb: function (rs) {
+						cb(rs);
+					}
+				});
+
+				return;
+			}
+
+			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
+			$.util.each(obj, function (k, exp) {
+				directiveUtil.commonHandler.call(this, {
+					$node: $node,
+					fors: fors,
+					expression: '{{'+exp+'}}',
+					cb: function (rs) {
+						cb(rs, k);
+					}
+				});
+			}, this);
+		}
+	};
+
 	//指令解析规则，可以通过Parser.add方法添加自定义指令处理规则
 	//所有解析规则默认接受四个参数
 	/**
@@ -14,26 +110,17 @@
 	var directiveRules = {
 		'vtext': function ($node, fors, expression, dir, updateFunc) {
 
-			var parser = this, updater = this.updater;
-
-			var scope = this.$scope;
-
-			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
-			var deps = depsalias.deps;
-			var exps = depsalias.exps;
-
-			var func = this.getAliasFunc(exps.join(''), true);
-
-			var text = func(scope);
-
+			var updater = this.updater;
 			updateFunc = updateFunc || 'updateTextContent';
 
-			updater[updateFunc]($node, text);
-
-			this.watcher.watch(deps, function (options) {
-				text = func(scope);
-				updater[updateFunc]($node, text);
-			}, fors);
+			directiveUtil.commonHandler.call(this, {
+				$node: $node,
+				fors: fors,
+				expression: '{{' + expression + '}}',
+				cb: function(rs){
+					updater[updateFunc]($node, rs);
+				}
+			});
 		},
 		'vhtml': function ($node, fors, expression, dir) {
 			var args = $.util.copyArray(arguments);
@@ -226,106 +313,89 @@
 			});
 		},
 		'vstyle': function ($node, fors, expression) {
-
-			var parser = this, updater = this.updater;
-
-			var $style = parser.getValue(Parser.formatExp(expression));
-
-			//v-style="string"写法，如：v-style="imgStyle"
-			if ($.util.isString($style)) {
-
-				var styles = Parser.formatJData(parser.getValue($style, fors));
-				    // access = Parser.makePath($style, fors);
-
-				updater.updateStyle($node, styles);
-
-				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
-
-				var exp = $.util.trim(expression);
-				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
-
-				var deps = depsAlias.deps;
-
-				parser.watcher.watch(deps, function (options) {
-					var newStyles = Parser.formatJData(parser.getValue($style, fors));
-					// updater.updateAttribute($node, attr, parser.getValue(exp, fors));
-					$.util.each(styles, function(k, v){
-						$node.css(k, '');
-					});
-
-					styles = newStyles;
-
-					updater.updateStyle($node, newStyles);
-
-				}, fors);
-
-				// parser.doWatch($node, access, styles, 'updateStyle', $style, fors);
-
-				return;
-			}
-
-			//v-style="json"写法，如：v-style="{'color':tColor, 'font-size':fontSize+'dp'}"
-			$.util.each($style, function (style, exp) {
-				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
-				updater.updateStyle($node, style, parser.getValue(exp, fors));
-
-				var deps = depsAlias.deps;
-
-				parser.watcher.watch(deps, function (options) {
-					updater.updateStyle($node, style, parser.getValue(exp, fors));
-				}, fors);
+			var oldStyle, updater = this.updater;
+			directiveUtil.jsonDirHandler.call(this, {
+				$node: $node,
+				fors: fors,
+				expression: expression,
+				cb: function(rs, k){
+					if(k){
+						$node.css(k, rs);
+						return;
+					}
+					rs = directiveUtil.formatStyle(rs);
+					if(oldStyle){
+						$.util.each(oldStyle, function(k ,v){
+							if(!rs[k]) rs[k] = '';
+						});
+					}
+					updater.updateStyle($node, rs);
+					oldStyle = rs;
+				}
 			});
+
 		},
 		'vclass': function ($node, fors, expression) {
-			var parser = this, updater = this.updater;
-
-			var $class = parser.getValue(Parser.formatExp(expression));
-
-			//v-class="string"写法，如：v-class="testClass"
-			if ($.util.isString($class)) {
-
-				var oldClass = Parser.formatJData(parser.getValue($class, fors));
-
-				// var access = Parser.makePath($class, fors);
-
-				updater.updateClass($node, oldClass);
-
-				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
-				var exp = $.util.trim(expression);
-				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
-
-				var deps = depsAlias.deps;
-
-				parser.watcher.watch(deps, function (options) {
-					var newClass = Parser.formatJData(parser.getValue($class, fors));
-					// updater.updateAttribute($node, attr, parser.getValue(exp, fors));
-					$.util.each(oldClass, function(k, v){
-						$node.removeClass(k);
-					});
-
-					oldClass = newClass;
-
-					updater.updateClass($node, newClass);
-
-				}, fors);
-
-				// parser.doWatch($node, access, oldClass, 'updateClass', $class, fors);
-
-				return;
-			}
-
-			//v-class="json"写法，如：v-class="{colorred:cls.colorRed, colorgreen:cls.colorGreen, font30:cls.font30, font60:cls.font60}"
-			$.util.each($class, function (cName, exp) {
-
-				updater.updateClass($node, cName, parser.getValue(exp, fors));
-
-				var deps = Parser.getDepsAlias(exp, fors, parser.getVmPre()).deps;
-
-				parser.watcher.watch(deps, function (options) {
-					updater.updateClass($node, cName, parser.getValue(exp, fors));
-				}, fors);
-
+			var oldClass, updater = this.updater;
+			directiveUtil.jsonDirHandler.call(this, {
+				$node: $node,
+				fors: fors,
+				expression: expression,
+				cb: function(rs, k){
+					if(k){
+						$node[rs?'addClass':'removeClass'](k);
+						return;
+					}
+		
+					if(typeof oldClass==='string'){
+						$node.removeClass(oldClass);
+					}else if(typeof oldClass==='object'){
+						$.util.each(oldClass, function(k, v){
+							$node.removeClass(k);
+						});
+					}
+					if(typeof rs==='string'){
+						$node.addClass(rs);
+					}else if(typeof rs==='object'){
+						$.util.each(rs, function(k, v){
+							$node[v?'addClass':'removeClass'](k);
+						});
+					}
+					oldClass = rs;
+				}
 			});
+		},
+		'vxclass': function($node, fors, expression){
+
+			var oldClass;
+
+			directiveUtil.commonHandler.call(this, {
+				$node: $node,
+				fors: fors,
+				expression: expression,
+				cb: function(rs){
+					if(oldClass) $node.removeClass(oldClass);
+					if(rs) $node.addClass(rs);
+					oldClass = rs;
+				}
+			});
+		},
+		'vxstyle': function($node, fors, expression){
+
+			var styles = directiveUtil.formatStyle(expression);
+
+			$.util.each(styles, function(styleName, exp){
+				directiveUtil.commonHandler.call(this, {
+					$node: $node,
+					fors: fors,
+					expression: exp,
+					cb: function(rs){
+						$node.css(styleName, rs);
+					}
+				});
+			}, this);
+
+			
 		},
 		'vshow': function ($node, fors, expression) {
 			var parser = this, updater = this.updater;
@@ -728,6 +798,7 @@
 		//将指令规则添加到Parser对象中
 		$.util.each(directiveRules, function (directive, rule) {
 			parser[directive] = function ($node, fors, expression, dir) {
+				expression = $.util.trim(expression || '');
 				$node.attr('acee', parser.parserIndex);
 				if (dir) {
 					var __directiveDef = $node.def('__directive');
