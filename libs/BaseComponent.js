@@ -347,6 +347,7 @@ BaseComponent.createClass = function(options, fullTag){
     };
 
     if(fullTag) MyPage.fullTag = fullTag;
+    if(options.isNode) MyPage.isNode = true;
 
     return MyPage;
 };

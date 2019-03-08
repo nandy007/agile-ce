@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.63.1551430676015 beta
+ *	Version	:	0.4.64.1552028967793 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -206,7 +206,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				directiveUtil.commonHandler.call(this, {
 					$node: $node,
 					fors: fors,
-					expression: '{{' + obj + '}}',
+					expression: directiveUtil.wrapperDir(obj),
 					cb: function cb(rs) {
 						_cb(rs);
 					}
@@ -220,12 +220,15 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				directiveUtil.commonHandler.call(this, {
 					$node: $node,
 					fors: fors,
-					expression: '{{' + exp + '}}',
+					expression: directiveUtil.wrapperDir(exp),
 					cb: function cb(rs) {
 						_cb(rs, k);
 					}
 				});
 			}, this);
+		},
+		wrapperDir: function wrapperDir(exp) {
+			return '{{' + exp + '}}';
 		}
 	};
 
@@ -246,7 +249,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
-				expression: '{{' + expression + '}}',
+				expression: directiveUtil.wrapperDir(expression),
 				cb: function cb(rs) {
 					updater[updateFunc]($node, rs);
 				}
@@ -5753,6 +5756,7 @@ BaseComponent.createClass = function (options, fullTag) {
     };
 
     if (fullTag) MyPage.fullTag = fullTag;
+    if (options.isNode) MyPage.isNode = true;
 
     return MyPage;
 };
