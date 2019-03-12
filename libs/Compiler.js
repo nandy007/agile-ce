@@ -230,7 +230,7 @@
 				if((priorityDirs.vcontext)) nodeAttrs.unshift(priorityDirs.vcontext);
 			}
 			if(priorityDirs.vif){
-				nodeAttrs.push(priorityDirs.vif);
+				nodeAttrs = [priorityDirs.vif];
 			}
 			
 			//编译节点指令

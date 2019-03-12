@@ -330,6 +330,15 @@
 		}
 
 	};
+	up.branchRender = function($placeholder, $node, cb){
+		var $old = $placeholder.def('old');
+		$old && $old.remove();
+		if($node){
+			cb($node);
+			$node.insertAfter($placeholder);
+		}
+		$placeholder.def('old', $node);
+	};
 
 	/**
 	 * 更新节点的 attribute realize v-bind

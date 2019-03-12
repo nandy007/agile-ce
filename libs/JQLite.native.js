@@ -118,6 +118,11 @@
 	}
 
 	JQLite.prototype = {
+		outerHTML: function(){
+			var el = this[0];
+			if(!el) return null;
+			return el.getOuterHTML();
+		},
 		add: function (el) {
 			$el = el instanceof JQLite ? el : new JQLite(el);
 			var domList = this.domList;
@@ -890,6 +895,7 @@
 		if (!obj) return;
 		var ret;
 		if (this.isArray(obj) || (!this.util.isString(obj) && this.util.isNotNaNNumber(obj.length))) {
+			obj = jqlite.util.copyArray(obj);
 			for (var i = 0; i < obj.length; i++) {
 				ret = callback.call(context, i, obj[i]);
 				if (ret === false) {

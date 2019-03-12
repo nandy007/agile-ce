@@ -415,54 +415,104 @@
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 			}, fors);
 		},
-		'vif': function ($node, fors, expression, dir) {
+		'vcif': function($node, fors, expression, dir){
+			var parser = this,
+			    updater = this.updater;
 
-			var parser = this, updater = this.updater;
-
-			var preCompile = function ($fragment) {
+			var preCompile = function preCompile($fragment) {
 				parser.vm.compileSteps($fragment, fors);
 			};
 
-			var mutexHandler = function(isFirst){
+			var mutexHandler = function mutexHandler(isFirst) {
 				var nodes = $placeholder.def('__nodes');
-				if(isFirst){
-					parser.$mutexGroup.children().each(function(){
+				if (isFirst) {
+					parser.$mutexGroup.children().each(function () {
 						nodes.push($(this));
 					});
 				}
 				var hasRender = false;
-				$.util.each(nodes, function(i, $el){
+				$.util.each(nodes, function (i, $el) {
 					var curRender = $el.def('__isrender');
-					if(hasRender) curRender = false;
-					if(curRender) hasRender = true;
+					if (hasRender) curRender = false;
+					if (curRender) hasRender = true;
 					updater.mutexRender($el, preCompile, curRender);
 				});
 			};
 
-			var isRender = dir==='v-else'?true:parser.getValue(expression, fors);
-			var mutexGroup = this.getMutexGroup(dir==='v-if'?$node:null);
+			var isRender = dir === 'v-else' ? true : parser.getValue(expression, fors);
+			var mutexGroup = this.getMutexGroup(dir === 'v-if' ? $node : null);
 
 			$node.def('__isrender', isRender);
 			$node.def('__mutexgroup', mutexGroup);
 
 			var $siblingNode = $node.next();
-			var nodes, $placeholder = parser.$mutexGroupPlaceholder;
+			var nodes,
+			    $placeholder = parser.$mutexGroupPlaceholder;
 
 			$node.def('__$placeholder', $placeholder);
 
-			if(!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')){	
+			if (!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')) {
 				parser.$mutexGroup.append($node);
 				mutexHandler(true);
-			}else{
+			} else {
 				parser.$mutexGroup.append($node);
 			}
-
-			
 
 			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
 
 			parser.watcher.watch(deps, function (options) {
 				$node.def('__isrender', parser.getValue(expression, fors));
+				mutexHandler();
+			}, fors);
+		},
+		'vif': function ($node, fors, expression, dir) {
+
+			if($node.hasAttr('mutexGroupCache') || Parser.config.mutexGroupCache){
+				return this.vcif($node, fors, expression, dir);
+			}
+
+			var parser = this, updater = this.updater;
+
+			var branchGroup = this.getBranchGroup(dir==='v-if'?$node:null);
+			var $placeholder = branchGroup.$placeholder, nodes = $placeholder.def('nodes');
+
+			var preCompile = function ($fragment) {
+				parser.vm.compileSteps($fragment, fors);
+			};
+
+			var mutexHandler = function(){
+				var theDef, lastIndex = -1;
+				$.util.each(nodes, function(i, nodeDef){
+					var curRender = nodeDef.dir==='v-else'?true:parser.getValue(nodeDef.expression, fors);
+					if(curRender) {
+						lastIndex = i;
+						theDef = nodeDef;
+						return false;
+					}
+				});
+				if($placeholder.def('lastIndex')===lastIndex) return;
+				$placeholder.def('lastIndex', lastIndex);
+				if(theDef){
+					updater.branchRender($placeholder, $(theDef.html), preCompile);
+				}else{
+					updater.branchRender($placeholder, null, preCompile);
+				}
+			};
+
+			var $siblingNode = $node.next();
+			nodes.push({
+				html: $node.outerHTML(),
+				expression: expression,
+				dir: dir
+			});
+			$node.remove();
+			if(!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')){
+				mutexHandler();
+			}
+
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
+
+			parser.watcher.watch(deps, function (options) {
 				mutexHandler();
 			}, fors);
 
@@ -478,8 +528,8 @@
 		'vlike': function ($node, fors, expression) {
 			$node.data('__like', expression);
 		},
-		'vmodel': function ($node, fors, expression) {
-			var type = $node.data('__like') || $node.elementType();
+		'vmodel': function ($node, fors, expression, dir) {
+			var type = dir.indexOf(':')>-1 ? (dir.split(':')[1]) : $node.data('__like') || $node.elementType();
 			switch (type) {
 				case 'text':
 				case 'password':
@@ -832,7 +882,18 @@
 			$placeholder.insertBefore($node);
 		}
 		return this.mutexGroup;
-	}
+	};
+	pp.getBranchGroup = function($node){
+		if($node){
+			var $placeholder = $.ui.createJQPlaceholder();
+			$placeholder.def('nodes', []);
+			this.branchGroup = {
+				$placeholder: $placeholder
+			};
+			$placeholder.insertBefore($node);
+		}
+		return this.branchGroup;
+	};
 
 	/**
 	 * 通用watch方法
@@ -1597,6 +1658,9 @@
 	};
 	Parser.hasVMPre = function(){
 		return !!__vmPre;
+	};
+	Parser.config = {
+		mutexGroupCache: false
 	};
 
 

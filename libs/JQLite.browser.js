@@ -25,6 +25,9 @@
 	};
 
 	jqlite.fn.extend({
+		outerHTML: function(){
+			return this.prop('outerHTML');
+		},
 		childs : function(index){
 			if(jqlite.util.isNumber(index)){
 				return this.contents().eq(index);

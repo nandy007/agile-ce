@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.64.1552028952232 beta
+ *	Version	:	0.4.65.1552375141394 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -516,8 +516,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 			}, fors);
 		},
-		'vif': function vif($node, fors, expression, dir) {
-
+		'vcif': function vcif($node, fors, expression, dir) {
 			var parser = this,
 			    updater = this.updater;
 
@@ -567,6 +566,60 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				mutexHandler();
 			}, fors);
 		},
+		'vif': function vif($node, fors, expression, dir) {
+
+			if ($node.hasAttr('mutexGroupCache') || Parser.config.mutexGroupCache) {
+				return this.vcif($node, fors, expression, dir);
+			}
+
+			var parser = this,
+			    updater = this.updater;
+
+			var branchGroup = this.getBranchGroup(dir === 'v-if' ? $node : null);
+			var $placeholder = branchGroup.$placeholder,
+			    nodes = $placeholder.def('nodes');
+
+			var preCompile = function preCompile($fragment) {
+				parser.vm.compileSteps($fragment, fors);
+			};
+
+			var mutexHandler = function mutexHandler() {
+				var theDef,
+				    lastIndex = -1;
+				$.util.each(nodes, function (i, nodeDef) {
+					var curRender = nodeDef.dir === 'v-else' ? true : parser.getValue(nodeDef.expression, fors);
+					if (curRender) {
+						lastIndex = i;
+						theDef = nodeDef;
+						return false;
+					}
+				});
+				if ($placeholder.def('lastIndex') === lastIndex) return;
+				$placeholder.def('lastIndex', lastIndex);
+				if (theDef) {
+					updater.branchRender($placeholder, $(theDef.html), preCompile);
+				} else {
+					updater.branchRender($placeholder, null, preCompile);
+				}
+			};
+
+			var $siblingNode = $node.next();
+			nodes.push({
+				html: $node.outerHTML(),
+				expression: expression,
+				dir: dir
+			});
+			$node.remove();
+			if (!$siblingNode.hasAttr('v-else') && !$siblingNode.hasAttr('v-elseif')) {
+				mutexHandler();
+			}
+
+			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
+
+			parser.watcher.watch(deps, function (options) {
+				mutexHandler();
+			}, fors);
+		},
 		'velseif': function velseif($node, fors, expression, dir) {
 			var args = $.util.copyArray(arguments);
 			this.vif.apply(this, args);
@@ -578,8 +631,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		'vlike': function vlike($node, fors, expression) {
 			$node.data('__like', expression);
 		},
-		'vmodel': function vmodel($node, fors, expression) {
-			var type = $node.data('__like') || $node.elementType();
+		'vmodel': function vmodel($node, fors, expression, dir) {
+			var type = dir.indexOf(':') > -1 ? dir.split(':')[1] : $node.data('__like') || $node.elementType();
 			switch (type) {
 				case 'text':
 				case 'password':
@@ -958,6 +1011,17 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			$placeholder.insertBefore($node);
 		}
 		return this.mutexGroup;
+	};
+	pp.getBranchGroup = function ($node) {
+		if ($node) {
+			var $placeholder = $.ui.createJQPlaceholder();
+			$placeholder.def('nodes', []);
+			this.branchGroup = {
+				$placeholder: $placeholder
+			};
+			$placeholder.insertBefore($node);
+		}
+		return this.branchGroup;
 	};
 
 	/**
@@ -1726,6 +1790,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	Parser.hasVMPre = function () {
 		return !!__vmPre;
 	};
+	Parser.config = {
+		mutexGroupCache: false
+	};
 
 	module.exports = Parser;
 
@@ -1790,6 +1857,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	};
 
 	jqlite.fn.extend({
+		outerHTML: function outerHTML() {
+			return this.prop('outerHTML');
+		},
 		childs: function childs(index) {
 			if (jqlite.util.isNumber(index)) {
 				return this.contents().eq(index);
@@ -11553,7 +11623,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				if (priorityDirs.vcontext) nodeAttrs.unshift(priorityDirs.vcontext);
 			}
 			if (priorityDirs.vif) {
-				nodeAttrs.push(priorityDirs.vif);
+				nodeAttrs = [priorityDirs.vif];
 			}
 
 			//编译节点指令
@@ -11997,6 +12067,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		} else {
 			$fragment.append($node);
 		}
+	};
+	up.branchRender = function ($placeholder, $node, cb) {
+		var $old = $placeholder.def('old');
+		$old && $old.remove();
+		if ($node) {
+			cb($node);
+			$node.insertAfter($placeholder);
+		}
+		$placeholder.def('old', $node);
 	};
 
 	/**
