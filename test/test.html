@@ -45,12 +45,20 @@
                 <span>{{item}}{{$index}}</span>
             </div> v-bind:class="{active:item.isActive}"
         </div> -->
-        <div v-for="item in ls">
+        <!-- <div v-for="item in ls">
             <div v-class="item.myclass">ddd</div>
         </div>
         <div v-if="a&&b">111</div>
         <div v-elseif="a&&c">222</div>
-        <div v-else v-on:click="click">333</div>
+        <div v-else v-on:click="click">333</div> -->
+        <lebal><input type="checkbox" value="1" v-model="cks"/>111</lebal>
+        <lebal><input type="checkbox" value="2" v-model="cks"/>222</lebal>
+        <lebal><input type="checkbox" value="3" v-model="cks"/>333</lebal>
+    </div>
+
+    <div id="copy">
+
+        
     </div>
     <script>
 		$.vm.setVMPre({
@@ -90,6 +98,7 @@
 
             },
             data: {
+                cks: [],
                 a: 1,
                 b: 0,
                 c : 1,
@@ -112,6 +121,8 @@
                 mystyle: 'color:red;'
             }
         };
+
+        
         
         // $.vm.setVMPre({
         //     data: 'data'
@@ -120,24 +131,29 @@
         
 
         $('#app').render(obj);
+
+        obj.data.cks.$reset(['1']);
+
+        console.log(obj.data.cks)
+
         // obj.data.disabled = true;
 
         // obj.data.title.push('333')
 
-        obj.data.list[0].shift();
-        // obj.list[0].splice(1, 1, '222')
-        // obj.title.unshift('ttt')
-        // obj.title.splice(1,1)
+        // obj.data.list[0].shift();
+        // // obj.list[0].splice(1, 1, '222')
+        // // obj.title.unshift('ttt')
+        // // obj.title.splice(1,1)
         
-        setTimeout(function(){
-            obj.data.isRed = true;
-            obj.data.myclass = 'blue';
-            obj.data.mystyle = 'background-color:blue;'
-            obj.data.a = 333;
-            obj.data.fontSize = 13;
-            obj.data.c = 0;
-        }, 1000);
-        console.log($('#aaa').data('test'), obj.data.list)
+        // setTimeout(function(){
+        //     obj.data.isRed = true;
+        //     obj.data.myclass = 'blue';
+        //     obj.data.mystyle = 'background-color:blue;'
+        //     obj.data.a = 333;
+        //     obj.data.fontSize = 13;
+        //     obj.data.c = 0;
+        // }, 1000);
+        // console.log($('#aaa').data('test'), obj.data.list)
 
     </script>
 </body>

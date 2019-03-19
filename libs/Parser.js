@@ -571,7 +571,7 @@
 		'vmradio': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
@@ -603,7 +603,7 @@
 
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(this.$scope), field = duplexField.field;
 
@@ -658,7 +658,7 @@
 		'vmselect': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
@@ -711,7 +711,7 @@
 		'vmnativeselect': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
@@ -723,7 +723,7 @@
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makePath(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
 			});

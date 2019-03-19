@@ -231,7 +231,13 @@ class BaseComponent{
     }
     // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
     triggerEvent(evtName, param){
-        this.$jsDom.triggerHandler(evtName, [param]);
+        var jsDom = this.$jsDom[0], k = '__before'+evtName.toLowerCase();
+        if(param && !jsDom[k]){
+            jsDom[k] = function(el, e){
+                e.detail = param;
+            };
+        }
+        this.$jsDom.triggerHandler(evtName);
     }
     // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
     selectComponent(selector){

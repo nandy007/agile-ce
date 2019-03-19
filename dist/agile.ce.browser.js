@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.65.1552375141394 beta
+ *	Version	:	0.4.66.1552981019538 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -681,7 +681,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -718,7 +718,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(this.$scope),
@@ -778,7 +778,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -836,7 +836,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makePath(expression, fors);
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -850,7 +850,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makePath(expression, fors);
+				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
@@ -12808,7 +12808,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
 
-		array.oPaths = paths;
+		arrProto.oPaths = paths;
 
 		// 已经监听过的数组不再重复监听
 		if (arrCbs[this.observeIndex]) return;
@@ -13150,7 +13150,14 @@ var BaseComponent = function () {
     }, {
         key: 'triggerEvent',
         value: function triggerEvent(evtName, param) {
-            this.$jsDom.triggerHandler(evtName, [param]);
+            var jsDom = this.$jsDom[0],
+                k = '__before' + evtName.toLowerCase();
+            if (param && !jsDom[k]) {
+                jsDom[k] = function (el, e) {
+                    e.detail = param;
+                };
+            }
+            this.$jsDom.triggerHandler(evtName);
         }
         // 获取dom对象的component实例，基础组件和扩展组件都可调用，对应小程序selectComponent
 

@@ -301,7 +301,7 @@
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
 
-		array.oPaths = paths;
+		arrProto.oPaths = paths;
 
 		// 已经监听过的数组不再重复监听
 		if(arrCbs[this.observeIndex]) return;

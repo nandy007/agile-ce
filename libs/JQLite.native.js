@@ -1532,7 +1532,8 @@
 			return el ? new JQAdapter(el) : new JQAdapter();
 		},
 		createJQPlaceholder: function(){
-			var dom = document.createElement("text", {style:'display:none;'});
+			// var dom = document.createElement("text", {style:'display:none;'});
+			var dom = document.createElement('placeholder');
 			dom.isPlaceholder = true;
 			return jqlite(dom);
 		},
