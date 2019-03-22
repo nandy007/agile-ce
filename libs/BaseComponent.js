@@ -32,6 +32,7 @@ class BaseComponent{
         }
         var viewData = this.viewData;
         if(!viewData) return;
+        if(!viewData.data) viewData.data = {};
         var pre = this.__getVmPre();
         if(pre){
             this.data = viewData[pre] = viewData[pre] || {};
@@ -41,8 +42,29 @@ class BaseComponent{
     }
 
     __setViewData(k, v){
-        var data = this.data;
+        var data = this.data, $jsDom = this.$jsDom, $ = this.$;
+
         data[k] = v;
+
+        Object.defineProperty(data, k, {
+			get: function(){
+                return v;
+            },
+			set: function(n){
+                try{
+                    if(String(n)!==$jsDom.attr(k)) $jsDom.attr(k, n);
+                }catch(e){
+                    $jsDom.attr(k, n);
+                }
+                if(v instanceof Array){
+                    v.$reset(n);
+                }else if(typeof v==='object'){
+                    $.extend(v, n);
+                }else{
+                    v = n;
+                }
+            }
+		});
     }
 
     __addCommProps(){
@@ -103,8 +125,9 @@ class BaseComponent{
             (function(k){
                 _this.__setViewData(k, _this.getAttrValue(k));
 				prop.handler = function(val){
-					_this.__setViewData(k, val);
-				}
+					_this.data[k] = val;
+                };
+                prop.init = function(){};
             })(k);
         }
 
@@ -186,19 +209,25 @@ class BaseComponent{
         return this.viewData && this.viewData.data ? 'data' : this.$.vm.getVMPre().data;
     }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
-    setData(obj){
+    setData(data){
         var pre = this.__getVmPre();
-		var nObj = {};
-		if(pre){
-			nObj[pre] = obj;
-		}else{
-			nObj = obj;
-		}
-		if (!this.$vm){
-			this.$.extend(true, this.viewData, nObj);
-		}else{
-			this.$vm.setViewData(nObj);
-		}
+        for(var k in data){
+            var exp = 'obj.' + (pre ? (pre+'.') : '') + k;
+            var val = data[k];
+            if(typeof val==='object') val = JSON.parse(JSON.stringify(val));
+            new Function('obj', 'val', `try{ ${exp} = val; }catch(e){console.log(e);}`)(this.viewData, val);
+        }
+		// var nObj = {};
+		// if(pre){
+		// 	nObj[pre] = obj;
+		// }else{
+		// 	nObj = obj;
+		// }
+		// if (!this.$vm){
+		// 	this.$.extend(true, this.viewData, nObj);
+		// }else{
+		// 	this.$vm.setViewData(nObj);
+		// }
     }
 
     __initEvent(){
@@ -232,7 +261,7 @@ class BaseComponent{
     // 事件触发方法，基础组件和扩展组件都可调用，对应小程序triggerEvent
     triggerEvent(evtName, param){
         var jsDom = this.$jsDom[0], k = '__before'+evtName.toLowerCase();
-        if(param && !jsDom[k]){
+        if(param){
             jsDom[k] = function(el, e){
                 e.detail = param;
             };
@@ -247,10 +276,28 @@ class BaseComponent{
     selectAllComponents(selector){
         var selectCom = this.$root.find(selector), rs = [];
         selectCom.each(function(){
-            var curComp = selectCom && selectCom.component;
+            var curComp = this && this.component;
             if(curComp) rs.push(curComp);
         });
         return rs;
+    }
+    __selectAllComponents(selector, isFirst){
+        var $page = this.$jsDom.getPage();
+        var selectCom = $page.find(selector), rs = [];
+        selectCom.each(function(){
+            var curComp = this && this.component;
+            if(curComp) rs.push(curComp);
+        });
+        return isFirst ? rs[0] : rs;
+    }
+    selectById(id){
+        return this.__selectAllComponents('#'+id, true);
+    }
+    selectByName(name){
+        return this.__selectAllComponents(`[name="${name}"]`);
+    }
+    selectBySelector(selector, isFirst){
+        return this.__selectAllComponents(selector, isFirst);
     }
 }
 

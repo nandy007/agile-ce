@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.66.1552981033319 beta
+ *	Version	:	0.4.67.1553219269159 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1990,6 +1990,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	}
 
 	JQLite.prototype = {
+		getPage: function getPage() {
+			var dom = document.getRootElement();
+			return jqlite(dom);
+		},
 		outerHTML: function outerHTML() {
 			var el = this[0];
 			if (!el) return null;
@@ -2615,7 +2619,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			this.each(function () {
 				var eventarr = this.getOn(evtName) || [];
 				jqlite.util.each(eventarr, function (i, func) {
-					func.apply(this, args.slice(0));
+					var _args = args.slice(0);
+					_args.push({
+						type: evtName,
+						currentTarget: this,
+						target: this,
+						timestamp: new Date().getTime()
+					});
+					func.apply(this, _args);
 				}, this);
 			});
 			return this;
@@ -5075,8 +5086,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 	var $ = __webpack_require__(0).JQLite;
 
+	var util = {
+		def: function def(obj, prop, val) {
+			Object.defineProperty(obj, prop, {
+				//设置是否可以枚举
+				enumerable: false,
+				//是否可以删除目标属性
+				// configurable: false,
+				// writable 控制是否可以修改(赋值)
+				writable: true,
+				//获取属性值  
+				value: val
+			});
+		}
+	};
+
+	var __arrProto = Array.prototype;
 	//v8引擎sort算法与浏览器不同，重写sort函数，以xSort代替
-	Array.prototype.xSort = function (fn) {
+	util.def(__arrProto, 'xSort', function (fn) {
 		var fn = fn || function (a, b) {
 			return a > b;
 		};
@@ -5090,18 +5117,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			}
 		}
 		return this;
-	};
+	});
 	// 重写push算法，使用索引值添加，提高效率
-	Array.prototype.xPush = function () {
+	util.def(__arrProto, 'xPush', function () {
 		var l = this.length;
 		for (var i = 0, len = arguments.length; i < len; i++) {
 			this[l + i] = arguments[i];
 		}
 		return this;
-	};
+	});
 
 	// 增加$set方法修改元素值
-	Array.prototype.$set = function (pos, item) {
+	util.def(__arrProto, '$set', function (pos, item) {
 		var len = this.length;
 		if (pos > len) {
 			return this.push(item);
@@ -5109,12 +5136,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			return this.unshift(item);
 		}
 		return this.splice(pos, 1, item);
-	};
+	});
 
 	// 增加$reset方法重置数组，如果没有参数则重置为空数组
-	Array.prototype.$reset = function (arr) {
+	util.def(__arrProto, '$reset', function (arr) {
 		return this.splice.apply(this, [0, this.length || 1].concat(arr || []));
-	};
+	});
 
 	// 重写的数组操作方法
 	var rewriteArrayMethods = ['pop', 'push', 'sort', 'shift', 'splice', 'unshift', 'reverse', 'xSort', 'xPush'];
@@ -5338,7 +5365,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				});
 			});
 
-			arrayMethods.cbs = arrCbs;
+			// arrayMethods.cbs = arrCbs;
+			util.def(arrayMethods, 'cbs', arrCbs);
 
 			array.__proto__ = arrayMethods;
 		};
@@ -5363,7 +5391,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
 
-		arrProto.oPaths = paths;
+		util.def(arrProto, 'oPaths', paths);
 
 		// 已经监听过的数组不再重复监听
 		if (arrCbs[this.observeIndex]) return;
@@ -5470,6 +5498,7 @@ var BaseComponent = function () {
             }
             var viewData = this.viewData;
             if (!viewData) return;
+            if (!viewData.data) viewData.data = {};
             var pre = this.__getVmPre();
             if (pre) {
                 this.data = viewData[pre] = viewData[pre] || {};
@@ -5480,8 +5509,31 @@ var BaseComponent = function () {
     }, {
         key: '__setViewData',
         value: function __setViewData(k, v) {
-            var data = this.data;
+            var data = this.data,
+                $jsDom = this.$jsDom,
+                $ = this.$;
+
             data[k] = v;
+
+            Object.defineProperty(data, k, {
+                get: function get() {
+                    return v;
+                },
+                set: function set(n) {
+                    try {
+                        if (String(n) !== $jsDom.attr(k)) $jsDom.attr(k, n);
+                    } catch (e) {
+                        $jsDom.attr(k, n);
+                    }
+                    if (v instanceof Array) {
+                        v.$reset(n);
+                    } else if ((typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object') {
+                        $.extend(v, n);
+                    } else {
+                        v = n;
+                    }
+                }
+            });
         }
     }, {
         key: '__addCommProps',
@@ -5545,8 +5597,9 @@ var BaseComponent = function () {
                 (function (k) {
                     _this.__setViewData(k, _this.getAttrValue(k));
                     prop.handler = function (val) {
-                        _this.__setViewData(k, val);
+                        _this.data[k] = val;
                     };
+                    prop.init = function () {};
                 })(k);
             }
 
@@ -5642,19 +5695,25 @@ var BaseComponent = function () {
 
     }, {
         key: 'setData',
-        value: function setData(obj) {
+        value: function setData(data) {
             var pre = this.__getVmPre();
-            var nObj = {};
-            if (pre) {
-                nObj[pre] = obj;
-            } else {
-                nObj = obj;
+            for (var k in data) {
+                var exp = 'obj.' + (pre ? pre + '.' : '') + k;
+                var val = data[k];
+                if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') val = JSON.parse(JSON.stringify(val));
+                new Function('obj', 'val', 'try{ ' + exp + ' = val; }catch(e){console.log(e);}')(this.viewData, val);
             }
-            if (!this.$vm) {
-                this.$.extend(true, this.viewData, nObj);
-            } else {
-                this.$vm.setViewData(nObj);
-            }
+            // var nObj = {};
+            // if(pre){
+            // 	nObj[pre] = obj;
+            // }else{
+            // 	nObj = obj;
+            // }
+            // if (!this.$vm){
+            // 	this.$.extend(true, this.viewData, nObj);
+            // }else{
+            // 	this.$vm.setViewData(nObj);
+            // }
         }
     }, {
         key: '__initEvent',
@@ -5707,7 +5766,7 @@ var BaseComponent = function () {
         value: function triggerEvent(evtName, param) {
             var jsDom = this.$jsDom[0],
                 k = '__before' + evtName.toLowerCase();
-            if (param && !jsDom[k]) {
+            if (param) {
                 jsDom[k] = function (el, e) {
                     e.detail = param;
                 };
@@ -5728,10 +5787,37 @@ var BaseComponent = function () {
             var selectCom = this.$root.find(selector),
                 rs = [];
             selectCom.each(function () {
-                var curComp = selectCom && selectCom.component;
+                var curComp = this && this.component;
                 if (curComp) rs.push(curComp);
             });
             return rs;
+        }
+    }, {
+        key: '__selectAllComponents',
+        value: function __selectAllComponents(selector, isFirst) {
+            var $page = this.$jsDom.getPage();
+            var selectCom = $page.find(selector),
+                rs = [];
+            selectCom.each(function () {
+                var curComp = this && this.component;
+                if (curComp) rs.push(curComp);
+            });
+            return isFirst ? rs[0] : rs;
+        }
+    }, {
+        key: 'selectById',
+        value: function selectById(id) {
+            return this.__selectAllComponents('#' + id, true);
+        }
+    }, {
+        key: 'selectByName',
+        value: function selectByName(name) {
+            return this.__selectAllComponents('[name="' + name + '"]');
+        }
+    }, {
+        key: 'selectBySelector',
+        value: function selectBySelector(selector, isFirst) {
+            return this.__selectAllComponents(selector, isFirst);
         }
     }]);
 

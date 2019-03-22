@@ -118,6 +118,10 @@
 	}
 
 	JQLite.prototype = {
+		getPage: function(){
+			var dom = document.getRootElement();
+			return jqlite(dom);
+		},
 		outerHTML: function(){
 			var el = this[0];
 			if(!el) return null;
@@ -730,7 +734,14 @@
 			this.each(function(){
 				var eventarr = this.getOn(evtName) || [];
 				jqlite.util.each(eventarr, function(i, func){
-					func.apply(this, args.slice(0));
+					var _args = args.slice(0);
+					_args.push({
+						type: evtName,
+						currentTarget: this,
+						target: this,
+						timestamp: new Date().getTime()
+					});
+					func.apply(this, _args);
 				}, this);
 			});
 			return this;

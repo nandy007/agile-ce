@@ -25,6 +25,10 @@
 	};
 
 	jqlite.fn.extend({
+		getPage: function(){
+			var dom = document.querySelector('aui-page > .active') || document;
+			return jqlite(dom);
+		},
 		outerHTML: function(){
 			return this.prop('outerHTML');
 		},

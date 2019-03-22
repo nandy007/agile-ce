@@ -3,8 +3,26 @@
 
 	var $ = require('./env').JQLite;
 
+
+	var util = {
+		def: function(obj, prop, val){
+			Object.defineProperty(obj, prop, {
+				//设置是否可以枚举
+				enumerable: false,
+				//是否可以删除目标属性
+				// configurable: false,
+				// writable 控制是否可以修改(赋值)
+				writable: true,
+				//获取属性值  
+				value: val
+			});
+		}
+	};
+
+
+	var __arrProto = Array.prototype;
 	//v8引擎sort算法与浏览器不同，重写sort函数，以xSort代替
-	Array.prototype.xSort = function (fn) {
+	util.def(__arrProto, 'xSort', function (fn) {
 		var fn = fn || function (a, b) { return a > b; };
 		for (var i = 0; i < this.length; i++) {
 			for (var j = i; j < this.length; j++) {
@@ -16,18 +34,18 @@
 			}
 		}
 		return this;
-	};
+	});
 	// 重写push算法，使用索引值添加，提高效率
-	Array.prototype.xPush = function () {
+	util.def(__arrProto, 'xPush', function () {
 		var l = this.length;
 		for (var i = 0, len = arguments.length; i < len; i++) {
 			this[l + i] = arguments[i];
 		}
 		return this;
-	};
+	});
 
 	// 增加$set方法修改元素值
-	Array.prototype.$set = function (pos, item) {
+	util.def(__arrProto, '$set', function (pos, item) {
 		var len = this.length;
 		if(pos > len){
 			return this.push(item);
@@ -35,12 +53,12 @@
 			return this.unshift(item);
 		}
 		return this.splice(pos, 1, item);
-	};
+	});
 
 	// 增加$reset方法重置数组，如果没有参数则重置为空数组
-	Array.prototype.$reset = function (arr) {
+	util.def(__arrProto, '$reset', function (arr) {
 		return this.splice.apply(this, [0, this.length||1].concat(arr||[]));
-	};
+	});
 
 	// 重写的数组操作方法
 	var rewriteArrayMethods = [
@@ -275,7 +293,8 @@
 				});
 			});
 
-			arrayMethods.cbs = arrCbs;
+			// arrayMethods.cbs = arrCbs;
+			util.def(arrayMethods, 'cbs', arrCbs);
 
 			array.__proto__ = arrayMethods;
 		};
@@ -301,7 +320,7 @@
 		var arrProto = array.__proto__;
 		var arrCbs = arrProto.cbs || {};
 
-		arrProto.oPaths = paths;
+		util.def(arrProto, 'oPaths', paths);
 
 		// 已经监听过的数组不再重复监听
 		if(arrCbs[this.observeIndex]) return;
