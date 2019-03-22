@@ -264,6 +264,7 @@ class BaseComponent{
         if(param){
             jsDom[k] = function(el, e){
                 e.detail = param;
+                return this.getComponent();
             };
         }
         this.$jsDom.triggerHandler(evtName);
