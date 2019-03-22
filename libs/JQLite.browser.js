@@ -24,6 +24,20 @@
 		return rs;
 	};
 
+	// 重写val方法
+	var origin_val = jqlite.prototype.val;
+	jqlite.prototype.val = function(){
+		var args = jqlite.util.copyArray(arguments);
+		var el = this[0];
+		if(!el) return args.length===0 ? '' : this;
+		var funcName = origin_val;
+		if(typeof el.value==='undefined'){
+			funcName = origin_attr;
+			args.unshift('value');
+		}
+		return funcName.apply(this, args);
+	};
+
 	jqlite.fn.extend({
 		getPage: function(){
 			var dom = document.querySelector('aui-page > .active') || document;

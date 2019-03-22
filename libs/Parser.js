@@ -323,7 +323,7 @@
 				expression: expression,
 				cb: function(rs, k){
 					if(k){
-						$node.css(k, rs);
+						updater.updateStyle($node, k, rs);
 						return;
 					}
 					rs = directiveUtil.formatStyle(rs);
@@ -346,22 +346,22 @@
 				expression: expression,
 				cb: function(rs, k){
 					if(k){
-						$node[rs?'addClass':'removeClass'](k);
+						updater.updateClass($node, k, rs);
 						return;
 					}
 		
 					if(typeof oldClass==='string'){
-						$node.removeClass(oldClass);
+						updater.updateClass($node, oldClass, false);
 					}else if(typeof oldClass==='object'){
 						$.util.each(oldClass, function(k, v){
-							$node.removeClass(k);
+							updater.updateClass($node, k, false);
 						});
 					}
 					if(typeof rs==='string'){
-						$node.addClass(rs);
+						updater.updateClass($node, rs, true);
 					}else if(typeof rs==='object'){
 						$.util.each(rs, function(k, v){
-							$node[v?'addClass':'removeClass'](k);
+							updater.updateClass($node, k, v);
 						});
 					}
 					oldClass = rs;
@@ -370,22 +370,22 @@
 		},
 		'vxclass': function($node, fors, expression){
 
-			var oldClass;
+			var oldClass, updater = this.updater;
 
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
 				expression: expression,
 				cb: function(rs){
-					if(oldClass) $node.removeClass(oldClass);
-					if(rs) $node.addClass(rs);
+					if(oldClass) updater.updateClass($node, oldClass, false);
+					if(rs) updater.updateClass($node, rs, true);
 					oldClass = rs;
 				}
 			});
 		},
 		'vxstyle': function($node, fors, expression){
 
-			var styles = directiveUtil.formatStyle(expression);
+			var styles = directiveUtil.formatStyle(expression), updater = this.updater;
 
 			$.util.each(styles, function(styleName, exp){
 				directiveUtil.commonHandler.call(this, {
@@ -393,7 +393,7 @@
 					fors: fors,
 					expression: exp,
 					cb: function(rs){
-						$node.css(styleName, rs);
+						updater.updateStyle($node, styleName, rs);
 					}
 				});
 			}, this);

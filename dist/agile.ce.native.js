@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.68.1553247920490 beta
+ *	Version	:	0.4.68.1553263605067 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -457,7 +457,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				expression: expression,
 				cb: function cb(rs, k) {
 					if (k) {
-						$node.css(k, rs);
+						updater.updateStyle($node, k, rs);
 						return;
 					}
 					rs = directiveUtil.formatStyle(rs);
@@ -480,22 +480,22 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				expression: expression,
 				cb: function cb(rs, k) {
 					if (k) {
-						$node[rs ? 'addClass' : 'removeClass'](k);
+						updater.updateClass($node, k, rs);
 						return;
 					}
 
 					if (typeof oldClass === 'string') {
-						$node.removeClass(oldClass);
+						updater.updateClass($node, oldClass, false);
 					} else if ((typeof oldClass === 'undefined' ? 'undefined' : _typeof(oldClass)) === 'object') {
 						$.util.each(oldClass, function (k, v) {
-							$node.removeClass(k);
+							updater.updateClass($node, k, false);
 						});
 					}
 					if (typeof rs === 'string') {
-						$node.addClass(rs);
+						updater.updateClass($node, rs, true);
 					} else if ((typeof rs === 'undefined' ? 'undefined' : _typeof(rs)) === 'object') {
 						$.util.each(rs, function (k, v) {
-							$node[v ? 'addClass' : 'removeClass'](k);
+							updater.updateClass($node, k, v);
 						});
 					}
 					oldClass = rs;
@@ -504,22 +504,24 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		},
 		'vxclass': function vxclass($node, fors, expression) {
 
-			var oldClass;
+			var oldClass,
+			    updater = this.updater;
 
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
 				expression: expression,
 				cb: function cb(rs) {
-					if (oldClass) $node.removeClass(oldClass);
-					if (rs) $node.addClass(rs);
+					if (oldClass) updater.updateClass($node, oldClass, false);
+					if (rs) updater.updateClass($node, rs, true);
 					oldClass = rs;
 				}
 			});
 		},
 		'vxstyle': function vxstyle($node, fors, expression) {
 
-			var styles = directiveUtil.formatStyle(expression);
+			var styles = directiveUtil.formatStyle(expression),
+			    updater = this.updater;
 
 			$.util.each(styles, function (styleName, exp) {
 				directiveUtil.commonHandler.call(this, {
@@ -527,7 +529,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 					fors: fors,
 					expression: exp,
 					cb: function cb(rs) {
-						$node.css(styleName, rs);
+						updater.updateStyle($node, styleName, rs);
 					}
 				});
 			}, this);
