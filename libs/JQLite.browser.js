@@ -8,7 +8,7 @@
 	jqlite.prototype.attr = function(){
 		var args = jqlite.util.copyArray(arguments);
 		var rs;
-		if(['disabled', 'checked', 'selected', 'autoplay'].indexOf(args[0])>-1){
+		if(jqliteUtil.isBooleanAttr(args[0])){
 			rs = jqliteUtil.booleanAttrForJquery.apply(this, args)
 		}else{
 			if(typeof args[1]!=='undefined'){
@@ -32,13 +32,46 @@
 		if(!el) return args.length===0 ? '' : this;
 		var funcName = origin_val;
 		if(typeof el.value==='undefined'){
-			funcName = origin_attr;
+			funcName = this.attr;
 			args.unshift('value');
 		}
 		return funcName.apply(this, args);
 	};
 
+	// 扩展xprop方法
+	var origin_prop = jqlite.prototype.prop;
+	jqlite.prototype.xprop = function(name, val){
+		var args = jqlite.util.copyArray(arguments);
+		var el = this[0];
+		if(!el) return args.length===0 ? '' : this;
+		if(arguments.length===1){
+            var el = this.length>0 && this[0];
+            if(!el) return '';
+            var rs = origin_prop.call(this, name);
+            if(typeof rs==='undefined'){
+                rs = el.getAttribute(name);
+            }
+            if(rs===''||rs===undefined||rs===null||rs==='false'){
+                rs = false;
+            }
+            return !!rs;
+        }else if(arguments.length===2){
+			var rs = origin_prop.call(this, name);
+			if(typeof rs==='undefined'){
+				this.each(function(){
+					this.setAttribute(name, val);
+				});
+			}else{
+				origin_prop.call(this, name, val);
+			}
+        }
+		return this;
+	};
+
 	jqlite.fn.extend({
+		isChecked: function(){
+			return this.is(':checked') || this.attr('checked');
+		},
 		getPage: function(){
 			var dom = document.querySelector('aui-page > .active') || document;
 			return jqlite(dom);

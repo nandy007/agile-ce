@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.69.1553305766908 beta
+ *	Version	:	0.4.71.1553321977948 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -691,7 +691,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			var value = parser.getValue(expression, fors);
 
-			var isChecked = $node.is(':checked');
+			var isChecked = $node.isChecked();
 
 			// 如果已经定义了默认值
 			if (isChecked) {
@@ -706,7 +706,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				if ($node.is(':checked')) {
+				if ($node.isChecked()) {
 					var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					var duplexField = parser.getDuplexField(access),
 					    duplex = duplexField.duplex(parser.$scope),
@@ -728,7 +728,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			var value = parser.getValue(expression, fors);
 
-			var isChecked = $node.is(':checked');
+			var isChecked = $node.isChecked();
 
 			if (isChecked) {
 				if ($.util.isBoolean(value)) {
@@ -755,7 +755,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				value = duplex[field];
 
 				var $this = $(this);
-				var checked = $this.is(':checked');
+				var checked = $this.isChecked();
 
 				if ($.util.isBoolean(value)) {
 					duplex[field] = checked;
@@ -1842,7 +1842,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	jqlite.prototype.attr = function () {
 		var args = jqlite.util.copyArray(arguments);
 		var rs;
-		if (['disabled', 'checked', 'selected', 'autoplay'].indexOf(args[0]) > -1) {
+		if (jqliteUtil.isBooleanAttr(args[0])) {
 			rs = jqliteUtil.booleanAttrForJquery.apply(this, args);
 		} else {
 			if (typeof args[1] !== 'undefined') {
@@ -1866,13 +1866,46 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		if (!el) return args.length === 0 ? '' : this;
 		var funcName = origin_val;
 		if (typeof el.value === 'undefined') {
-			funcName = origin_attr;
+			funcName = this.attr;
 			args.unshift('value');
 		}
 		return funcName.apply(this, args);
 	};
 
+	// 扩展xprop方法
+	var origin_prop = jqlite.prototype.prop;
+	jqlite.prototype.xprop = function (name, val) {
+		var args = jqlite.util.copyArray(arguments);
+		var el = this[0];
+		if (!el) return args.length === 0 ? '' : this;
+		if (arguments.length === 1) {
+			var el = this.length > 0 && this[0];
+			if (!el) return '';
+			var rs = origin_prop.call(this, name);
+			if (typeof rs === 'undefined') {
+				rs = el.getAttribute(name);
+			}
+			if (rs === '' || rs === undefined || rs === null || rs === 'false') {
+				rs = false;
+			}
+			return !!rs;
+		} else if (arguments.length === 2) {
+			var rs = origin_prop.call(this, name);
+			if (typeof rs === 'undefined') {
+				this.each(function () {
+					this.setAttribute(name, val);
+				});
+			} else {
+				origin_prop.call(this, name, val);
+			}
+		}
+		return this;
+	};
+
 	jqlite.fn.extend({
+		isChecked: function isChecked() {
+			return this.is(':checked') || this.attr('checked');
+		},
 		getPage: function getPage() {
 			var dom = document.querySelector('aui-page > .active') || document;
 			return jqlite(dom);
@@ -11195,6 +11228,10 @@ module.exports = function (module) {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var util = module.exports = {
+    isBooleanAttr: function isBooleanAttr(name) {
+        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay'];
+        return __booleanAttr.indexOf(name) > -1;
+    },
     cleanJSON: function cleanJSON(obj) {
         try {
             obj = JSON.parse(JSON.stringify(obj));
@@ -12165,7 +12202,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   */
 	up.updateRadioChecked = function ($radio, value) {
 		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
-		if ($radio.prop('checked') != checkStatus) $radio.prop('checked', checkStatus);
+		if ($radio.xprop('checked') != checkStatus) $radio.xprop('checked', checkStatus);
 	};
 
 	/**
@@ -12186,7 +12223,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 		var checkStatus = $.util.isBoolean(values) ? values : values.indexOf(value) > -1;
 
-		if ($checkbox.prop('checked') != checkStatus) $checkbox.prop('checked', checkStatus);
+		if ($checkbox.xprop('checked') != checkStatus) $checkbox.xprop('checked', checkStatus);
 	};
 
 	/**
@@ -12196,17 +12233,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {Boolean}               multi
   */
 	up.updateSelectChecked = function ($select, selected, multi) {
-		var getNumber = $select.hasAttr('number');
-		var $options = $select.children(),
-		    leng = $options.length;
-		var multiple = multi || $select.hasAttr('multiple');
+		// var getNumber = $select.hasAttr('number');
+		// var $options = $select.children(), leng = $options.length;
+		// var multiple = multi || $select.hasAttr('multiple');
 
-		$options.each(function (i) {
-			var $option = $(this);
-			var value = $option.val();
-			value = getNumber ? +value : $option.hasAttr('number') ? +value : value;
-			$option.prop('selected', multiple ? selected.indexOf(value) > -1 : selected === value);
-		});
+		// $options.each(function(i){
+		// 	var $option = $(this);
+		// 	var value = $option.val();
+		// 	value = getNumber ? +value : ($option.hasAttr('number') ? +value : value);
+		// 	$option.prop('selected', multiple ? selected.indexOf(value) > -1 : selected === value);
+		// });
+		$select.val(selected);
 	};
 
 	module.exports = Updater;

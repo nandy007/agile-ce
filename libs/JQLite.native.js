@@ -118,6 +118,9 @@
 	}
 
 	JQLite.prototype = {
+		isChecked: function(){
+			return this.is(':checked');
+		},
 		getPage: function(){
 			var dom = document.getRootElement();
 			return jqlite(dom);

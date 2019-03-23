@@ -1,5 +1,9 @@
 
 var util = module.exports = {
+    isBooleanAttr: function(name){
+        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay'];
+        return __booleanAttr.indexOf(name)>-1;
+    },
     cleanJSON: function cleanJSON(obj){
 		try{
 			obj = JSON.parse(JSON.stringify(obj));

@@ -577,7 +577,7 @@
 
 			var value = parser.getValue(expression, fors);
 
-			var isChecked = $node.is(':checked');
+			var isChecked = $node.isChecked();
 
 			// 如果已经定义了默认值
 			if (isChecked) {
@@ -592,7 +592,7 @@
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				if($node.is(':checked')) {
+				if($node.isChecked()) {
 					var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
@@ -609,7 +609,7 @@
 
 			var value = parser.getValue(expression, fors);
 
-			var isChecked = $node.is(':checked');
+			var isChecked = $node.isChecked();
 
 			if (isChecked) {
 				if ($.util.isBoolean(value)) {
@@ -634,7 +634,7 @@
 				value = duplex[field];
 
 				var $this = $(this);
-				var checked = $this.is(':checked');
+				var checked = $this.isChecked();
 
 				if ($.util.isBoolean(value)) {
 					duplex[field] = checked;

@@ -407,7 +407,7 @@
 	 */
 	up.updateRadioChecked = function ($radio, value) {
 		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
-		if($radio.prop('checked')!=checkStatus) $radio.prop('checked', checkStatus);
+		if($radio.xprop('checked')!=checkStatus) $radio.xprop('checked', checkStatus);
 	};
 
 	/**
@@ -428,7 +428,7 @@
 		
 		var checkStatus = $.util.isBoolean(values) ? values : (values.indexOf(value) > -1);
 
-		if($checkbox.prop('checked')!=checkStatus) $checkbox.prop('checked', checkStatus);
+		if($checkbox.xprop('checked')!=checkStatus) $checkbox.xprop('checked', checkStatus);
 
 	};
 
@@ -439,16 +439,17 @@
 	 * @param   {Boolean}               multi
 	 */
 	up.updateSelectChecked = function ($select, selected, multi) {
-		var getNumber = $select.hasAttr('number');
-		var $options = $select.children(), leng = $options.length;
-		var multiple = multi || $select.hasAttr('multiple');
+		// var getNumber = $select.hasAttr('number');
+		// var $options = $select.children(), leng = $options.length;
+		// var multiple = multi || $select.hasAttr('multiple');
 
-		$options.each(function(i){
-			var $option = $(this);
-			var value = $option.val();
-			value = getNumber ? +value : ($option.hasAttr('number') ? +value : value);
-			$option.prop('selected', multiple ? selected.indexOf(value) > -1 : selected === value);
-		});
+		// $options.each(function(i){
+		// 	var $option = $(this);
+		// 	var value = $option.val();
+		// 	value = getNumber ? +value : ($option.hasAttr('number') ? +value : value);
+		// 	$option.prop('selected', multiple ? selected.indexOf(value) > -1 : selected === value);
+		// });
+		$select.val(selected);
 	};
 	
 	module.exports = Updater;
