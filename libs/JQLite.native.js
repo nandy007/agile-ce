@@ -428,6 +428,9 @@
 		prop: function () {
 			this.attr.apply(this, arguments);
 		},
+		xprop: function () {
+			this.attr.apply(this, arguments);
+		},
 		removeAttr: function (name) {
 			this.each(function () {
 				this.removeAttr(name);
