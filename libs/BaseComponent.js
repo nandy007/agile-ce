@@ -300,6 +300,17 @@ class BaseComponent{
     selectBySelector(selector, isFirst){
         return this.__selectAllComponents(selector, isFirst);
     }
+    getValueByName(name){
+        var comps = this.__selectAllComponents(`[name="${name}"][checked="true"]`);
+        return comps.length>0 ? comps[0].getAttrValue('value') : '';
+    }
+    getValuesByName(name){
+        var comps = this.__selectAllComponents(`[name="${name}"][checked="true"]`), rs = [];
+        for(var i=0, len=comps.length;i<len;i++){
+            rs.push(comps[0].getAttrValue('value'));
+        }
+        return rs;
+    }
 }
 
 BaseComponent.wrapperClass = function(MyClass){
