@@ -210,13 +210,15 @@ class BaseComponent{
     }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
     setData(data){
-        var pre = this.__getVmPre();
+        var pre = this.__getVmPre(), keyArr = [];
         for(var k in data){
+            keyArr.push(k);
             var exp = 'obj.' + (pre ? (pre+'.') : '') + k;
             var val = data[k];
             if(typeof val==='object') val = JSON.parse(JSON.stringify(val));
             new Function('obj', 'val', `try{ ${exp} = val; }catch(e){console.log(e);}`)(this.viewData, val);
         }
+        this.__handlerObservers && this.__handlerObservers(keyArr);
 		// var nObj = {};
 		// if(pre){
 		// 	nObj[pre] = obj;
@@ -354,6 +356,7 @@ function _structure(options){
     var properties = json.properties; delete json.properties;
     var events = json.events; delete json.events;
     var props = json.props; delete json.props;
+    var observers = json.observers; delete json.observers;
     var viewData = $.isEmptyObject(json) ? (properties ? {} : null ) : json;
 
     var json = {
@@ -362,7 +365,8 @@ function _structure(options){
         events: events,
         props: props,
         viewData: viewData,
-        lifecycle: {}
+        lifecycle: {},
+        observers: observers
     };
     var lifecycleFuncs = BaseComponent.lifecycleFuncs.slice(0), funcName;
     while(funcName = lifecycleFuncs.shift()){
@@ -397,6 +401,34 @@ BaseComponent.createClass = function(options, fullTag){
                 json.lifecycle.onHide && json.lifecycle.onHide.call(comp);
             });
             json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
+            
+            // if(json.observers) $jsDom.on('__mvvmDataChange', function(e, options){
+            //     comp.mvvmDataChangeHandler(options);
+            // });
+        },
+        mvvmDataChangeHandler: function(options){
+            var json = this.__json;
+            var ps = options.path;
+            var pre = this.__getVmPre();
+            if(pre) ps = ps.replace(pre+'.', '');
+            
+        },
+        __handlerObservers: function(keyArr){
+            if(keyArr.length===0) return;
+            var json = this.__json, observers = json.observers;
+            if(!observers) return;
+            for(var k in observers){
+                var ks = k.replace(/ /g, '').split(','), flag = false;
+                for(var i=0, len=keyArr.length;i<len;i++){
+                    if(ks.indexOf(keyArr[i])>-1){
+                        flag = true;
+                        break;
+                    }
+                }
+                if(flag){
+                    observers[k].apply(this);
+                }
+            }
         },
         initViewData: function(){
             const json = this.__json;

@@ -130,11 +130,14 @@
 
         
 
-        $('#app').render(obj);
+        $('#app').on('__mvvmDataChange', function(e, opts){
+            console.log(opts);
+        }).render(obj);
 
         obj.data.cks.$reset(['1']);
+        
 
-        console.log(obj.data.cks)
+        // console.log(obj.data.cks)
 
         // obj.data.disabled = true;
 

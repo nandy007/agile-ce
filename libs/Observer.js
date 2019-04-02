@@ -103,6 +103,11 @@
 	op.trigger = function (options) {
 		this.watcher.change(options);
 		this.watcher.changeDirect();
+		try{
+			this.watcher.parser.vm.$element.triggerHandler('__mvvmDataChange', [options]);
+		}catch(e){
+			console.error(e);
+		}
 	};
 
 	/**
@@ -166,6 +171,15 @@
 		return pObj;
 	};
 
+	op.isEqual = function(a, b){
+		var ta = typeof a, tb = typeof b;
+		if(ta !== tb) return false;
+		if(ta==='object'){
+			return JSON.stringify(a) === JSON.stringify(b);
+		}
+		return a===b;
+	};
+
 
 	/**
 	 * 拦截对象属性存取描述符（绑定监测）
@@ -196,7 +210,7 @@
 
 			var myPath = ob.formatPaths(paths).join('.');
 
-			if (newValue === oldValue) {
+			if (ob.isEqual(newValue, oldValue)) {
 				return;
 			}
 

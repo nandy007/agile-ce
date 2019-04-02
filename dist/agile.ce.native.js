@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.73.1554006546823 beta
+ *	Version	:	0.4.74.1554194894191 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5094,6 +5094,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 (function () {
 
 	var $ = __webpack_require__(0).JQLite;
@@ -5188,6 +5190,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	op.trigger = function (options) {
 		this.watcher.change(options);
 		this.watcher.changeDirect();
+		try {
+			this.watcher.parser.vm.$element.triggerHandler('__mvvmDataChange', [options]);
+		} catch (e) {
+			console.error(e);
+		}
 	};
 
 	/**
@@ -5252,6 +5259,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		return pObj;
 	};
 
+	op.isEqual = function (a, b) {
+		var ta = typeof a === 'undefined' ? 'undefined' : _typeof(a),
+		    tb = typeof b === 'undefined' ? 'undefined' : _typeof(b);
+		if (ta !== tb) return false;
+		if (ta === 'object') {
+			return JSON.stringify(a) === JSON.stringify(b);
+		}
+		return a === b;
+	};
+
 	/**
   * 拦截对象属性存取描述符（绑定监测）
   * @param   {Object|Array}  object  [对象或数组]
@@ -5282,7 +5299,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 			var myPath = ob.formatPaths(paths).join('.');
 
-			if (newValue === oldValue) {
+			if (ob.isEqual(newValue, oldValue)) {
 				return;
 			}
 
@@ -5708,13 +5725,16 @@ var BaseComponent = function () {
     }, {
         key: 'setData',
         value: function setData(data) {
-            var pre = this.__getVmPre();
+            var pre = this.__getVmPre(),
+                keyArr = [];
             for (var k in data) {
+                keyArr.push(k);
                 var exp = 'obj.' + (pre ? pre + '.' : '') + k;
                 var val = data[k];
                 if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') val = JSON.parse(JSON.stringify(val));
                 new Function('obj', 'val', 'try{ ' + exp + ' = val; }catch(e){console.log(e);}')(this.viewData, val);
             }
+            this.__handlerObservers && this.__handlerObservers(keyArr);
             // var nObj = {};
             // if(pre){
             // 	nObj[pre] = obj;
@@ -5900,6 +5920,7 @@ function _structure(options) {
     var properties = json.properties;delete json.properties;
     var events = json.events;delete json.events;
     var props = json.props;delete json.props;
+    var observers = json.observers;delete json.observers;
     var viewData = $.isEmptyObject(json) ? properties ? {} : null : json;
 
     var json = {
@@ -5908,7 +5929,8 @@ function _structure(options) {
         events: events,
         props: props,
         viewData: viewData,
-        lifecycle: {}
+        lifecycle: {},
+        observers: observers
     };
     var lifecycleFuncs = BaseComponent.lifecycleFuncs.slice(0),
         funcName;
@@ -5946,6 +5968,35 @@ BaseComponent.createClass = function (options, fullTag) {
                 json.lifecycle.onHide && json.lifecycle.onHide.call(comp);
             });
             json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
+
+            // if(json.observers) $jsDom.on('__mvvmDataChange', function(e, options){
+            //     comp.mvvmDataChangeHandler(options);
+            // });
+        },
+        mvvmDataChangeHandler: function mvvmDataChangeHandler(options) {
+            var json = this.__json;
+            var ps = options.path;
+            var pre = this.__getVmPre();
+            if (pre) ps = ps.replace(pre + '.', '');
+        },
+        __handlerObservers: function __handlerObservers(keyArr) {
+            if (keyArr.length === 0) return;
+            var json = this.__json,
+                observers = json.observers;
+            if (!observers) return;
+            for (var k in observers) {
+                var ks = k.replace(/ /g, '').split(','),
+                    flag = false;
+                for (var i = 0, len = keyArr.length; i < len; i++) {
+                    if (ks.indexOf(keyArr[i]) > -1) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag) {
+                    observers[k].apply(this);
+                }
+            }
         },
         initViewData: function initViewData() {
             var json = this.__json;
