@@ -131,11 +131,12 @@
         
 
         var mv = $('#app').render(obj);
-
+        
+        // 监听数据变化
         mv.dataChange(function(opt){
             console.log(opt)
         });
-
+        // 设置数据值（强行进行清理）
         mv.setData({
             'data.cks': ['2', '3']
         });
