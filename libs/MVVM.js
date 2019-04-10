@@ -72,10 +72,25 @@
 	/**
 	 * 设置绑定数据
 	 */
-	mp.setViewData = function(obj){
+	mp.setData = function(obj){
 		var viewData = this.$data;
-		this.extend(viewData, obj||{});
+		for(var k in obj){
+			var func = new Function('d', 'v', `try{d.${k}=v;}catch(e){console.error(e);}`);
+			var v = obj[k];
+			if(typeof v==='object') v = JSON.parse(JSON.stringify(v));
+			func(viewData, v);
+		}
 	};
+
+	/**
+	 * 设置数据变化回调
+	 */
+	mp.dataChange = function(cb){
+		var _this = this;
+		this.vm.$element.on('__mvvmDataChange', function(e, options){
+			cb.call(_this, JSON.parse(JSON.stringify(options)));
+		});
+	}
 
 	/**
 	 * 获取 mvvm 绑定的数据

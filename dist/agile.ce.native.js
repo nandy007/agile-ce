@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.74.1554194894191 beta
+ *	Version	:	0.4.75.1554864518310 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -3937,9 +3937,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	/**
   * 设置绑定数据
   */
-	mp.setViewData = function (obj) {
+	mp.setData = function (obj) {
 		var viewData = this.$data;
-		this.extend(viewData, obj || {});
+		for (var k in obj) {
+			var func = new Function('d', 'v', 'try{d.' + k + '=v;}catch(e){console.error(e);}');
+			var v = obj[k];
+			if ((typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object') v = JSON.parse(JSON.stringify(v));
+			func(viewData, v);
+		}
+	};
+
+	/**
+  * 设置数据变化回调
+  */
+	mp.dataChange = function (cb) {
+		var _this = this;
+		this.vm.$element.on('__mvvmDataChange', function (e, options) {
+			cb.call(_this, JSON.parse(JSON.stringify(options)));
+		});
 	};
 
 	/**

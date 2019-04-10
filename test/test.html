@@ -130,11 +130,15 @@
 
         
 
-        $('#app').on('__mvvmDataChange', function(e, opts){
-            console.log(opts);
-        }).render(obj);
+        var mv = $('#app').render(obj);
 
-        obj.data.cks.$reset(['1']);
+        mv.dataChange(function(opt){
+            console.log(opt)
+        });
+
+        mv.setData({
+            'data.cks': ['2', '3']
+        });
         
 
         // console.log(obj.data.cks)
