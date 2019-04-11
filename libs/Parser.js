@@ -415,6 +415,10 @@
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 			}, fors);
 		},
+		'vhide': function($node, fors, expression){
+			var parser = this;
+			parser.vshow.call(parser, $node, fors, `!(${expression})`);
+		},
 		'vcif': function($node, fors, expression, dir){
 			var parser = this,
 			    updater = this.updater;

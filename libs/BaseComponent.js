@@ -75,7 +75,7 @@ class BaseComponent{
             hidden: {
                 type: Boolean,
                 handler: function(val){
-                    $jsDom[val?'show':'hide']();
+                    $jsDom[val?'hide':'show']();
                 },
                 init: function(){
                     if($jsDom.hasAttr('hidden')) this.handler(comp.getAttrValue('hidden'));

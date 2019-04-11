@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.75.1554864504595 beta
+ *	Version	:	0.4.76.1554986177074 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -517,6 +517,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			parser.watcher.watch(deps, function (options) {
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
 			}, fors);
+		},
+		'vhide': function vhide($node, fors, expression) {
+			var parser = this;
+			parser.vshow.call(parser, $node, fors, '!(' + expression + ')');
 		},
 		'vcif': function vcif($node, fors, expression, dir) {
 			var parser = this,
@@ -11229,7 +11233,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var util = module.exports = {
     isBooleanAttr: function isBooleanAttr(name) {
-        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay'];
+        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay', 'hidden'];
         return __booleanAttr.indexOf(name) > -1;
     },
     cleanJSON: function cleanJSON(obj) {
@@ -13069,7 +13073,7 @@ var BaseComponent = function () {
                 hidden: {
                     type: Boolean,
                     handler: function handler(val) {
-                        $jsDom[val ? 'show' : 'hide']();
+                        $jsDom[val ? 'hide' : 'show']();
                     },
                     init: function init() {
                         if ($jsDom.hasAttr('hidden')) this.handler(comp.getAttrValue('hidden'));
