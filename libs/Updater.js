@@ -433,6 +433,18 @@
 	};
 
 	/**
+	 * 更新 swtich 的激活状态 realize v-model
+	 * @param   {JQLite/input}          $checkbox
+	 * @param   {Boolean}               value      [激活数组或状态]
+	 */
+	up.updateSwitchChecked = function ($switch, value) {
+		var checkStatus = !!value;
+		if($switch.xprop('checked')!=checkStatus) $switch.xprop('checked', checkStatus);
+
+	};
+
+
+	/**
 	 * 更新 select 的激活状态 realize v-model
 	 * @param   {JQLite/select}         $select
 	 * @param   {Array|String}          selected  [选中值]

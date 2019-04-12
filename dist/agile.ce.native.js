@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.76.1554986192023 beta
+ *	Version	:	0.4.76.1555085282077 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -683,6 +683,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 					this.vmcheckbox.apply(this, arguments);return;
 				case 'select':
 					this.vmselect.apply(this, arguments);return;
+				case 'switch':
+					this.vmswitch.apply(this, arguments);return;
 			}
 
 			if (this['vm' + type]) {
@@ -742,10 +744,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			Parser.bindChangeEvent($node, function () {
 				if ($node.isChecked()) {
-					var access = Parser.makeDep(expression, fors, parser.getVmPre());
-					var duplexField = parser.getDuplexField(access),
-					    duplex = duplexField.duplex(parser.$scope),
-					    field = duplexField.field;
+					// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+					// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
 				}
 			});
@@ -782,10 +782,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			Parser.bindChangeEvent($node, function () {
 
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access),
-				    duplex = duplexField.duplex(parser.$scope),
-				    field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 				value = duplex[field];
 
@@ -861,10 +859,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			});
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access),
-				    duplex = duplexField.duplex(parser.$scope),
-				    field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				var selects = Parser.getSelecteds($(this));
 				duplex[field] = multi ? selects : selects[0];
 			});
@@ -887,11 +883,30 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access),
-				    duplex = duplexField.duplex(parser.$scope),
-				    field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
+			});
+		},
+		'vmswtich': function vmswtich($node, fors, expression, dir) {
+			var parser = this,
+			    updater = this.updater;
+
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+
+			var duplexField = parser.getDuplexField(access),
+			    duplex = duplexField.duplex(parser.$scope),
+			    field = duplexField.field;
+
+			updater.updateSwitchChecked($node, duplex[field]);
+
+			var deps = [access];
+			parser.watcher.watch(deps, function () {
+				updater.updateSwitchChecked($node, duplex[field]);
+			}, fors);
+
+			Parser.bindChangeEvent($node, function () {
+				duplex[field] = $node.xprop('checked');
 			});
 		},
 		'vfilter': function vfilter($node, fors, expression) {
@@ -1088,8 +1103,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 
-  * @param   {String}     access        [节点路径]
+ 	 * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
@@ -4764,6 +4778,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		var checkStatus = $.util.isBoolean(values) ? values : values.indexOf(value) > -1;
 
 		if ($checkbox.xprop('checked') != checkStatus) $checkbox.xprop('checked', checkStatus);
+	};
+
+	/**
+  * 更新 swtich 的激活状态 realize v-model
+  * @param   {JQLite/input}          $checkbox
+  * @param   {Boolean}               value      [激活数组或状态]
+  */
+	up.updateSwitchChecked = function ($switch, value) {
+		var checkStatus = !!value;
+		if ($switch.xprop('checked') != checkStatus) $switch.xprop('checked', checkStatus);
 	};
 
 	/**

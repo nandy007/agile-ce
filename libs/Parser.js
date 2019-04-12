@@ -543,6 +543,7 @@
 				case 'radio': this.vmradio.apply(this, arguments); return;
 				case 'checkbox': this.vmcheckbox.apply(this, arguments); return;
 				case 'select': this.vmselect.apply(this, arguments); return;
+				case 'switch': this.vmswitch.apply(this, arguments); return;
 			}
 
 			if (this['vm' + type]) {
@@ -597,8 +598,8 @@
 
 			Parser.bindChangeEvent($node, function () {
 				if($node.isChecked()) {
-					var access = Parser.makeDep(expression, fors, parser.getVmPre());
-					var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+					// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+					// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
 				}
 			});
@@ -632,8 +633,8 @@
 
 			Parser.bindChangeEvent($node, function () {
 
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 				value = duplex[field];
 
@@ -706,8 +707,8 @@
 			});
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				var selects = Parser.getSelecteds($(this));
 				duplex[field] = multi ? selects : selects[0];
 			});
@@ -727,9 +728,32 @@
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
-				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
+			});
+		},
+		'vmswtich': function ($node, fors, expression, dir) {
+			var parser = this, updater = this.updater;
+
+			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+
+			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
+
+			if($node.hasAttr('checked')){
+				duplex[field] = $node.xprop('checked');
+			}else{
+				updater.updateSwitchChecked($node, duplex[field]);
+			}
+			
+
+			var deps = [access];
+			parser.watcher.watch(deps, function () {
+				updater.updateSwitchChecked($node, duplex[field]);
+			}, fors);
+
+			Parser.bindChangeEvent($node, function () {
+				duplex[field] = $node.xprop('checked');
 			});
 		},
 		'vfilter': function ($node, fors, expression) {
