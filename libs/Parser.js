@@ -733,7 +733,7 @@
 				duplex[field] = $node.val();
 			});
 		},
-		'vmswtich': function ($node, fors, expression, dir) {
+		'vmswitch': function ($node, fors, expression, dir) {
 			var parser = this, updater = this.updater;
 
 			var access = Parser.makeDep(expression, fors, parser.getVmPre());
