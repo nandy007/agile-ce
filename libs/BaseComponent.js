@@ -108,19 +108,20 @@ class BaseComponent{
 
     __initProto(){
         var _this = this;
-        var __props = [];
-        this.__props = __props;
+        // var __props = [];
+        // this.__props = __props;
 
         // 内部事件
         for(var k in this.events){
             var event = this.events[k];
             event.init ? event.init() : (event.handler && event.handler());
         }
-
+        var __propRefers = this.__propRefers = {};
         // 外部属性
         this.__setThisData(this.properties);
         for(var k in (this.properties||{})){
-            __props.push(k);
+            // __props.push(k);
+            __propRefers[k.toLowerCase()] = k;
             var prop = this.properties[k];
             (function(k){
                 _this.__setViewData(k, _this.getAttrValue(k));
@@ -133,7 +134,8 @@ class BaseComponent{
 
         // 内部属性
         for(var k in (this.props||{})){
-            __props.push(k);
+            // __props.push(k);
+            __propRefers[k.toLowerCase()] = k;
             var prop = this.props[k];
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
@@ -254,7 +256,10 @@ class BaseComponent{
     }
     // 属性变化回调，基础组件内可调用
     attrChanged(attrName, attrValue){
-        if(this.__props&&this.__props.indexOf(attrName)>-1){
+        attrName = attrName.toLowerCase();
+        var __propRefers = this.__propRefers;
+        if(__propRefers[attrName]){
+            attrName = __propRefers[attrName];
             var prop = this.__getProp(attrName), val = this.getAttrValue(attrName);
             prop.handler && prop.handler(val);
             prop.observer && prop.observer.call(this, val);

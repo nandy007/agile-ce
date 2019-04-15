@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.78.1555305674939 beta
+ *	Version	:	0.4.79.1555314134582 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -13137,19 +13137,20 @@ var BaseComponent = function () {
         key: '__initProto',
         value: function __initProto() {
             var _this = this;
-            var __props = [];
-            this.__props = __props;
+            // var __props = [];
+            // this.__props = __props;
 
             // 内部事件
             for (var k in this.events) {
                 var event = this.events[k];
                 event.init ? event.init() : event.handler && event.handler();
             }
-
+            var __propRefers = this.__propRefers = {};
             // 外部属性
             this.__setThisData(this.properties);
             for (var k in this.properties || {}) {
-                __props.push(k);
+                // __props.push(k);
+                __propRefers[k.toLowerCase()] = k;
                 var prop = this.properties[k];
                 (function (k) {
                     _this.__setViewData(k, _this.getAttrValue(k));
@@ -13162,7 +13163,8 @@ var BaseComponent = function () {
 
             // 内部属性
             for (var k in this.props || {}) {
-                __props.push(k);
+                // __props.push(k);
+                __propRefers[k.toLowerCase()] = k;
                 var prop = this.props[k];
                 prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
             }
@@ -13312,7 +13314,10 @@ var BaseComponent = function () {
     }, {
         key: 'attrChanged',
         value: function attrChanged(attrName, attrValue) {
-            if (this.__props && this.__props.indexOf(attrName) > -1) {
+            attrName = attrName.toLowerCase();
+            var __propRefers = this.__propRefers;
+            if (__propRefers[attrName]) {
+                attrName = __propRefers[attrName];
                 var prop = this.__getProp(attrName),
                     val = this.getAttrValue(attrName);
                 prop.handler && prop.handler(val);
