@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.76.1555085282077 beta
+ *	Version	:	0.4.77.1555296371640 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -898,7 +898,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    duplex = duplexField.duplex(parser.$scope),
 			    field = duplexField.field;
 
-			updater.updateSwitchChecked($node, duplex[field]);
+			if ($node.hasAttr('checked')) {
+				duplex[field] = $node.xprop('checked');
+			} else {
+				updater.updateSwitchChecked($node, duplex[field]);
+			}
 
 			var deps = [access];
 			parser.watcher.watch(deps, function () {
@@ -1103,7 +1107,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 	 * @param   {String}     access        [节点路径]
+ 
+  * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {

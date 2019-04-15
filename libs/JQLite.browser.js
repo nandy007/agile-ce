@@ -64,6 +64,7 @@
 			}else{
 				origin_prop.call(this, name, val);
 			}
+			this.triggerHandler('attrChanged', name, val);
         }
 		return this;
 	};
