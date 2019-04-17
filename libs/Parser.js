@@ -1528,13 +1528,23 @@
 
 	//获取select组件的取值
 	Parser.getSelecteds = function ($select) {
-		var sels = [];
-		var getNumber = $select.hasAttr('number');
-		$select.find("option:selected").each(function () {
-			var $option = $(this);
-			var value = $option.val();
-			sels.push(getNumber ? +value : Parser.formatValue($option, value));
-		});
+		var sels = [], getNumber = $select.hasAttr('number');
+		if($select.is('select')){
+
+			$select.find("option:selected").each(function () {
+				var $option = $(this);
+				var value = $option.val();
+				sels.push(getNumber ? +value : Parser.formatValue($option, value));
+			});
+		}else{
+			sels = ($select.attr('value')||'').split(',');
+			if(getNumber){
+				for(var i=0, len=sels.length;i<len;i++){
+					sels[i] = (+sels[i]);
+				}
+			}
+			
+		}
 
 		return sels;
 	};

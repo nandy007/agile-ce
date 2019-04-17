@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.79.1555314151608 beta
+ *	Version	:	0.4.80.1555481059669 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1687,13 +1687,23 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	//获取select组件的取值
 	Parser.getSelecteds = function ($select) {
-		var sels = [];
-		var getNumber = $select.hasAttr('number');
-		$select.find("option:selected").each(function () {
-			var $option = $(this);
-			var value = $option.val();
-			sels.push(getNumber ? +value : Parser.formatValue($option, value));
-		});
+		var sels = [],
+		    getNumber = $select.hasAttr('number');
+		if ($select.is('select')) {
+
+			$select.find("option:selected").each(function () {
+				var $option = $(this);
+				var value = $option.val();
+				sels.push(getNumber ? +value : Parser.formatValue($option, value));
+			});
+		} else {
+			sels = ($select.attr('value') || '').split(',');
+			if (getNumber) {
+				for (var i = 0, len = sels.length; i < len; i++) {
+					sels[i] = +sels[i];
+				}
+			}
+		}
 
 		return sels;
 	};
@@ -5365,6 +5375,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 						} else {
 							val = newValue;
 						}
+
 						ob.trigger({
 							path: myPath,
 							oldVal: oldValue,
@@ -5564,6 +5575,7 @@ var BaseComponent = function () {
             } else {
                 this.$root = this.$jsDom;
             }
+
             // this.__setThisData();
         }
     }, {
@@ -5723,6 +5735,7 @@ var BaseComponent = function () {
                 _this2.$vm.destroy();
             });
             this.$vm = this.$root.render(this.viewData);
+            this.__observerData();
         }
     }, {
         key: '__getProp',
@@ -5770,6 +5783,17 @@ var BaseComponent = function () {
         value: function __getVmPre() {
             return this.viewData && this.viewData.data ? 'data' : this.$.vm.getVMPre().data;
         }
+    }, {
+        key: '__observerData',
+        value: function __observerData() {
+            var _this = this;
+            this.$vm.dataChange(function (options) {
+                var ps = options.path;
+                var pre = _this.__getVmPre();
+                if (pre) ps = ps.replace(pre + '.', '');
+                _this.__handlerObservers([ps]);
+            });
+        }
         // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
 
     }, {
@@ -5777,6 +5801,7 @@ var BaseComponent = function () {
         value: function setData(data) {
             var pre = this.__getVmPre(),
                 keyArr = [];
+            this.__transDataChange = true;
             for (var k in data) {
                 keyArr.push(k);
                 var exp = 'obj.' + (pre ? pre + '.' : '') + k;
@@ -5784,6 +5809,7 @@ var BaseComponent = function () {
                 if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object') val = JSON.parse(JSON.stringify(val));
                 new Function('obj', 'val', 'try{ ' + exp + ' = val; }catch(e){console.log(e);}')(this.viewData, val);
             }
+            this.__transDataChange = false;
             this.__handlerObservers && this.__handlerObservers(keyArr);
             // var nObj = {};
             // if(pre){
@@ -6033,7 +6059,11 @@ BaseComponent.createClass = function (options, fullTag) {
             if (pre) ps = ps.replace(pre + '.', '');
         },
         __handlerObservers: function __handlerObservers(keyArr) {
+
             if (keyArr.length === 0) return;
+
+            if (this.__transDataChange) return;
+
             var json = this.__json,
                 observers = json.observers;
             if (!observers) return;
@@ -6050,6 +6080,7 @@ BaseComponent.createClass = function (options, fullTag) {
                     observers[k].apply(this);
                 }
             }
+            this.__transDataChange = false;
         },
         initViewData: function initViewData() {
             var json = this.__json;

@@ -228,6 +228,7 @@
 						} else {
 							val = newValue;
 						}
+						
 						ob.trigger({
 							path: myPath,
 							oldVal: oldValue,

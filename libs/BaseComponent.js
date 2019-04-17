@@ -22,6 +22,7 @@ class BaseComponent{
         }else{
             this.$root = this.$jsDom;
         }
+        
         // this.__setThisData();
     }
 
@@ -171,6 +172,7 @@ class BaseComponent{
                     this.$vm.destroy();
                 });
         this.$vm = this.$root.render(this.viewData);
+        this.__observerData();
     }
 
     __getProp(name){
@@ -210,9 +212,20 @@ class BaseComponent{
     __getVmPre(){
         return this.viewData && this.viewData.data ? 'data' : this.$.vm.getVMPre().data;
     }
+
+    __observerData(){
+        var _this = this;
+        this.$vm.dataChange(function(options){
+            var ps = options.path;
+            var pre = _this.__getVmPre();
+            if(pre) ps = ps.replace(pre+'.', '');
+            _this.__handlerObservers([ps]);
+        });
+    }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
     setData(data){
         var pre = this.__getVmPre(), keyArr = [];
+        this.__transDataChange = true;
         for(var k in data){
             keyArr.push(k);
             var exp = 'obj.' + (pre ? (pre+'.') : '') + k;
@@ -220,6 +233,7 @@ class BaseComponent{
             if(typeof val==='object') val = JSON.parse(JSON.stringify(val));
             new Function('obj', 'val', `try{ ${exp} = val; }catch(e){console.log(e);}`)(this.viewData, val);
         }
+        this.__transDataChange = false;
         this.__handlerObservers && this.__handlerObservers(keyArr);
 		// var nObj = {};
 		// if(pre){
@@ -419,7 +433,11 @@ BaseComponent.createClass = function(options, fullTag){
             
         },
         __handlerObservers: function(keyArr){
+
             if(keyArr.length===0) return;
+
+            if(this.__transDataChange) return;
+
             var json = this.__json, observers = json.observers;
             if(!observers) return;
             for(var k in observers){
@@ -434,6 +452,7 @@ BaseComponent.createClass = function(options, fullTag){
                     observers[k].apply(this);
                 }
             }
+            this.__transDataChange = false;
         },
         initViewData: function(){
             const json = this.__json;
