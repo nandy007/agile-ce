@@ -219,7 +219,7 @@ class BaseComponent{
             var ps = options.path;
             var pre = _this.__getVmPre();
             if(pre) ps = ps.replace(pre+'.', '');
-            _this.__handlerObservers([ps]);
+            _this.__handlerObservers && _this.__handlerObservers([ps]);
         });
     }
     // 设置data值，基础组件和扩展组件都可调用，对应小程序setData

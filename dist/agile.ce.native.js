@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.80.1555481059669 beta
+ *	Version	:	0.4.81.1555490281587 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5791,7 +5791,7 @@ var BaseComponent = function () {
                 var ps = options.path;
                 var pre = _this.__getVmPre();
                 if (pre) ps = ps.replace(pre + '.', '');
-                _this.__handlerObservers([ps]);
+                _this.__handlerObservers && _this.__handlerObservers([ps]);
             });
         }
         // 设置data值，基础组件和扩展组件都可调用，对应小程序setData
