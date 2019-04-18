@@ -377,6 +377,13 @@ function _structure(options){
     var props = json.props; delete json.props;
     var observers = json.observers; delete json.observers;
     var viewData = $.isEmptyObject(json) ? (properties ? {} : null ) : json;
+    var methods = viewData.methods || {};
+    for(var k in viewData){
+        if(typeof viewData[k]==='function' && BaseComponent.lifecycleFuncs.indexOf(k)<0 ) {
+            methods[k] = viewData[k];
+        }
+    }
+    viewData.methods = methods;
 
     var json = {
         // methods: methods,
