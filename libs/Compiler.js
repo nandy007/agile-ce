@@ -144,6 +144,9 @@
 				//对slot子节点递归调用
 				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
 				return;
+			}else if(this.isComponent && isRoot){
+				_this.walkElement($node.childs(), fors, directiveNodes);
+				return;
 			}
 
 			var ignoreRoot = $node.hasAttr('vmignoreroot');
