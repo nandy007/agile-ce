@@ -147,7 +147,6 @@ class BaseComponent{
         // 外部方法挂载
         var viewData = this.viewData || {};
         this.__wrapperMethod(viewData.methods);
-
     }
 
     __wrapperMethod(methods){
@@ -158,7 +157,7 @@ class BaseComponent{
                 var oldFunc = ctx[k];
                 ctx[k] = function(){
                     oldFunc && oldFunc.apply(ctx, arguments);
-                    return method.apply(ctx, arguments);
+                    return methods[k].apply(ctx, arguments);
                 };
             })(this, k);
         }
@@ -377,13 +376,6 @@ function _structure(options){
     var props = json.props; delete json.props;
     var observers = json.observers; delete json.observers;
     var viewData = $.isEmptyObject(json) ? (properties ? {} : null ) : json;
-    var methods = viewData.methods || {};
-    for(var k in viewData){
-        if(typeof viewData[k]==='function' && BaseComponent.lifecycleFuncs.indexOf(k)<0 ) {
-            methods[k] = viewData[k];
-        }
-    }
-    viewData.methods = methods;
 
     var json = {
         // methods: methods,
