@@ -112,6 +112,13 @@ class BaseComponent{
         // var __props = [];
         // this.__props = __props;
 
+        // 内部方法挂载
+        this.__wrapperMethod(this.methods);
+
+        // 外部方法挂载
+        var viewData = this.viewData || {};
+        this.__wrapperMethod(viewData.methods);
+
         // 内部事件
         for(var k in this.events){
             var event = this.events[k];
@@ -130,6 +137,7 @@ class BaseComponent{
 					_this.data[k] = val;
                 };
                 prop.init = function(){};
+                prop.observer && prop.observer.call(_this, _this.getAttrValue(k));
             })(k);
         }
 
@@ -140,13 +148,6 @@ class BaseComponent{
             var prop = this.props[k];
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
-
-        // 内部方法挂载
-        this.__wrapperMethod(this.methods);
-
-        // 外部方法挂载
-        var viewData = this.viewData || {};
-        this.__wrapperMethod(viewData.methods);
     }
 
     __wrapperMethod(methods){
@@ -399,7 +400,7 @@ function _setLifecycleFunc(json, funcName){
     json.lifecycle[funcName] = func;
 }
 
-BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide'];
+BaseComponent.lifecycleFuncs = ['onLoad', 'onShow', 'onHide', 'created'];
 
 BaseComponent.createClass = function(options, fullTag){
     // var json = _structure(options);
@@ -419,6 +420,8 @@ BaseComponent.createClass = function(options, fullTag){
                 json.lifecycle.onHide && json.lifecycle.onHide.call(comp);
             });
             json.lifecycle.onLoad && json.lifecycle.onLoad.call(comp);
+
+            json.lifecycle.created && json.lifecycle.created.call(comp);
             
             // if(json.observers) $jsDom.on('__mvvmDataChange', function(e, options){
             //     comp.mvvmDataChangeHandler(options);
