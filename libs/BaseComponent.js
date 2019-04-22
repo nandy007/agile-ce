@@ -113,11 +113,11 @@ class BaseComponent{
         // this.__props = __props;
 
         // 内部方法挂载
-        this.__wrapperMethod(this.methods);
+        // this.__wrapperMethod(this.methods);
 
         // 外部方法挂载
-        var viewData = this.viewData || {};
-        this.__wrapperMethod(viewData.methods);
+        // var viewData = this.viewData || {};
+        // this.__wrapperMethod(viewData.methods);
 
         // 内部事件
         for(var k in this.events){
@@ -150,13 +150,35 @@ class BaseComponent{
         }
     }
 
+    __setBeforeCreated(func, args){
+        this.__beforeFuncs = this.__beforeFuncs || [];
+        this.__beforeFuncs.push({
+            func: func,
+            args: args
+        });
+    }
+
+    __triggerCreated(){
+        this.isCreated = true;
+        var rs = (this.__beforeFuncs||[]).splice(0);
+        for(var i=0, len=rs.length;i<len;i++){
+            var fnObj = rs[i];
+            fnObj.func.apply(this, fnObj.args);
+        }
+    }
+
     __wrapperMethod(methods){
+        var comp = this;
         for(var k in (methods || {})){
             var method = methods[k];
             if(typeof method!=='function') continue;
             (function(ctx, k){
                 var oldFunc = ctx[k];
                 ctx[k] = function(){
+                    if(!comp.isCreated){
+                        comp.__setBeforeCreated(ctx[k], arguments);
+                        return;
+                    }
                     oldFunc && oldFunc.apply(ctx, arguments);
                     return methods[k].apply(ctx, arguments);
                 };
@@ -261,12 +283,13 @@ class BaseComponent{
     // 组件创建回调函数，基础组件和扩展组件都可调用，对应小程序的loaded
     created(){
         this.__initInnerDom();
-        this.initViewData && this.initViewData();
+        // this.initViewData && this.initViewData();
         this.initProto && this.initProto();
         this.__addCommProps();
         this.__initEvent();
         this.__initProto();
         this.__mvvmRender();
+        this.__triggerCreated();
     }
     // 属性变化回调，基础组件内可调用
     attrChanged(attrName, attrValue){
@@ -339,7 +362,19 @@ BaseComponent.wrapperClass = function(MyClass){
     class Wrapper extends MyClass{
         constructor(el){
             super(el);
+            var $ = require('./env').JQLite;
             this.jsDom = el;
+            this.$jsDom = $(el);
+            this.initViewData && this.initViewData();
+            // this.initProto && this.initProto();
+            // this.__addCommProps();
+
+            // 内部方法挂载
+            this.__wrapperMethod(this.methods);
+
+            // 外部方法挂载
+            var viewData = this.viewData || {};
+            this.__wrapperMethod(viewData.methods);
         }
     }
 

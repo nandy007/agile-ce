@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.85.1555751004808 beta
+ *	Version	:	0.4.86.1555927004589 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -13156,11 +13156,11 @@ var BaseComponent = function () {
             // this.__props = __props;
 
             // 内部方法挂载
-            this.__wrapperMethod(this.methods);
+            // this.__wrapperMethod(this.methods);
 
             // 外部方法挂载
-            var viewData = this.viewData || {};
-            this.__wrapperMethod(viewData.methods);
+            // var viewData = this.viewData || {};
+            // this.__wrapperMethod(viewData.methods);
 
             // 内部事件
             for (var k in this.events) {
@@ -13193,14 +13193,38 @@ var BaseComponent = function () {
             }
         }
     }, {
+        key: '__setBeforeCreated',
+        value: function __setBeforeCreated(func, args) {
+            this.__beforeFuncs = this.__beforeFuncs || [];
+            this.__beforeFuncs.push({
+                func: func,
+                args: args
+            });
+        }
+    }, {
+        key: '__triggerCreated',
+        value: function __triggerCreated() {
+            this.isCreated = true;
+            var rs = (this.__beforeFuncs || []).splice(0);
+            for (var i = 0, len = rs.length; i < len; i++) {
+                var fnObj = rs[i];
+                fnObj.func.apply(this, fnObj.args);
+            }
+        }
+    }, {
         key: '__wrapperMethod',
         value: function __wrapperMethod(methods) {
+            var comp = this;
             for (var k in methods || {}) {
                 var method = methods[k];
                 if (typeof method !== 'function') continue;
                 (function (ctx, k) {
                     var oldFunc = ctx[k];
                     ctx[k] = function () {
+                        if (!comp.isCreated) {
+                            comp.__setBeforeCreated(ctx[k], arguments);
+                            return;
+                        }
                         oldFunc && oldFunc.apply(ctx, arguments);
                         return methods[k].apply(ctx, arguments);
                     };
@@ -13332,12 +13356,13 @@ var BaseComponent = function () {
         key: 'created',
         value: function created() {
             this.__initInnerDom();
-            this.initViewData && this.initViewData();
+            // this.initViewData && this.initViewData();
             this.initProto && this.initProto();
             this.__addCommProps();
             this.__initEvent();
             this.__initProto();
             this.__mvvmRender();
+            this.__triggerCreated();
         }
         // 属性变化回调，基础组件内可调用
 
@@ -13445,7 +13470,19 @@ BaseComponent.wrapperClass = function (MyClass) {
 
             var _this4 = _possibleConstructorReturn(this, (Wrapper.__proto__ || Object.getPrototypeOf(Wrapper)).call(this, el));
 
+            var $ = __webpack_require__(0).JQLite;
             _this4.jsDom = el;
+            _this4.$jsDom = $(el);
+            _this4.initViewData && _this4.initViewData();
+            // this.initProto && this.initProto();
+            // this.__addCommProps();
+
+            // 内部方法挂载
+            _this4.__wrapperMethod(_this4.methods);
+
+            // 外部方法挂载
+            var viewData = _this4.viewData || {};
+            _this4.__wrapperMethod(viewData.methods);
             return _this4;
         }
 
