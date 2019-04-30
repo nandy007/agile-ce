@@ -119,6 +119,8 @@ class BaseComponent{
         // var viewData = this.viewData || {};
         // this.__wrapperMethod(viewData.methods);
 
+        var jqUtil = require('./JQLiteUtil');
+
         // 内部事件
         for(var k in this.events){
             var event = this.events[k];
@@ -131,6 +133,7 @@ class BaseComponent{
             // __props.push(k);
             __propRefers[k.toLowerCase()] = k;
             var prop = this.properties[k];
+            if(prop.type===Boolean) jqUtil.booleanAttr(k); // 添加boolean类型处理
             (function(k){
                 _this.__setViewData(k, _this.getAttrValue(k));
 				prop.handler = function(val){
@@ -146,6 +149,7 @@ class BaseComponent{
             // __props.push(k);
             __propRefers[k.toLowerCase()] = k;
             var prop = this.props[k];
+            if(prop.type===Boolean) jqUtil.booleanAttr(k); // 添加boolean类型处理
             prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
         }
     }

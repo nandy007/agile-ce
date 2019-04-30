@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.87.1556538860463 beta
+ *	Version	:	0.4.88.1556609842485 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -96,7 +96,7 @@ var __EXPORTS_DEFINED__ = function (mod, modName) {
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1867,29 +1867,83 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-module.exports = require("Document");
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(4);
-
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var env = __webpack_require__(0);
-env.JQLite = __webpack_require__(5);
-if (!env.$) env.$ = env.JQLite;
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-module.exports = env.JQLite;
+var util = module.exports = {
+    __booleanAttr: ['disabled', 'checked', 'selected', 'autoplay', 'hidden'],
+    booleanAttr: function booleanAttr() {
+        if (arguments.length === 0) return util.__booleanAttr;
+        for (var i = 0, len = arguments.length; i < len; i++) {
+            if (util.__booleanAttr.indexOf(arguments[i]) === -1) {
+                util.__booleanAttr.push(arguments[i]);
+            }
+        }
+    },
+    isBooleanAttr: function isBooleanAttr(name) {
+        var __booleanAttr = util.booleanAttr();
+        return __booleanAttr.indexOf(name) > -1;
+    },
+    cleanJSON: function cleanJSON(obj) {
+        try {
+            obj = JSON.parse(JSON.stringify(obj));
+        } catch (e) {}
+        return obj;
+    },
+    stringify: function stringify(json) {
+        try {
+            return (typeof json === 'undefined' ? 'undefined' : _typeof(json)) === 'object' ? JSON.stringify(json) : json;
+        } catch (e) {
+            console.error('json数据转换字符串失败：' + String(json));
+        }
+        return json;
+    },
+    parse: function parse(val) {
+        try {
+            return JSON.parse(val);
+        } catch (e) {
+            console.error('json字符串转换对象失败：' + String(val));
+        }
+        return val;
+    },
+    booleanAttrForJquery: function booleanAttrForJquery(name, val) {
+        if (arguments.length === 1) {
+            var el = this.length > 0 && this[0];
+            if (!el) return '';
+            var rs = this.prop(name);
+            if (typeof rs === 'undefined') {
+                rs = el.getAttribute(name);
+            }
+            if (rs === '' || rs === undefined || rs === null || rs === 'false') {
+                rs = false;
+            }
+            return !!rs;
+        } else if (arguments.length === 2) {
+            this.each(function () {
+                this.setAttribute(name, val);
+            });
+            return this.prop(name, val);
+        }
+        return this;
+    }
+};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("Document");
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(5);
+
 
 /***/ }),
 /* 5 */
@@ -1898,12 +1952,25 @@ module.exports = env.JQLite;
 "use strict";
 
 
+var env = __webpack_require__(0);
+env.JQLite = __webpack_require__(6);
+if (!env.$) env.$ = env.JQLite;
+
+module.exports = env.JQLite;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 (function () {
-	var jqliteUtil = __webpack_require__(6);
+	var jqliteUtil = __webpack_require__(2);
 	var ui = __webpack_require__(7),
-	    document = __webpack_require__(2),
+	    document = __webpack_require__(3),
 	    window = __webpack_require__(8),
 	    Adapter = __webpack_require__(9),
 	    time = __webpack_require__(10);
@@ -3725,68 +3792,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		return jqlite.file.read(str);
 	});
 	_template.hookHelper('getDom', function (id) {
-		return __webpack_require__(2).getElement(id);
+		return __webpack_require__(3).getElement(id);
 	});
 	jqlite.template = _template;
 })();
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var util = module.exports = {
-    isBooleanAttr: function isBooleanAttr(name) {
-        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay', 'hidden'];
-        return __booleanAttr.indexOf(name) > -1;
-    },
-    cleanJSON: function cleanJSON(obj) {
-        try {
-            obj = JSON.parse(JSON.stringify(obj));
-        } catch (e) {}
-        return obj;
-    },
-    stringify: function stringify(json) {
-        try {
-            return (typeof json === 'undefined' ? 'undefined' : _typeof(json)) === 'object' ? JSON.stringify(json) : json;
-        } catch (e) {
-            console.error('json数据转换字符串失败：' + String(json));
-        }
-        return json;
-    },
-    parse: function parse(val) {
-        try {
-            return JSON.parse(val);
-        } catch (e) {
-            console.error('json字符串转换对象失败：' + String(val));
-        }
-        return val;
-    },
-    booleanAttrForJquery: function booleanAttrForJquery(name, val) {
-        if (arguments.length === 1) {
-            var el = this.length > 0 && this[0];
-            if (!el) return '';
-            var rs = this.prop(name);
-            if (typeof rs === 'undefined') {
-                rs = el.getAttribute(name);
-            }
-            if (rs === '' || rs === undefined || rs === null || rs === 'false') {
-                rs = false;
-            }
-            return !!rs;
-        } else if (arguments.length === 2) {
-            this.each(function () {
-                this.setAttribute(name, val);
-            });
-            return this.prop(name, val);
-        }
-        return this;
-    }
-};
 
 /***/ }),
 /* 7 */
@@ -5682,6 +5691,8 @@ var BaseComponent = function () {
             // var viewData = this.viewData || {};
             // this.__wrapperMethod(viewData.methods);
 
+            var jqUtil = __webpack_require__(2);
+
             // 内部事件
             for (var k in this.events) {
                 var event = this.events[k];
@@ -5694,6 +5705,7 @@ var BaseComponent = function () {
                 // __props.push(k);
                 __propRefers[k.toLowerCase()] = k;
                 var prop = this.properties[k];
+                if (prop.type === Boolean) jqUtil.booleanAttr(k); // 添加boolean类型处理
                 (function (k) {
                     _this.__setViewData(k, _this.getAttrValue(k));
                     prop.handler = function (val) {
@@ -5709,6 +5721,7 @@ var BaseComponent = function () {
                 // __props.push(k);
                 __propRefers[k.toLowerCase()] = k;
                 var prop = this.props[k];
+                if (prop.type === Boolean) jqUtil.booleanAttr(k); // 添加boolean类型处理
                 prop.init ? prop.init() : prop.handler && prop.handler(this.getAttrValue(k));
             }
         }

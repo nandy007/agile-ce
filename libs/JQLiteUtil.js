@@ -1,7 +1,16 @@
 
 var util = module.exports = {
+    __booleanAttr: ['disabled', 'checked', 'selected', 'autoplay', 'hidden'],
+    booleanAttr: function(){
+        if(arguments.length===0) return util.__booleanAttr;
+        for(var i=0, len=arguments.length;i<len;i++){
+            if(util.__booleanAttr.indexOf(arguments[i])===-1){
+                util.__booleanAttr.push(arguments[i]);
+            }
+        }
+    },
     isBooleanAttr: function(name){
-        var __booleanAttr = ['disabled', 'checked', 'selected', 'autoplay', 'hidden'];
+        var __booleanAttr = util.booleanAttr();
         return __booleanAttr.indexOf(name)>-1;
     },
     cleanJSON: function cleanJSON(obj){
