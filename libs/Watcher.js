@@ -21,6 +21,14 @@
 		swapSub : function(subs, tSub, oSub){//交换订阅绑定
 			var func = new Function('subs', 'subs.'+this.fomateSubPath(tSub)+' = subs.'+this.fomateSubPath(oSub)+';');
 			func(subs);
+		},
+		typeExts: {
+			string: ['length', 'substr', 'substring'],
+			array: ['length', 'indexOf']
+		},
+		getTypeExts: function(val){
+			var type = (val instanceof Array ? 'array' : typeof val).toLowerCase();
+			return watcherUtil.typeExts[type] || [];
 		}
 	};
 
@@ -45,6 +53,10 @@
 		this.observer = new Observer(model, this);
 	}
 
+	Watcher.addTypeExt = function(type, exts){
+		watcherUtil[type] = (watcherUtil[type] || []).concat(exts);
+	};
+
 	var wp = Watcher.prototype;
 
 	/**
@@ -52,10 +64,18 @@
 	 * @param   {Object}    options
 	 */
 	wp.change = function(options){
+		var exts = watcherUtil.getTypeExts(options.newArray || options.newVal);
+		$.util.each(exts, function(i, ext){
+			exts[i] = options.path + '.' + ext;
+		});
+		exts.unshift(options.path);
 		var subs = this.$depSub;
-		var sub = watcherUtil.iterator(options.path.split('.'), subs);
-		$.util.each(sub['$']||[], function(i, cb){		
-			cb(options, i);
+
+		$.util.each(exts, function(index, ext){
+			var sub = watcherUtil.iterator(ext.split('.'), subs);
+			$.util.each(sub['$']||[], function(i, cb){		
+				cb(Object.assign({}, options, {path: ext}), i);
+			});
 		});
 	};
 

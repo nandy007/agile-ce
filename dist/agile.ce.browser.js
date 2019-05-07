@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.4.88.1556609824079 beta
+ *	Version	:	0.5.0.1557214902613 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1076,8 +1076,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 
-  * @param   {String}     access        [节点路径]
+ 	 * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
@@ -11460,7 +11459,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * 设置绑定数据
   */
 	mp.setData = function (obj) {
-		var viewData = this.$data;
+		var viewData = this.getData();
 		for (var k in obj) {
 			var func = new Function('d', 'v', 'try{d.' + k + '=v;}catch(e){console.error(e);}');
 			var v = obj[k];
@@ -11475,6 +11474,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	mp.dataChange = function (cb) {
 		var _this = this;
 		this.vm.$element.on('__mvvmDataChange', function (e, options) {
+			var pre = _this.getVMPre() + '.';
+			if (options.path.indexOf(pre) === 0) {
+				options.path = options.path.replace(pre, '');
+			}
 			cb.call(_this, JSON.parse(JSON.stringify(options)));
 		});
 	};
@@ -11483,7 +11486,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * 获取 mvvm 绑定的数据
   */
 	mp.getData = function () {
-		return this.$data;
+		var pre = this.getVMPre();
+		return pre ? this.$data[pre] : this.$data;
 	};
 
 	/**
@@ -12327,6 +12331,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 (function () {
 
 	var $ = __webpack_require__(0).JQLite;
@@ -12353,6 +12361,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			//交换订阅绑定
 			var func = new Function('subs', 'subs.' + this.fomateSubPath(tSub) + ' = subs.' + this.fomateSubPath(oSub) + ';');
 			func(subs);
+		},
+		typeExts: {
+			string: ['length', 'substr', 'substring'],
+			array: ['length', 'indexOf']
+		},
+		getTypeExts: function getTypeExts(val) {
+			var type = (val instanceof Array ? 'array' : typeof val === 'undefined' ? 'undefined' : _typeof(val)).toLowerCase();
+			return watcherUtil.typeExts[type] || [];
 		}
 	};
 
@@ -12377,6 +12393,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		this.observer = new Observer(model, this);
 	}
 
+	Watcher.addTypeExt = function (type, exts) {
+		watcherUtil[type] = (watcherUtil[type] || []).concat(exts);
+	};
+
 	var wp = Watcher.prototype;
 
 	/**
@@ -12384,10 +12404,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {Object}    options
   */
 	wp.change = function (options) {
+		var exts = watcherUtil.getTypeExts(options.newArray || options.newVal);
+		$.util.each(exts, function (i, ext) {
+			exts[i] = options.path + '.' + ext;
+		});
+		exts.unshift(options.path);
 		var subs = this.$depSub;
-		var sub = watcherUtil.iterator(options.path.split('.'), subs);
-		$.util.each(sub['$'] || [], function (i, cb) {
-			cb(options, i);
+
+		$.util.each(exts, function (index, ext) {
+			var sub = watcherUtil.iterator(ext.split('.'), subs);
+			$.util.each(sub['$'] || [], function (i, cb) {
+				cb(_extends({}, options, { path: ext }), i);
+			});
 		});
 	};
 
@@ -13309,10 +13337,11 @@ var BaseComponent = function () {
         value: function __observerData() {
             var _this = this;
             this.$vm.dataChange(function (options) {
-                var ps = options.path;
-                var pre = _this.__getVmPre();
-                if (pre) ps = ps.replace(pre + '.', '');
-                _this.__handlerObservers && _this.__handlerObservers([ps]);
+                // var ps = options.path;
+                // var pre = _this.__getVmPre();
+                // if(pre) ps = ps.replace(pre+'.', '');
+                // _this.__handlerObservers && _this.__handlerObservers([ps]);
+                _this.__handlerObservers && _this.__handlerObservers([options.path]);
             });
         }
         // 设置data值，基础组件和扩展组件都可调用，对应小程序setData

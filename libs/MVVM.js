@@ -73,7 +73,7 @@
 	 * 设置绑定数据
 	 */
 	mp.setData = function(obj){
-		var viewData = this.$data;
+		var viewData = this.getData();
 		for(var k in obj){
 			var func = new Function('d', 'v', `try{d.${k}=v;}catch(e){console.error(e);}`);
 			var v = obj[k];
@@ -88,6 +88,10 @@
 	mp.dataChange = function(cb){
 		var _this = this;
 		this.vm.$element.on('__mvvmDataChange', function(e, options){
+			var pre = _this.getVMPre() + '.';
+			if(options.path.indexOf(pre)===0){
+				options.path = options.path.replace(pre, '');
+			}
 			cb.call(_this, JSON.parse(JSON.stringify(options)));
 		});
 	}
@@ -96,7 +100,8 @@
 	 * 获取 mvvm 绑定的数据
 	 */
 	mp.getData = function(){
-		return this.$data;
+		var pre = this.getVMPre();
+		return pre ? this.$data[pre] : this.$data;
 	};
 
 	/**

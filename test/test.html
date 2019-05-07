@@ -51,10 +51,11 @@
         <div v-if="a&&b">111</div>
         <div v-elseif="a&&c">222</div>
         <div v-else v-on:click="click">333</div> -->
-        <lebal><input type="checkbox" value="1" v-model="cks"/>111</lebal>
+        <!-- <lebal><input type="checkbox" value="1" v-model="cks"/>111</lebal>
         <lebal><input type="checkbox" value="2" v-model="cks"/>222</lebal>
         <lebal><input type="checkbox" value="3" v-model="cks"/>333</lebal>
-        <div v-hide="false">隐藏</div>
+        <div v-hide="false">隐藏</div> -->
+        <div v-text="cks.indexOf('3')"></div>
     </div>
 
     <div id="copy">
@@ -134,12 +135,13 @@
         var mv = $('#app').render(obj);
         
         // 监听数据变化
-        mv.dataChange(function(opt){
-            console.log(opt)
-        });
+        // mv.dataChange(function(opt){
+        //     console.log(opt)
+        // });
         // 设置数据值（强行进行清理）
         mv.setData({
-            'data.cks': ['2', '3']
+            'cks': ['2', '3'],
+            'myclass': 'blue'
         });
         
 
