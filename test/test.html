@@ -55,7 +55,8 @@
         <lebal><input type="checkbox" value="2" v-model="cks"/>222</lebal>
         <lebal><input type="checkbox" value="3" v-model="cks"/>333</lebal>
         <div v-hide="false">隐藏</div> -->
-        <div v-text="cks.indexOf('3')"></div>
+        <input type="text" v-model="ipt" v-on:keypress="keypress"/>
+        <div>{{ipt}}</div>
     </div>
 
     <div id="copy">
@@ -99,6 +100,9 @@
                 alert(1)
 
             },
+            keypress: function(){
+                console.log(obj.data.ipt);
+            },
             data: {
                 cks: [],
                 a: 1,
@@ -120,7 +124,8 @@
                 isRed: false,
                 fontSize: 40,
                 myclass: 'red',
-                mystyle: 'color:red;'
+                mystyle: 'color:red;',
+                ipt: ''
             }
         };
 
