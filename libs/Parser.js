@@ -1563,13 +1563,12 @@
 		});
 		$node.__on__(eventRefer.compositionend || 'compositionend', function () {
 			composeLock = false;
+			$(this).trigger(eventRefer.input || 'input');
 		});
 
 		// input 事件(实时触发)
 		$node.__on__(eventRefer.input || 'input', function () {
-			setTimeout(()=>{
-				if (!composeLock) callbacl.apply(this, arguments);
-			});
+			if(!composeLock) callbacl.apply(this, arguments);
 		});
 
 		// change 事件(失去焦点触发)

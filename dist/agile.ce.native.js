@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.1.1560133576833 beta
+ *	Version	:	0.5.2.1560134551039 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1721,16 +1721,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		});
 		$node.__on__(eventRefer.compositionend || 'compositionend', function () {
 			composeLock = false;
+			$(this).trigger(eventRefer.input || 'input');
 		});
 
 		// input 事件(实时触发)
 		$node.__on__(eventRefer.input || 'input', function () {
-			var _this = this,
-			    _arguments = arguments;
-
-			setTimeout(function () {
-				if (!composeLock) callbacl.apply(_this, _arguments);
-			});
+			if (!composeLock) callbacl.apply(this, arguments);
 		});
 
 		// change 事件(失去焦点触发)
