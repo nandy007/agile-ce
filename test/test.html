@@ -55,14 +55,11 @@
         <lebal><input type="checkbox" value="2" v-model="cks"/>222</lebal>
         <lebal><input type="checkbox" value="3" v-model="cks"/>333</lebal>
         <div v-hide="false">隐藏</div> -->
-        <input type="text" v-model="ipt" v-on:keypress="keypress"/>
-        <div>{{ipt}}</div>
+        <!-- <input type="text" v-model="ipt" v-on:keypress="keypress"/>
+        <div>{{ipt}}</div> -->
+        <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span>
     </div>
 
-    <div id="copy">
-
-        
-    </div>
     <script>
 		$.vm.setVMPre({
             data: 'data',
@@ -125,7 +122,8 @@
                 fontSize: 40,
                 myclass: 'red',
                 mystyle: 'color:red;',
-                ipt: ''
+                ipt: '',
+                switch: '0'
             }
         };
 
@@ -161,14 +159,9 @@
         // // obj.title.unshift('ttt')
         // // obj.title.splice(1,1)
         
-        // setTimeout(function(){
-        //     obj.data.isRed = true;
-        //     obj.data.myclass = 'blue';
-        //     obj.data.mystyle = 'background-color:blue;'
-        //     obj.data.a = 333;
-        //     obj.data.fontSize = 13;
-        //     obj.data.c = 0;
-        // }, 1000);
+        setTimeout(function(){
+            obj.data.switch = '1'
+        }, 1000);
         // console.log($('#aaa').data('test'), obj.data.list)
 
     </script>

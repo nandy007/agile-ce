@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.2.1560134545706 beta
+ *	Version	:	0.5.3.1562676795834 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -867,19 +867,28 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    duplex = duplexField.duplex(parser.$scope),
 			    field = duplexField.field;
 
+			var trueValue = $node.hasAttr('true-value') ? $node.attr('true-value') : true,
+			    falseValue = $node.hasAttr('false-value') ? $node.attr('false-value') : false,
+			    isNumber = $node.hasAttr('number');
+
+			if (isNumber) {
+				trueValue = +trueValue;
+				falseValue = +falseValue;
+			}
+
 			if ($node.hasAttr('checked')) {
-				duplex[field] = $node.xprop('checked');
+				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
 			} else {
-				updater.updateSwitchChecked($node, duplex[field]);
+				updater.updateSwitchChecked($node, duplex[field] === trueValue ? true : false);
 			}
 
 			var deps = [access];
 			parser.watcher.watch(deps, function () {
-				updater.updateSwitchChecked($node, duplex[field]);
+				updater.updateSwitchChecked($node, duplex[field] === trueValue ? true : false);
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				duplex[field] = $node.xprop('checked');
+				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
 			});
 		},
 		'vfilter': function vfilter($node, fors, expression) {
