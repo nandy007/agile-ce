@@ -42,6 +42,27 @@
 				return this.getSlotParent(soltParent);
 			}
 			return soltParent;
+		},
+		getSlotChildren: function(slot, root, isToggle){
+			isToggle = !!isToggle;
+			var slotChild = slot.firstChild, $renderChildren , canAdd = isToggle;
+			while(slotChild){
+				if(canAdd && slotChild.refer===root){
+					canAdd = !isToggle;
+				}else if(!canAdd && slotChild.refer===root){
+					canAdd = isToggle;
+				}
+				if(canAdd){
+					if(!$renderChildren){
+						$renderChildren = $(slotChild)
+					}else{
+						$renderChildren = $.merge($renderChildren, $(slotChild));
+					}
+				}
+				slotChild = slotChild.nextSibling;
+			}
+
+			return $renderChildren;
 		}
 	};
 
@@ -129,8 +150,19 @@
 			if($node.hasAttr('vmignore')) return;
 
 			var isRoot = _this.root===this;
+			if(!isRoot && this.isSlotParent){
+				if (compileUtil.hasDirective($node)) {
+					directiveNodes.push({
+						el : $node,
+						fors : fors
+					});
+				}
 
-			if(!isRoot && this.isSlotParent) return;
+				var $renderChildren = compileUtil.getSlotChildren(this, _this.root, true);
+				if($renderChildren) _this.walkElement($renderChildren, fors, directiveNodes);
+
+				return;
+			}
 
 			if(this.isComponent && !isRoot){
 				//缓存指令节点
@@ -142,7 +174,11 @@
 				}
 				if(compileUtil.isInPre($node)) return;
 				//对slot子节点递归调用
-				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
+				// _this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
+				if(!this.slotParent) return;
+
+				var $renderChildren = compileUtil.getSlotChildren(this.slotParent.firstChild, _this.root);
+				if($renderChildren) _this.walkElement($renderChildren, fors, directiveNodes);
 				return;
 			}else if(this.isComponent && isRoot){
 				_this.walkElement($node.childs(), fors, directiveNodes);
@@ -300,7 +336,7 @@
 
 		//a{{b}}c -> "a"+b+"c"，其中a和c不能包含英文双引号"，否则会编译报错
 		text = ('"'+text.replace(new RegExp(BRACE2RE.source, 'g'), function(s, s1){
-			return '"+('+s1+')+"';
+			return '"+(__$extend.toString('+s1+'))+"';
 		})+'"').replace(/(\+"")|(""\+)/g, '');
 
 		if(isHold){

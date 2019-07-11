@@ -8,18 +8,18 @@
 			var $node = opts.$node, fors = opts.fors, expression = opts.expression, cb = opts.cb;
 			var parser = this;
 			var scope = this.$scope;
-
 			var expressions = [];
 			expression.replace(/\{\{([^\}]+)\}\}/g, function(s, s1){
 				expressions.push($.util.trim(s1));
 			});
+			
 			$.util.each(expressions, function(i, exp){
 				var depsalias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
 				var deps = depsalias.deps;
 				var exps = depsalias.exps;
 
 				var func = this.getAliasFunc(exps.join(''), true);
-
 				cb(func(scope));
 
 				this.watcher.watch(deps, function (options) {
@@ -371,11 +371,16 @@
 		'vxclass': function($node, fors, expression){
 
 			var oldClass, updater = this.updater;
+			// btn-{{type}} {{'name-'+size+' '+mode}}
+			// -> 'btn-'+type+' '+'name-'+size+' '+mode
+			var exp = "{{'" + expression.replace(/\{\{([^\}]+)\}\}/g, function(s, s1){
+				return "'+" + s1 + "+'";
+			}) + "'}}";
 
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
-				expression: expression,
+				expression: exp,
 				cb: function(rs){
 					if(oldClass) updater.updateClass($node, oldClass, false);
 					if(rs) updater.updateClass($node, rs, true);
@@ -812,9 +817,6 @@
 		//if else组
 		this.mutexGroup = 0;
 
-		//获取原始scope
-		this.$scope = this.getScope();
-
 		//视图刷新模块
 		this.updater = new Updater(this.vm);
 		//数据订阅模块
@@ -828,6 +830,9 @@
 		this.initProxy();
 
 		this.initVmPre();
+
+		//获取原始scope
+		this.$scope = this.getScope();
 
 		this.init();
 	};
@@ -1190,7 +1195,22 @@
 
 	//创建scope数据
 	pp.getScope = function () {
-		return Object.create(this.vm.$data);
+		var scope = Object.create(this.vm.$data);
+		var data = scope[this.getVmPre()];
+		if(data && !data.__$extend){
+			data.__$extend = {
+				toString: function(s){
+					try{
+						return String(s);
+					}catch(e){
+						console.error(e);
+					}
+					return '';
+				}
+			}
+		}
+
+		return scope;
 	};
 
 	/**

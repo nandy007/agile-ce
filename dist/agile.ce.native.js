@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.3.1562676800828 beta
+ *	Version	:	0.5.4.1562832257644 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -139,18 +139,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    cb = opts.cb;
 			var parser = this;
 			var scope = this.$scope;
-
 			var expressions = [];
 			expression.replace(/\{\{([^\}]+)\}\}/g, function (s, s1) {
 				expressions.push($.util.trim(s1));
 			});
+
 			$.util.each(expressions, function (i, exp) {
 				var depsalias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
 				var deps = depsalias.deps;
 				var exps = depsalias.exps;
 
 				var func = this.getAliasFunc(exps.join(''), true);
-
 				cb(func(scope));
 
 				this.watcher.watch(deps, function (options) {
@@ -506,11 +506,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			var oldClass,
 			    updater = this.updater;
+			// btn-{{type}} {{'name-'+size+' '+mode}}
+			// -> 'btn-'+type+' '+'name-'+size+' '+mode
+			var exp = "{{'" + expression.replace(/\{\{([^\}]+)\}\}/g, function (s, s1) {
+				return "'+" + s1 + "+'";
+			}) + "'}}";
 
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
-				expression: expression,
+				expression: exp,
 				cb: function cb(rs) {
 					if (oldClass) updater.updateClass($node, oldClass, false);
 					if (rs) updater.updateClass($node, rs, true);
@@ -969,9 +974,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		//if else组
 		this.mutexGroup = 0;
 
-		//获取原始scope
-		this.$scope = this.getScope();
-
 		//视图刷新模块
 		this.updater = new Updater(this.vm);
 		//数据订阅模块
@@ -985,6 +987,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		this.initProxy();
 
 		this.initVmPre();
+
+		//获取原始scope
+		this.$scope = this.getScope();
 
 		this.init();
 	};
@@ -1347,7 +1352,22 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	//创建scope数据
 	pp.getScope = function () {
-		return Object.create(this.vm.$data);
+		var scope = Object.create(this.vm.$data);
+		var data = scope[this.getVmPre()];
+		if (data && !data.__$extend) {
+			data.__$extend = {
+				toString: function toString(s) {
+					try {
+						return String(s);
+					} catch (e) {
+						console.error(e);
+					}
+					return '';
+				}
+			};
+		}
+
+		return scope;
 	};
 
 	/**
@@ -4087,6 +4107,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				return this.getSlotParent(soltParent);
 			}
 			return soltParent;
+		},
+		getSlotChildren: function getSlotChildren(slot, root, isToggle) {
+			isToggle = !!isToggle;
+			var slotChild = slot.firstChild,
+			    $renderChildren,
+			    canAdd = isToggle;
+			while (slotChild) {
+				if (canAdd && slotChild.refer === root) {
+					canAdd = !isToggle;
+				} else if (!canAdd && slotChild.refer === root) {
+					canAdd = isToggle;
+				}
+				if (canAdd) {
+					if (!$renderChildren) {
+						$renderChildren = $(slotChild);
+					} else {
+						$renderChildren = $.merge($renderChildren, $(slotChild));
+					}
+				}
+				slotChild = slotChild.nextSibling;
+			}
+
+			return $renderChildren;
 		}
 	};
 
@@ -4172,8 +4215,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			if ($node.hasAttr('vmignore')) return;
 
 			var isRoot = _this.root === this;
+			if (!isRoot && this.isSlotParent) {
+				if (compileUtil.hasDirective($node)) {
+					directiveNodes.push({
+						el: $node,
+						fors: fors
+					});
+				}
 
-			if (!isRoot && this.isSlotParent) return;
+				var $renderChildren = compileUtil.getSlotChildren(this, _this.root, true);
+				if ($renderChildren) _this.walkElement($renderChildren, fors, directiveNodes);
+
+				return;
+			}
 
 			if (this.isComponent && !isRoot) {
 				//缓存指令节点
@@ -4185,7 +4239,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				}
 				if (compileUtil.isInPre($node)) return;
 				//对slot子节点递归调用
-				_this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
+				// _this.walkElement($(this.slotParent).childs(), fors, directiveNodes);
+				if (!this.slotParent) return;
+
+				var $renderChildren = compileUtil.getSlotChildren(this.slotParent.firstChild, _this.root);
+				if ($renderChildren) _this.walkElement($renderChildren, fors, directiveNodes);
 				return;
 			} else if (this.isComponent && isRoot) {
 				_this.walkElement($node.childs(), fors, directiveNodes);
@@ -4340,7 +4398,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 		//a{{b}}c -> "a"+b+"c"，其中a和c不能包含英文双引号"，否则会编译报错
 		text = ('"' + text.replace(new RegExp(BRACE2RE.source, 'g'), function (s, s1) {
-			return '"+(' + s1 + ')+"';
+			return '"+(__$extend.toString(' + s1 + '))+"';
 		}) + '"').replace(/(\+"")|(""\+)/g, '');
 
 		if (isHold) {
