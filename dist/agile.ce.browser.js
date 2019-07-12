@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.4.1562832252171 beta
+ *	Version	:	0.5.5.1562901114039 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -340,7 +340,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    isCatch = opts.isCatch;
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
+				var depsAlias = Parser.getDepsAlias(func, fors, parser.getVmPre('method'));
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -1655,7 +1655,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		var dirs = Parser.splitName(dir);
 		var kv = {};
 		if (dirs.length === 1) {
-			kv = JSON.stringify(exp);
+			try {
+				kv = new Function('return ' + exp + ';')();
+			} catch (e) {
+				console.error(e);
+			}
+			// kv = JSON.stringify(exp);
 		} else if (dirs.length === 2) {
 			kv[dirs[1]] = exp;
 		}

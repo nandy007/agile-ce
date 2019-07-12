@@ -57,7 +57,9 @@
         <div v-hide="false">隐藏</div> -->
         <!-- <input type="text" v-model="ipt" v-on:keypress="keypress"/>
         <div>{{ipt}}</div> -->
-        <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span>
+        <!-- <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span> -->
+
+        <span id="s" v-on:aaaBbbCcc="aaa">dsfdsfdsf</span>
     </div>
 
     <script>
@@ -124,6 +126,9 @@
                 mystyle: 'color:red;',
                 ipt: '',
                 switch: '0'
+            },
+            aaa: function(){
+                console.log(4444444)
             }
         };
 
@@ -146,6 +151,8 @@
             'cks': ['2', '3'],
             'myclass': 'blue'
         });
+
+        $('#s').trigger('aaaBbbCcc')
         
 
         // console.log(obj.data.cks)

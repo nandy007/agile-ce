@@ -237,7 +237,7 @@
 			var isOnce = opts.isOnce, isCatch = opts.isCatch;
 
 			$.util.each(evts, function (evt, func) {
-				var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre('method'));
+				var depsAlias = Parser.getDepsAlias(func, fors, parser.getVmPre('method'));
 
 				var funcStr = depsAlias.exps.join('.');
 
@@ -1528,7 +1528,12 @@
 		var dirs = Parser.splitName(dir);
 		var kv = {};
 		if (dirs.length === 1) {
-			kv = JSON.stringify(exp);
+			try{
+				kv = new Function(`return ${exp};`)();
+			}catch(e){
+				console.error(e);
+			}
+			// kv = JSON.stringify(exp);
 		} else if (dirs.length === 2) {
 			kv[dirs[1]] = exp;
 		}
