@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.5.1562901114039 beta
+ *	Version	:	0.5.6.1563015524642 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -12436,12 +12436,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			func(subs);
 		},
 		typeExts: {
-			string: ['length', 'substr', 'substring'],
+			string: ['length', 'endsWith', 'indexOf', 'substr', 'substring', 'toLowerCase', 'toUpperCase', 'replace', 'charAt'],
 			array: ['length', 'indexOf']
 		},
 		getTypeExts: function getTypeExts(val) {
 			var type = (val instanceof Array ? 'array' : typeof val === 'undefined' ? 'undefined' : _typeof(val)).toLowerCase();
-			return watcherUtil.typeExts[type] || [];
+			return $.util.copyArray(watcherUtil.typeExts[type] || []);
 		}
 	};
 

@@ -59,7 +59,7 @@
         <div>{{ipt}}</div> -->
         <!-- <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span> -->
 
-        <span id="s" v-on:aaaBbbCcc="aaa">dsfdsfdsf</span>
+        <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span>
     </div>
 
     <script>
@@ -149,10 +149,12 @@
         // 设置数据值（强行进行清理）
         mv.setData({
             'cks': ['2', '3'],
-            'myclass': 'blue'
+            'myclass': 'blue',
         });
 
-        $('#s').trigger('aaaBbbCcc')
+        obj.data.title.push('aaa')
+
+        // $('#s').trigger('aaaBbbCcc')
         
 
         // console.log(obj.data.cks)

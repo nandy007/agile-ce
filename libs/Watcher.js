@@ -23,12 +23,12 @@
 			func(subs);
 		},
 		typeExts: {
-			string: ['length', 'substr', 'substring'],
+			string: ['length', 'endsWith', 'indexOf', 'substr', 'substring', 'toLowerCase', 'toUpperCase', 'replace', 'charAt'],
 			array: ['length', 'indexOf']
 		},
 		getTypeExts: function(val){
 			var type = (val instanceof Array ? 'array' : typeof val).toLowerCase();
-			return watcherUtil.typeExts[type] || [];
+			return $.util.copyArray(watcherUtil.typeExts[type] || []);
 		}
 	};
 
