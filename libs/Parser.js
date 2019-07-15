@@ -744,17 +744,17 @@
 			var access = Parser.makeDep(expression, fors, parser.getVmPre());
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
-
+			
 			if($node.hasAttr('checked')){
 				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			}else{
-				updater.updateSwitchChecked($node, duplex[field]===trueValue ? true : false);
+				updater.updateSwitchChecked($node, duplex[field]===Parser.getSwitch($node, true) ? true : false);
 			}
 			
 
 			var deps = [access];
 			parser.watcher.watch(deps, function () {
-				updater.updateSwitchChecked($node, duplex[field]===trueValue ? true : false);
+				updater.updateSwitchChecked($node, duplex[field]===Parser.getSwitch($node, true) ? true : false);
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {

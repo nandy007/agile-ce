@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.7.1563184567572 beta
+ *	Version	:	0.5.8.1563186359789 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -906,12 +906,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			if ($node.hasAttr('checked')) {
 				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			} else {
-				updater.updateSwitchChecked($node, duplex[field] === trueValue ? true : false);
+				updater.updateSwitchChecked($node, duplex[field] === Parser.getSwitch($node, true) ? true : false);
 			}
 
 			var deps = [access];
 			parser.watcher.watch(deps, function () {
-				updater.updateSwitchChecked($node, duplex[field] === trueValue ? true : false);
+				updater.updateSwitchChecked($node, duplex[field] === Parser.getSwitch($node, true) ? true : false);
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
