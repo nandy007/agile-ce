@@ -374,7 +374,7 @@
 			// btn-{{type}} {{'name-'+size+' '+mode}}
 			// -> 'btn-'+type+' '+'name-'+size+' '+mode
 			var exp = "{{'" + expression.replace(/\{\{([^\}]+)\}\}/g, function(s, s1){
-				return "'+" + s1 + "+'";
+				return "'+(" + s1 + ")+'";
 			}) + "'}}";
 
 			directiveUtil.commonHandler.call(this, {
@@ -575,7 +575,7 @@
 			Parser.bindTextEvent($node, function () {
 				var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
-				duplex[field] = $node.val();
+				duplex[field] = Parser.formatValue($node, $node.val());
 			});
 		},
 		'vmradio': function ($node, fors, expression, dir) {
@@ -745,17 +745,8 @@
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
-			var trueValue = $node.hasAttr('true-value') ? $node.attr('true-value') : true, 
-				falseValue = $node.hasAttr('false-value') ? $node.attr('false-value') : false, 
-				isNumber = $node.hasAttr('number');
-			
-			if(isNumber){
-				trueValue = (+trueValue);
-				falseValue = (+falseValue);
-			}
-
 			if($node.hasAttr('checked')){
-				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
+				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			}else{
 				updater.updateSwitchChecked($node, duplex[field]===trueValue ? true : false);
 			}
@@ -767,7 +758,7 @@
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
+				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			});
 		},
 		'vfilter': function ($node, fors, expression) {
@@ -1581,6 +1572,18 @@
 		}
 
 		return sels;
+	};
+
+	Parser.getSwitch = function ($node, checked) {
+		var trueValue = $node.hasAttr('true-value') ? $node.attr('true-value') : true, 
+				falseValue = $node.hasAttr('false-value') ? $node.attr('false-value') : false, 
+				isNumber = $node.hasAttr('number');
+			
+		if(isNumber){
+			trueValue = (+trueValue);
+			falseValue = (+falseValue);
+		}
+		return checked ? trueValue : falseValue;
 	};
 
 	//文本输入框的事件监听处理

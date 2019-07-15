@@ -59,7 +59,9 @@
         <div>{{ipt}}</div> -->
         <!-- <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span> -->
 
-        <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span>
+        <!-- <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span> -->
+
+        <span v-xclass="{{a===1?'myclass':'bbb'}}">dsfsfdsf{{a}}</span>
     </div>
 
     <script>

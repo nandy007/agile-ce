@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.6.1563015529830 beta
+ *	Version	:	0.5.7.1563184567572 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -509,7 +509,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			// btn-{{type}} {{'name-'+size+' '+mode}}
 			// -> 'btn-'+type+' '+'name-'+size+' '+mode
 			var exp = "{{'" + expression.replace(/\{\{([^\}]+)\}\}/g, function (s, s1) {
-				return "'+" + s1 + "+'";
+				return "'+(" + s1 + ")+'";
 			}) + "'}}";
 
 			directiveUtil.commonHandler.call(this, {
@@ -718,7 +718,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
-				duplex[field] = $node.val();
+				duplex[field] = Parser.formatValue($node, $node.val());
 			});
 		},
 		'vmradio': function vmradio($node, fors, expression, dir) {
@@ -903,17 +903,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    duplex = duplexField.duplex(parser.$scope),
 			    field = duplexField.field;
 
-			var trueValue = $node.hasAttr('true-value') ? $node.attr('true-value') : true,
-			    falseValue = $node.hasAttr('false-value') ? $node.attr('false-value') : false,
-			    isNumber = $node.hasAttr('number');
-
-			if (isNumber) {
-				trueValue = +trueValue;
-				falseValue = +falseValue;
-			}
-
 			if ($node.hasAttr('checked')) {
-				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
+				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			} else {
 				updater.updateSwitchChecked($node, duplex[field] === trueValue ? true : false);
 			}
@@ -924,7 +915,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
-				duplex[field] = $node.xprop('checked') ? trueValue : falseValue;
+				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			});
 		},
 		'vfilter': function vfilter($node, fors, expression) {
@@ -1739,6 +1730,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		}
 
 		return sels;
+	};
+
+	Parser.getSwitch = function ($node, checked) {
+		var trueValue = $node.hasAttr('true-value') ? $node.attr('true-value') : true,
+		    falseValue = $node.hasAttr('false-value') ? $node.attr('false-value') : false,
+		    isNumber = $node.hasAttr('number');
+
+		if (isNumber) {
+			trueValue = +trueValue;
+			falseValue = +falseValue;
+		}
+		return checked ? trueValue : falseValue;
 	};
 
 	//文本输入框的事件监听处理
