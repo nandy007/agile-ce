@@ -356,6 +356,16 @@
 	};
 
 	/**
+	 * 更新节点的 data realize v-data
+	 * @param   {JQLite}      $node
+	 * @param   {String}      dataName
+	 * @param   {String}      value
+	 */
+	up.updateDataSet = function ($node, attribute, value) {
+		$node.data(attribute, value);
+	};
+
+	/**
 	 * 更新节点的 class realize v-bind:class
 	 * @param   {JQLite}              $node
 	 * @param   {String|Object}       className

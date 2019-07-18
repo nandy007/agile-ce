@@ -789,6 +789,27 @@
 			this.watcher.watch(deps, function (options) {
 				if(evtName) $node.trigger(evtName);
 			}, fors);
+		},
+		'vdata': function($node, fors, expression, dir){
+			var parser = this, updater = this.updater;
+
+			var attrs = Parser.parseDir(dir, expression);
+
+			$.util.each(attrs, function (attr, exp) {
+				exp = $.util.trim(exp);
+
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
+				exp = depsAlias.exps.join('.');
+
+				updater.updateDataSet($node, attr, parser.getValue(exp, fors));
+
+				var deps = depsAlias.deps;
+
+				parser.watcher.watch(deps, function (options) {
+					updater.updateDataSet($node, attr, parser.getValue(exp, fors));
+				}, fors);
+			});
 		}
 	};
 

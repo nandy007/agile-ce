@@ -24,6 +24,16 @@
 		return rs;
 	};
 
+	var origin_data = jqlite.prototype.data;
+	jqlite.prototype.data = function(){
+		var args = jqlite.util.copyArray(arguments);
+		var rs = origin_data.apply(this, args);
+		if(args.length===2){
+			this.triggerHandler('attrChanged', args[0], this.data(args[0]), true);
+		}
+		return rs;
+	};
+
 	// 重写val方法
 	var origin_val = jqlite.prototype.val;
 	jqlite.prototype.val = function(){

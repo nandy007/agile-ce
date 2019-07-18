@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.8.1563186354316 beta
+ *	Version	:	0.5.9.1563452512824 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -915,6 +915,28 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			this.watcher.watch(deps, function (options) {
 				if (evtName) $node.trigger(evtName);
 			}, fors);
+		},
+		'vdata': function vdata($node, fors, expression, dir) {
+			var parser = this,
+			    updater = this.updater;
+
+			var attrs = Parser.parseDir(dir, expression);
+
+			$.util.each(attrs, function (attr, exp) {
+				exp = $.util.trim(exp);
+
+				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
+
+				exp = depsAlias.exps.join('.');
+
+				updater.updateDataSet($node, attr, parser.getValue(exp, fors));
+
+				var deps = depsAlias.deps;
+
+				parser.watcher.watch(deps, function (options) {
+					updater.updateDataSet($node, attr, parser.getValue(exp, fors));
+				}, fors);
+			});
 		}
 	};
 
@@ -1991,6 +2013,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 		if (args.length === 2) {
 			this.triggerHandler('attrChanged', args[0], this.attr(args[0]));
+		}
+		return rs;
+	};
+
+	var origin_data = jqlite.prototype.data;
+	jqlite.prototype.data = function () {
+		var args = jqlite.util.copyArray(arguments);
+		var rs = origin_data.apply(this, args);
+		if (args.length === 2) {
+			this.triggerHandler('attrChanged', args[0], this.data(args[0]), true);
 		}
 		return rs;
 	};
@@ -12289,6 +12321,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		} else {
 			$node.attr(attribute, value);
 		}
+	};
+
+	/**
+  * 更新节点的 data realize v-data
+  * @param   {JQLite}      $node
+  * @param   {String}      dataName
+  * @param   {String}      value
+  */
+	up.updateDataSet = function ($node, attribute, value) {
+		$node.data(attribute, value);
 	};
 
 	/**
