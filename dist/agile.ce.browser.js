@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.9.1563452512824 beta
+ *	Version	:	0.5.10.1563781701569 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -232,6 +232,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		'vfor': function vfor($node, fors, expression) {
 
 			Parser.transAttr($node, 'v-template', 'useTemplate');
+
+			var forTpl = $node.outerHTML();
+			$node.def('__forTpl', forTpl);
 
 			var parser = this;
 
@@ -1230,7 +1233,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, aliasGroup, access, ni, filter);
-			var $plate = $node.clone(); //.data('vforIndex', vforIndex);
+			// var $plate = $node.clone();//.data('vforIndex', vforIndex);
+			var $plate = $($node.def('__forTpl')); // clone会导致组件内部有子组件，导致dom结构变化的问题
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 

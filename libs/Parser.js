@@ -134,6 +134,9 @@
 
 			Parser.transAttr($node, 'v-template', 'useTemplate');
 
+			const forTpl = $node.outerHTML();
+			$node.def('__forTpl', forTpl);
+
 			var parser = this;
 
 			var vforIndex = this.vforIndex++;
@@ -1106,7 +1109,8 @@
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, aliasGroup, access, ni, filter);
-			var $plate = $node.clone();//.data('vforIndex', vforIndex);
+			// var $plate = $node.clone();//.data('vforIndex', vforIndex);
+			var $plate = $($node.def('__forTpl')); // clone会导致组件内部有子组件，导致dom结构变化的问题
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 
