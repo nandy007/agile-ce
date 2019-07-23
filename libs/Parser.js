@@ -780,7 +780,7 @@
 			var scope = this.$scope;
 			// Parser.transAttr($node, 'v-template', 'useTemplate');
 			// var template = $node.attr('useTemplate') || $node.html();
-			var template = expression || $node.html();
+			var template = (expression ? this.getValue(expression, fors) : '') || expression || $node.html();
 			var html = $.template(template, $.extend({}, scope, scope.$alias)) || '';
 			$node.html(html);
 		},
