@@ -61,7 +61,7 @@
 
         <!-- <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span> -->
 
-        <span v-xclass="{{a===1?'myclass':'bbb'}}">dsfsfdsf{{a}}</span>
+        <div v-html:deep="html"></div>
     </div>
 
     <script>
@@ -105,6 +105,7 @@
                 console.log(obj.data.ipt);
             },
             data: {
+                html: `<span>{{myclass}}</span>`,
                 cks: [],
                 a: 1,
                 b: 0,
@@ -149,12 +150,12 @@
         //     console.log(opt)
         // });
         // 设置数据值（强行进行清理）
-        mv.setData({
-            'cks': ['2', '3'],
-            'myclass': 'blue',
-        });
+        // mv.setData({
+        //     'cks': ['2', '3'],
+        //     'myclass': 'blue',
+        // });
 
-        obj.data.title.push('aaa')
+        // obj.data.title.push('aaa')
 
         // $('#s').trigger('aaaBbbCcc')
         
@@ -170,9 +171,9 @@
         // // obj.title.unshift('ttt')
         // // obj.title.splice(1,1)
         
-        setTimeout(function(){
-            obj.data.switch = '1'
-        }, 1000);
+        // setTimeout(function(){
+        //     obj.data.switch = '1'
+        // }, 1000);
         // console.log($('#aaa').data('test'), obj.data.list)
 
     </script>

@@ -115,15 +115,18 @@
 
 			var updater = this.updater;
 			updateFunc = updateFunc || 'updateTextContent';
+			var parser = this;
 
 			directiveUtil.commonHandler.call(this, {
 				$node: $node,
 				fors: fors,
 				expression: directiveUtil.wrapperDir(expression),
-				cb: function(rs){
+				cb: function cb(rs) {
 					updater[updateFunc]($node, rs);
+					if(dir==='v-html:deep') parser.vm.compileSteps($node.childs(), fors);
 				}
 			});
+
 		},
 		'vhtml': function ($node, fors, expression, dir) {
 			var args = $.util.copyArray(arguments);
