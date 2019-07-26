@@ -298,9 +298,9 @@ $('#app').render({
 
 ```html
 
-<input type="checkbox" value="1" number v-model="cks"/>
-<input type="checkbox" value="2" number v-model="cks"/>
-<input type="checkbox" value="3" number v-model="cks"/>
+<input type="checkbox" value="1" number v-model:checkbox="cks"/>
+<input type="checkbox" value="2" number v-model:checkbox="cks"/>
+<input type="checkbox" value="3" number v-model:checkbox="cks"/>
 
 ```
 
