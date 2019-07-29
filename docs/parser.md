@@ -62,6 +62,15 @@ html富文本注入指令，有两种写法
 
 ```
 
+## v-xhtml
+
+html富文本注入扩展指令，用于自定义组件中。
+
+写法：<code>v-xhtml:slot-name="expression"</code>
+
+其中<code>slot-name</code>为组件内元素的属性slot-name对应的值。表达式的计算结果将作为代码片段添加到该元素内，如果代码片段中包含指令会继续编译和注入数据。
+
+
 ## v-for
 
 循环体指令。

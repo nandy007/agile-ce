@@ -133,6 +133,22 @@
 			args.push('updateHTMLContent');
 			this.vtext.apply(this, args);
 		},
+		'vxhtml': function ($node, fors, expression, dir) {
+			// var args = $.util.copyArray(arguments);
+			// args.push('updateHTMLContent');
+			var parser = this;
+			var sn = Parser.splitName(dir), slotName = sn[1];
+			dir = 'v-html:deep';
+			// 后续可考虑监听组件的init或者created事件
+			setTimeout(function(){
+				if(slotName){
+					var $slot = $node.find('[slot-name='+slotName+']');
+					if($slot.length>0) $node = $($slot[0]);
+				}
+				var args = [$node, fors, expression, dir, 'updateHTMLContent'];
+				parser.vtext.apply(parser, args);
+			},10);
+		},
 		'vfor': function ($node, fors, expression) {
 
 			Parser.transAttr($node, 'v-template', 'useTemplate');
