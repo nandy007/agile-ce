@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.14.1564460194157 beta
+ *	Version	:	0.5.15.1564499055262 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -1125,7 +1125,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 	 * @param   {String}     access        [节点路径]
+ 
+  * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
@@ -1326,13 +1327,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		// if (!isParent) scope[str$alias]['$index'] = $index;
 		if (!isParent) scope[str$alias][indexAlias] = $index;
 		if (fors.filter) {
-			var filter$access = Parser.makePath(fors.filter, fors);
+			var filter$access = Parser.makeAliasPath(fors.filter, fors, this.getVmPre('method'));
 
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
 			var cur$item = scope[str$alias][alias];
 
-			var filter$func = this.getAliasFunc(filter$access)(scope);
+			var filter$func = this.getAliasFunc(filter$access, true)(scope);
 			if (typeof filter$func === 'function') {
 				filter$func.call({
 					reObserve: function reObserve() {

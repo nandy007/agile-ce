@@ -27,163 +27,50 @@
 
 <body>
     <div id="app">
-        <!-- <input type="text" v-bind:disabled="disabled"> -->
-        <!-- <div v-html="html" v-bind:test="html"></div> -->
-        <!-- <div v-for="(itemA) in list" for-index="aindex">
-            <div v-for="itemB,bindex in itemA"  v-on:click="ttt" v-bind:data-aa="bindex">
-                <span>{{aindex}}-{{bindex}}</span>
-            </div>
-            
-        </div> -->
-        <!-- <div  v-bind:style="{ color: myclass, fontSize: fontSize + 'px' }">aaaaaaa</div> -->
-        <!-- <div v-xstyle="background-color:{{isRed?'red':'blue'}}">bbbbbbb</div> -->
-        <!-- <div>{{a}}</div> -->
-        <!-- <div id="aaa" v-bind:data-test="list"><span>dddddd</span>dddddd</div> -->
-        <!-- <div>
-            <span v-on:click="click">{{'title:'+a}}</span>
-            <div v-for="item in title">
-                <span>{{item}}{{$index}}</span>
-            </div> v-bind:class="{active:item.isActive}"
-        </div> -->
-        <!-- <div v-for="item in ls">
-            <div v-class="item.myclass">ddd</div>
-        </div>
-        <div v-if="a&&b">111</div>
-        <div v-elseif="a&&c">222</div>
-        <div v-else v-on:click="click">333</div> -->
-        <!-- <lebal><input type="checkbox" value="1" v-model="cks"/>111</lebal>
-        <lebal><input type="checkbox" value="2" v-model="cks"/>222</lebal>
-        <lebal><input type="checkbox" value="3" v-model="cks"/>333</lebal>
-        <div v-hide="false">隐藏</div> -->
-        <!-- <input type="text" v-model="ipt" v-on:keypress="keypress"/>
-        <div>{{ipt}}</div> -->
-        <!-- <input type="checkbox" v-model:switch="switch" true-value="1" false-value="0"/><span>{{switch}}</span> -->
-
-        <!-- <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span> -->
-
-        <div v-bind:obj="obj.aaa">dfdgdfgdfg</div>
+        <div v-for="item in list" v-filter="doFilter" v-on:click="click(item)" v-xclass="{{item.disabled?'red':'blue'}}">{{item.name}}</div>
     </div>
 
     <script>
 		$.vm.setVMPre({
-            data: 'data',
+            data: '',
             method: ''
         });
+        
         var obj = {
-            // html: '<font color="red">aaa</font>',
-            // doFilter: function(index, item, arr, $node){
-            //     // console.log(index);
-            //     // $.util.defRec(item, 'title', obj.title[index]);
-            //     // console.log(111);
-                
-            //     if(typeof arr[index]==='object'){
-            //         item.title = obj.title[index];
-            //     }else{
-            //         arr[index] = {
-            //             c: item,
-            //             title: obj.title[index]
-            //         };
-            //         this.reObserve();
-            //     }
-            // },
-            // test: 1,
-			// list: [
-            //     [
-            //         'a', 'b', 'c'
-            //     ]
-            // ],
-
-            ttt: function(e){
-                console.log(e.currentTarget.dataset)
-            },
-    
-            click: function(){
-                alert(1)
-
-            },
-            keypress: function(){
-                console.log(obj.data.ipt);
-            },
             data: {
-                obj: {
-                    aaa: [],
-                    bbb: []
-                },
-                html: `<span>{{myclass}}</span>`,
-                cks: [],
-                a: 1,
-                b: 0,
-                c : 1,
-                title: ['title0', 'title1', 'title2'],
-                disabled: false,
+                text: 'click',
                 list: [
-                    [
-                        'a', 'b', 'c'
-                    ]
-                ],
-                ls: [
                     {
-                        myclass: 'red',
-                        isActive: true
+                        name: 'title1',
+                    },
+                    {
+                        name: 'title2',
                     }
-                ],
-                isRed: false,
-                fontSize: 40,
-                myclass: 'red',
-                mystyle: 'color:red;',
-                ipt: '',
-                switch: '0'
+                ]
             },
-            aaa: function(){
-                console.log(4444444)
+            methods: {
+                click: function(item){
+                    item.disabled = !item.disabled;
+                },
+                doFilter: function(index, item){
+                    console.log(111)
+                    if(typeof item.disabled==='undefined'){
+                        item.disabled = true;
+                        this.reObserve();
+                    }
+                }
             }
         };
 
+        $('#app').render(obj);
+
+
+        setTimeout(()=>{
+            obj.data.list.unshift({
+                name: 'title3'
+            })
+        }, 5000);
         
-        
-        // $.vm.setVMPre({
-        //     data: 'data'
-        // });
-
-        
-
-        var mv = $('#app').render(obj);
-        
-        // 监听数据变化
-        // mv.dataChange(function(opt){
-        //     console.log(opt)
-        // });
-        // 设置数据值（强行进行清理）
-        // mv.setData({
-        //     'cks': ['2', '3'],
-        //     'myclass': 'blue',
-        // });
-
-        // obj.data.title.push('aaa')
-
-        // $('#s').trigger('aaaBbbCcc')
-        
-
-        // console.log(obj.data.cks)
-
-        // obj.data.disabled = true;
-
-        // obj.data.title.push('333')
-
-        // obj.data.list[0].shift();
-        // // obj.list[0].splice(1, 1, '222')
-        // // obj.title.unshift('ttt')
-        // // obj.title.splice(1,1)
-        
-        setTimeout(function(){
-            // console.log(obj.data.obj)
-            // obj.data.obj = {
-            //     aaa: [1,2,3],
-            //     bbb:[4,5]
-            // }
-            obj.data.obj.aaa = [1,2,3];
-        }, 1000);
-        // console.log($('#aaa').data('test'), obj.data.list)
 
     </script>
 </body>

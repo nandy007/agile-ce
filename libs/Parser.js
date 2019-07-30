@@ -1197,13 +1197,13 @@
 		// if (!isParent) scope[str$alias]['$index'] = $index;
 		if (!isParent) scope[str$alias][indexAlias] = $index;
 		if (fors.filter) {
-			var filter$access = Parser.makePath(fors.filter, fors);
+			var filter$access = Parser.makeAliasPath(fors.filter, fors, this.getVmPre('method'));
 
 			$.util.defRec(scope[str$alias][alias], '$index', $index);
 
 			var cur$item = scope[str$alias][alias];
 
-			var filter$func = this.getAliasFunc(filter$access)(scope);
+			var filter$func = this.getAliasFunc(filter$access, true)(scope);
 			if(typeof filter$func==='function'){
 				filter$func.call({
 					reObserve: function(){
