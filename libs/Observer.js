@@ -217,7 +217,19 @@
 			// 新值为对象或数组重新监测
 			var isNeed = observeUtil.isNeed(newValue);
 			if (isNeed) {
-				if(isNeed===1) $.extend(true, oldValue||{},newValue);
+				
+				if(isNeed===1){
+					var oldNeed = observeUtil.isNeed(oldValue);
+					var _oldValue = oldNeed ? $.extend(true, oldNeed===1?{}:[], oldValue) : oldValue;
+
+					$.extend(true, oldValue||{},newValue);
+					
+					ob.trigger({
+						path: myPath,
+						oldVal: _oldValue,
+						newVal: newValue
+					});
+				}
 				if(isNeed===2) {
 					try{
 						oldValue.$reset(newValue);
@@ -236,6 +248,7 @@
 						});
 					}
 				}
+				
 				ob.observe(newValue, paths, parent);
 				return;
 			}

@@ -61,7 +61,7 @@
 
         <!-- <span v-if="title.length>3">{{myclass.substr(1, 2)}}{{myclass.length}}</span> -->
 
-        <div v-html:deep="html"></div>
+        <div v-bind:obj="obj.aaa">dfdgdfgdfg</div>
     </div>
 
     <script>
@@ -105,6 +105,10 @@
                 console.log(obj.data.ipt);
             },
             data: {
+                obj: {
+                    aaa: [],
+                    bbb: []
+                },
                 html: `<span>{{myclass}}</span>`,
                 cks: [],
                 a: 1,
@@ -171,9 +175,14 @@
         // // obj.title.unshift('ttt')
         // // obj.title.splice(1,1)
         
-        // setTimeout(function(){
-        //     obj.data.switch = '1'
-        // }, 1000);
+        setTimeout(function(){
+            // console.log(obj.data.obj)
+            // obj.data.obj = {
+            //     aaa: [1,2,3],
+            //     bbb:[4,5]
+            // }
+            obj.data.obj.aaa = [1,2,3];
+        }, 1000);
         // console.log($('#aaa').data('test'), obj.data.list)
 
     </script>

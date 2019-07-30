@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.13.1564395014421 beta
+ *	Version	:	0.5.14.1564460194157 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -13025,7 +13025,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			// 新值为对象或数组重新监测
 			var isNeed = observeUtil.isNeed(newValue);
 			if (isNeed) {
-				if (isNeed === 1) $.extend(true, oldValue || {}, newValue);
+
+				if (isNeed === 1) {
+					var oldNeed = observeUtil.isNeed(oldValue);
+					var _oldValue = oldNeed ? $.extend(true, oldNeed === 1 ? {} : [], oldValue) : oldValue;
+
+					$.extend(true, oldValue || {}, newValue);
+
+					ob.trigger({
+						path: myPath,
+						oldVal: _oldValue,
+						newVal: newValue
+					});
+				}
 				if (isNeed === 2) {
 					try {
 						oldValue.$reset(newValue);
@@ -13044,6 +13056,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 						});
 					}
 				}
+
 				ob.observe(newValue, paths, parent);
 				return;
 			}
