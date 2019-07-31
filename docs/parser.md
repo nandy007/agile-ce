@@ -129,6 +129,56 @@ var obj = {
 5. Array.$reset(newArr);// newArr为新的数组
 
 
+## v-filter
+
+支持对vfor数据进行预处理。循环到的每个对象每次有变化都会进到v-filter回调中。
+
+写法：<code>v-filter="expression"</code>。expression的执行结果应该是一个函数。该函数固定接受两个参数：<code>index</code>（当前循环索引）和<code>item</code>（当前循环到的对象）。
+
+函数的this指针包含一个函数<code>reObserve()</code>，一旦调用则item数据重新监测，一般用于给item添加数据后对新数据进行监测。
+
+比如：
+
+```javascript
+
+{
+    data: {
+        text: 'click',
+        list: [
+            {
+                name: 'title1',
+            },
+            {
+                name: 'title2',
+            }
+        ]
+    },
+    methods: {
+        click: function(item){
+            item.disabled = !item.disabled;
+        },
+        doFilter: function(index, item){
+            // 同样的数据会可能会重复调用filter，需要判断如果已经处理过则不再处理（判断条件视具体业务定）
+            if(typeof item.disabled==='undefined'){
+                // 给循环对象添加disabled属性
+                item.disabled = true;
+                // 并对当前对象重新监测，如果不重新监测，则当disabled值变化时不会体现到dom的变化中
+                this.reObserve();
+            }
+        }
+    }
+}
+
+```
+
+```html
+
+<div id="app">
+    <div v-for="item in list" v-filter="doFilter" v-on:click="click(item)" v-xclass="{{item.disabled?'red':'blue'}}">{{item.name}}</div>
+</div>
+
+```
+
 
 ## v-on
 
