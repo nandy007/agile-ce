@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.15.1564499069911 beta
+ *	Version	:	0.5.16.1565105809481 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -5052,6 +5052,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	var wp = Watcher.prototype;
 
 	/**
+  * watch深度订阅数据改变回调
+  * @param   {Object}    options
+  */
+	wp.deepChange = function (subs, path) {
+		if (!subs) return;
+		$.util.each(subs, function (k, sub) {
+			var ext = path + '.' + k;
+			$.util.each(sub['$'] || [], function (i, cb) {
+				var options = {
+					path: ext
+				};
+				cb(_extends({}, options, { path: ext }), i);
+			});
+		});
+	};
+
+	/**
   * watch订阅数据改变回调
   * @param   {Object}    options
   */
@@ -5061,14 +5078,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 			exts[i] = options.path + '.' + ext;
 		});
 		exts.unshift(options.path);
-		var subs = this.$depSub;
+		var subs = this.$depSub,
+		    deep = options.deep;
 
 		$.util.each(exts, function (index, ext) {
 			var sub = watcherUtil.iterator(ext.split('.'), subs);
 			$.util.each(sub['$'] || [], function (i, cb) {
 				cb(_extends({}, options, { path: ext }), i);
 			});
-		});
+			if (deep) {
+				this.deepChange(sub, ext);
+			}
+		}, this);
 	};
 
 	wp.changeDirect = function () {
@@ -5544,10 +5565,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 					$.extend(true, oldValue || {}, newValue);
 
 					ob.trigger({
+						deep: true,
 						path: myPath,
 						oldVal: _oldValue,
 						newVal: newValue
 					});
+
+					ob.observe(oldValue, paths, parent);
 				}
 				if (isNeed === 2) {
 					try {
@@ -5561,14 +5585,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 						}
 
 						ob.trigger({
+							deep: true,
 							path: myPath,
 							oldVal: oldValue,
 							newVal: newValue
 						});
 					}
+
+					ob.observe(newValue, paths, parent);
 				}
 
-				ob.observe(newValue, paths, parent);
+				// ob.observe(newValue, paths, parent);
 				return;
 			}
 

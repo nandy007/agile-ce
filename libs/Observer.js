@@ -225,10 +225,13 @@
 					$.extend(true, oldValue||{},newValue);
 					
 					ob.trigger({
+						deep: true,
 						path: myPath,
 						oldVal: _oldValue,
 						newVal: newValue
 					});
+
+					ob.observe(oldValue, paths, parent);
 				}
 				if(isNeed===2) {
 					try{
@@ -242,14 +245,17 @@
 						}
 						
 						ob.trigger({
+							deep: true,
 							path: myPath,
 							oldVal: oldValue,
 							newVal: newValue
 						});
 					}
+
+					ob.observe(newValue, paths, parent);
 				}
 				
-				ob.observe(newValue, paths, parent);
+				// ob.observe(newValue, paths, parent);
 				return;
 			}
 

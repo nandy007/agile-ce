@@ -59,6 +59,24 @@
 
 	var wp = Watcher.prototype;
 
+
+	/**
+	 * watch深度订阅数据改变回调
+	 * @param   {Object}    options
+	 */
+	wp.deepChange = function(subs, path){
+		if(!subs) return;
+		$.util.each(subs, function(k, sub){
+			var ext = path + '.' + k;
+			$.util.each(sub['$'] || [], function (i, cb) {
+				var options = {
+					path: ext
+				};
+				cb(Object.assign({}, options, { path: ext }), i);
+			});
+		});
+	};
+
 	/**
 	 * watch订阅数据改变回调
 	 * @param   {Object}    options
@@ -69,14 +87,17 @@
 			exts[i] = options.path + '.' + ext;
 		});
 		exts.unshift(options.path);
-		var subs = this.$depSub;
+		var subs = this.$depSub, deep = options.deep;
 
 		$.util.each(exts, function(index, ext){
 			var sub = watcherUtil.iterator(ext.split('.'), subs);
 			$.util.each(sub['$']||[], function(i, cb){		
 				cb(Object.assign({}, options, {path: ext}), i);
 			});
-		});
+			if(deep){
+				this.deepChange(sub, ext);
+			}
+		}, this);
 	};
 
 	wp.changeDirect = function(){
