@@ -405,7 +405,7 @@
 	 * @param   {String}        value
 	 */
 	up.updateValue = function ($text, value) {
-		if ($text.val() !== value) {
+		if ($text.getFormatValue() !== value) {
 			$text.val(value);
 		}
 	};
@@ -416,7 +416,7 @@
 	 * @param   {String} value
 	 */
 	up.updateRadioChecked = function ($radio, value) {
-		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
+		var checkStatus = $radio.getFormatValue() === value;
 		if($radio.xprop('checked')!=checkStatus) $radio.xprop('checked', checkStatus);
 	};
 
@@ -426,7 +426,7 @@
 	 * @param   {Array|Boolean}         values      [激活数组或状态]
 	 */
 	up.updateCheckboxChecked = function ($checkbox, values) {
-		var value = $checkbox.val();
+		var value = $checkbox.getFormatValue();
 
 		if (!$.isArray(values) && !$.util.isBoolean(values)) {
 			return $.util.warn('Checkbox v-model value must be a type of Boolean or Array');

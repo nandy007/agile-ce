@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.16.1565105809481 beta
+ *	Version	:	0.5.17.1565695120384 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1156,8 +1156,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 
-  * @param   {String}     access        [节点路径]
+ 	 * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
@@ -1752,7 +1751,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	//如果指令值为数字则强制转换格式为数字
 	Parser.formatValue = function ($node, value) {
-		return $node.hasAttr('number') ? +value : value;
+		// return $node.hasAttr('number') ? +value : value;
+		return $node.getFormatValue(value);
 	};
 
 	//获取select组件的取值
@@ -4907,7 +4907,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {String}        value
   */
 	up.updateValue = function ($text, value) {
-		if ($text.val() !== value) {
+		if ($text.getFormatValue() !== value) {
 			$text.val(value);
 		}
 	};
@@ -4918,7 +4918,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {String} value
   */
 	up.updateRadioChecked = function ($radio, value) {
-		var checkStatus = $radio.val() === ($.util.isNotNaNNumber(value) ? String(value) : value);
+		var checkStatus = $radio.getFormatValue() === value;
 		if ($radio.xprop('checked') != checkStatus) $radio.xprop('checked', checkStatus);
 	};
 
@@ -4928,7 +4928,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {Array|Boolean}         values      [激活数组或状态]
   */
 	up.updateCheckboxChecked = function ($checkbox, values) {
-		var value = $checkbox.val();
+		var value = $checkbox.getFormatValue();
 
 		if (!$.isArray(values) && !$.util.isBoolean(values)) {
 			return $.util.warn('Checkbox v-model value must be a type of Boolean or Array');

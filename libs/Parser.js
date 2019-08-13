@@ -1592,7 +1592,8 @@
 
 	//如果指令值为数字则强制转换格式为数字
 	Parser.formatValue = function ($node, value) {
-		return $node.hasAttr('number') ? +value : value;
+		// return $node.hasAttr('number') ? +value : value;
+		return $node.getFormatValue(value);
 	};
 
 	//获取select组件的取值

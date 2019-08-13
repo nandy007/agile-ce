@@ -27,10 +27,12 @@
 
 <body>
     <div id="app">
-        <span>{{userinfo.into}}</span>
-        <span>{{userinfo.info.age}}</span>
-        <span>{{list[0].name}}</span>
-        <!-- <div v-for="item in list" v-filter="doFilter" v-on:click="click(item)" v-xclass="{{item.disabled?'red':'blue'}}">{{item.name}}</div> -->
+        <input type="radio" value="true" v-model:radio="rd" boolean></input>
+        <input type="radio" value="false" v-model:radio="rd" boolean></input>
+
+        <input type="checkbox" value="true" v-model:checkbox="ck" boolean></input>
+        <input type="checkbox" value="false" v-model:checkbox="ck" boolean></input>
+        <input type="checkbox" value="1" v-model:checkbox="ck" number></input>
     </div>
 
     <script>
@@ -41,57 +43,16 @@
         
         var obj = {
             data: {
-                text: 'click',
-                list: [
-                    {
-                        name: 'title1',
-                    },
-                    {
-                        name: 'title2',
-                    }
-                ],
-                userinfo: {
-                    username: 'nandy',
-                    company: 'no',
-                    info: {
-                        age: 100,
-                        sex: 1
-                    }
-                }
+                rd: true,
+                ck: [1]
             },
             methods: {
-                click: function(item){
-                    item.disabled = !item.disabled;
-                },
-                doFilter: function(index, item){
-                    console.log(111)
-                    if(typeof item.disabled==='undefined'){
-                        item.disabled = true;
-                        this.reObserve();
-                    }
-                }
+
             }
         };
 
         $('#app').render(obj);
 
-        obj.data.userinfo = {
-            username: 'test',
-            into: 'more'
-        };
-
-        obj.data.list = [
-            {
-                name: '2222'
-            }
-        ]
-
-
-        setTimeout(()=>{
-            obj.data.list.unshift({
-                name: 'title3'
-            })
-        }, 5000);
         
 
     </script>

@@ -80,6 +80,15 @@
 	};
 
 	jqlite.fn.extend({
+		getFormatValue: function(value){
+			if(arguments.length===0) value = this.val();
+			if(this.hasAttr('number')){
+				return +value;
+			}else if(this.hasAttr('boolean')){
+				return value===true||value==='true' ? true : false;
+			}
+			return value;
+		},
 		isChecked: function(){
 			return this.is(':checked') || this.attr('checked');
 		},
