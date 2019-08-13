@@ -340,7 +340,7 @@ expression的值为boolean时，当为true则switch为开状态，反之为关�
 
 **需要注意：**
 
-标准表单dom的value都是字符串形式，如果expression为数字形态，需要在dom添加<code>number</code>属性。
+标准表单dom的value都是字符串形式，如果expression为数字形态，需要在dom添加<code>number</code>属性；为布尔型，需要在dom添加<code>boolean</code>属性。
 
 比如：
 
