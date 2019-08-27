@@ -249,7 +249,7 @@
 				});
 
 				__modelInit && __modelInit();
-			});
+			}, fors);
 		},
 		'von': function ($node, fors, expression, dir, opts) {
 			var parser = this;
@@ -731,7 +731,7 @@
 
 			parser.watcher.watch(deps, function () {
 				updater.updateSelectChecked($node, parser.getValue(expression, fors), multi);
-			});
+			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
