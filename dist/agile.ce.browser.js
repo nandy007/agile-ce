@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.18.1566890243742 beta
+ *	Version	:	0.5.19.1567404140496 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -822,11 +822,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 				var value = parser.getValue(expression, fors);
 
-				if ($.util.isString(value) || $.util.isNumber(value)) {
+				if ($.util.isString(value)) {
 					if (multi) {
 						return $.util.warn('<select> 设置的model [' + field + '] 不是数组不能多选');
 					}
 					isDefined = Boolean(value);
+				} else if ($.util.isNumber(value)) {
+					if (multi) {
+						return $.util.warn('<select> 设置的model [' + field + '] 不是数组不能多选');
+					}
+					isDefined = true;
 				} else if ($.isArray(value)) {
 					if (!multi) {
 						return $.util.warn(' <select> 没有 multiple 属性，model [' + field + '] 不可以设置为数组');
