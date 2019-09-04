@@ -99,6 +99,13 @@
 		},
 		wrapperDir: function(exp){
 			return '{{' + exp + '}}';
+		},
+		isSelectMultiple: function($node){
+			var v = $node.attr('multiple');
+			if(v===false || v==='false'){
+				return false;
+			}
+			return true;
 		}
 	};
 
@@ -694,7 +701,7 @@
 
 			var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
-			var multi = $node.hasAttr('multiple');
+			var multi = directiveUtil.isSelectMultiple($node);
 
 			var init = function(){
 				var isDefined;
@@ -1612,7 +1619,18 @@
 				sels.push(getNumber ? +value : Parser.formatValue($option, value));
 			});
 		}else{
-			sels = ($select.attr('value')||'').split(',');
+			var multi = directiveUtil.isSelectMultiple($select);
+			var v = $select.attr('value')||'';
+			if(multi){
+				try{
+					sels = v ? JSON.parse(v) : [];
+				}catch(e){
+					sels = [];
+				}
+			}else{
+				sels = [v];
+			}
+			
 			if(getNumber){
 				for(var i=0, len=sels.length;i<len;i++){
 					sels[i] = (+sels[i]);

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.19.1567404146665 beta
+ *	Version	:	0.5.20.1567562905659 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -229,6 +229,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		},
 		wrapperDir: function wrapperDir(exp) {
 			return '{{' + exp + '}}';
+		},
+		isSelectMultiple: function isSelectMultiple($node) {
+			var v = $node.attr('multiple');
+			if (v === false || v === 'false') {
+				return false;
+			}
+			return true;
 		}
 	};
 
@@ -846,7 +853,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			    duplex = duplexField.duplex(parser.$scope),
 			    field = duplexField.field;
 
-			var multi = $node.hasAttr('multiple');
+			var multi = directiveUtil.isSelectMultiple($node);
 
 			var init = function init() {
 				var isDefined;
@@ -1772,7 +1779,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				sels.push(getNumber ? +value : Parser.formatValue($option, value));
 			});
 		} else {
-			sels = ($select.attr('value') || '').split(',');
+			var multi = directiveUtil.isSelectMultiple($select);
+			var v = $select.attr('value') || '';
+			if (multi) {
+				try {
+					sels = v ? JSON.parse(v) : [];
+				} catch (e) {
+					sels = [];
+				}
+			} else {
+				sels = [v];
+			}
+
 			if (getNumber) {
 				for (var i = 0, len = sels.length; i < len; i++) {
 					sels[i] = +sels[i];
