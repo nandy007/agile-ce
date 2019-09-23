@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.20.1567562905659 beta
+ *	Version	:	0.5.21.1569217741299 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -353,6 +353,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			this.watcher.watch(deps, function (options, i) {
 
 				if (!options.method) {
+					if (!options.newVal) {
+						options.newVal = parser.getAliasValue($access);
+					}
 					options = {
 						path: options.path,
 						method: 'xReset',
@@ -1168,7 +1171,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 	 * @param   {String}     access        [节点路径]
+ 
+  * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {

@@ -221,6 +221,9 @@
 			this.watcher.watch(deps, function (options, i) {
 
 				if (!options.method) {
+					if(!options.newVal){
+						options.newVal = parser.getAliasValue($access);
+					}
 					options = {
 						path: options.path,
 						method: 'xReset',
