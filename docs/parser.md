@@ -301,6 +301,8 @@ v-data与v-bind的区别是，v-bind绑定的数据会被清理，而v-data则�
 
 为了保证组件显示时的样式正确，请勿设置dom的显示样式为<code>display:none;</code>，否则显示时将设置样式<code>display:block;</code>，（比如某个dom显示的时候希望<code>display:flex</code>则可能得不到想要的结果）。
 
+该指令可搭配<code>display</code>一起使用，当表达式结果为true时，将设置dom的display样式为dom的display属性值。
+
 ## v-model
 
 双向绑定指令。

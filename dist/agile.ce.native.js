@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.21.1569217741299 beta
+ *	Version	:	0.5.22.1569459749543 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1171,8 +1171,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 	/**
   * 根据路径获取最后一个键值对的取值域
- 
-  * @param   {String}     access        [节点路径]
+ 	 * @param   {String}     access        [节点路径]
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
@@ -4833,7 +4832,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   * @param   {Boolean}    isDisplay        [是否显示]
   */
 	up.updateShowHide = function ($node, defaultValue, isDisplay) {
-		$node.css('display', isDisplay ? defaultValue === 'none' ? null : defaultValue : 'none');
+		var display = $node.attr('display'); // display属性为默认显示时的display样式
+		if (isDisplay) {
+			if (!display) {
+				display = defaultValue === 'none' ? null : defaultValue;
+			}
+		} else {
+			display = 'none';
+		}
+		$node.css('display', display);
 	};
 
 	var __RENDER = '__render'; //缓存标记

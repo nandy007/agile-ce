@@ -35,6 +35,8 @@
                 <option value="2">选项2</option>
                 <option value="3">选项3</option>
             </select>
+
+            <div v-show="showDiv" display="flex">sdfsdfsdfsd</div>
         <!-- </div> -->
     </div>
 
@@ -46,6 +48,7 @@
         
         var obj = {
             data: {
+                showDiv: false,
                 v: 0,
                 rd: true,
                 ck: [1],
@@ -66,6 +69,8 @@
         $('#app').render(obj);
 
         obj.data.v = 2;
+
+        obj.data.showDiv = true;
 
         
 

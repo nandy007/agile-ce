@@ -305,7 +305,15 @@
 	 * @param   {Boolean}    isDisplay        [是否显示]
 	 */
 	up.updateShowHide = function($node, defaultValue, isDisplay){
-		$node.css('display', isDisplay?(defaultValue==='none'?null:defaultValue):'none');
+		let display = $node.attr('display'); // display属性为默认显示时的display样式
+		if(isDisplay){
+			if(!display){
+				display = defaultValue==='none'?null:defaultValue;
+			}
+		}else{
+			display = 'none';
+		}
+		$node.css('display', display);
 	};
 
 	var __RENDER = '__render';//缓存标记
