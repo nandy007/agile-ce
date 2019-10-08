@@ -131,6 +131,7 @@
 				cb: function cb(rs) {
 					updater[updateFunc]($node, rs);
 					if(dir==='v-html:deep') parser.vm.compileSteps($node.childs(), fors);
+					$node.triggerHandler('contentUpdated');
 				}
 			});
 
@@ -150,7 +151,8 @@
 			setTimeout(function(){
 				if(slotName){
 					var $slot = $node.find('[slot-name='+slotName+']');
-					if($slot.length>0) $node = $($slot[0]);
+					if($slot.length===0) return;
+					$node = $($slot[0]); 
 				}
 				var args = [$node, fors, expression, dir, 'updateHTMLContent'];
 				parser.vtext.apply(parser, args);

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.22.1569459749543 beta
+ *	Version	:	0.5.23.1570497291999 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -261,6 +261,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				cb: function cb(rs) {
 					updater[updateFunc]($node, rs);
 					if (dir === 'v-html:deep') parser.vm.compileSteps($node.childs(), fors);
+					$node.triggerHandler('contentUpdated');
 				}
 			});
 		},
@@ -280,7 +281,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			setTimeout(function () {
 				if (slotName) {
 					var $slot = $node.find('[slot-name=' + slotName + ']');
-					if ($slot.length > 0) $node = $($slot[0]);
+					if ($slot.length === 0) return;
+					$node = $($slot[0]);
 				}
 				var args = [$node, fors, expression, dir, 'updateHTMLContent'];
 				parser.vtext.apply(parser, args);
