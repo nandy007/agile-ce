@@ -101,6 +101,7 @@
 			return '{{' + exp + '}}';
 		},
 		isSelectMultiple: function($node){
+			if(!$node.hasAttr('multiple')) return false;
 			var v = $node.attr('multiple');
 			if(v===false || v==='false'){
 				return false;

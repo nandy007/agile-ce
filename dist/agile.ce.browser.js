@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.23.1570497286594 beta
+ *	Version	:	0.5.24.1573692932931 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -200,6 +200,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			return '{{' + exp + '}}';
 		},
 		isSelectMultiple: function isSelectMultiple($node) {
+			if (!$node.hasAttr('multiple')) return false;
 			var v = $node.attr('multiple');
 			if (v === false || v === 'false') {
 				return false;
