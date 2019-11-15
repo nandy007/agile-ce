@@ -82,8 +82,9 @@
 		// $element.on('DOMNodeRemoved', function(){
 		// 	compiler.destroy();
 		// });
-
-		if (!$element.isElement()||$element.length===0) {
+		// nodeType=11为fragment
+		if(!element) return $.util.warn('至少包含一个dom元素');
+		if (element.nodeType!==11 && !$element.isElement()) {
 			return $.util.warn('第一个参数element必须是一个原生DOM对象或者一个JQLite对象: ', element);
 		}
 

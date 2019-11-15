@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.24.1573692938201 beta
+ *	Version	:	0.5.25.1573806630981 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -4231,8 +4231,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		// $element.on('DOMNodeRemoved', function(){
 		// 	compiler.destroy();
 		// });
-
-		if (!$element.isElement() || $element.length === 0) {
+		// nodeType=11为fragment
+		if (!element) return $.util.warn('至少包含一个dom元素');
+		if (element.nodeType !== 11 && !$element.isElement()) {
 			return $.util.warn('第一个参数element必须是一个原生DOM对象或者一个JQLite对象: ', element);
 		}
 
