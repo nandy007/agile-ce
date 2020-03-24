@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.5.25.1573806625922 beta
+ *	Version	:	0.5.25.1585017089165 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -12602,7 +12602,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				};
 				cb(_extends({}, options, { path: ext }), i);
 			});
-		});
+			// 继续深度遍历后面的节点
+			this.deepChange(sub, ext);
+		}, this);
 	};
 
 	/**
@@ -13057,105 +13059,246 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		return a === b;
 	};
 
+	op.getPropHooker = function (object, paths, val, parent) {
+		var prop = paths[paths.length - 1].p;
+		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
+		var getter = descriptor.get,
+		    setter = descriptor.set,
+		    ob = this;
+		var originSet, originGet, hookSet, hookGet;
+		if (getter && getter.name === 'GetHooker') {
+			hookSet = setter;
+			hookGet = getter;
+			originSet = setter.originSet;
+			originGet = getter.originGet;
+		} else {
+			hookSet = function SetHooker(newValue) {
+				var setter = hookSet.originSet;
+				var oldValue = hookGet();
+				if (ob.isEqual(newValue, oldValue)) {
+					return;
+				}
+
+				// 新值为对象或数组重新监测
+				var isNeed = observeUtil.isNeed(newValue);
+				if (isNeed) {
+
+					if (isNeed === 1) {
+						var oldNeed = observeUtil.isNeed(oldValue);
+						var _oldValue = oldNeed ? $.extend(true, oldNeed === 1 ? {} : [], oldValue) : oldValue;
+
+						$.extend(true, oldValue || {}, newValue);
+
+						ob.triggerByPaths({
+							deep: true,
+							hookSet: hookSet,
+							oldVal: _oldValue,
+							newVal: newValue
+						});
+
+						ob.observe(oldValue, paths, parent);
+					}
+					if (isNeed === 2) {
+						try {
+							oldValue.$reset(newValue);
+						} catch (e) {
+							// 如果赋值的为数组，但是初始值不是数组，则需要执行setter
+							if (setter) {
+								setter.call(object, newValue);
+							} else {
+								val = newValue;
+							}
+
+							ob.triggerByPaths({
+								deep: true,
+								hookSet: hookSet,
+								oldVal: oldValue,
+								newVal: newValue
+							});
+						}
+
+						ob.observe(newValue, paths, parent);
+					}
+
+					// ob.observe(newValue, paths, parent);
+					return;
+				}
+
+				if (setter) {
+					setter.call(object, newValue);
+				} else {
+					val = newValue;
+				}
+
+				// 触发变更回调
+				ob.triggerByPaths({
+					hookSet: hookSet,
+					oldVal: oldValue,
+					newVal: newValue
+				});
+			};
+			hookGet = function GetHooker() {
+				var getter = hookGet.originGet;
+				return getter ? getter.call(object) : val;
+			};
+			originSet = hookSet.originSet = setter;
+			originGet = hookGet.originGet = getter;
+			// 定义 object[prop] 的 getter 和 setter
+			Object.defineProperty(object, prop, {
+				get: hookGet,
+				set: hookSet
+			});
+		}
+		return {
+			originSet: originSet, originGet: originGet, hookSet: hookSet, hookGet: hookGet
+		};
+	};
+
+	op.triggerByPaths = function (opts) {
+		var hookSet = opts.hookSet,
+		    hooks = hookSet.__o__ || {};
+		for (var k in hooks) {
+			var func = hooks[k];
+			func({
+				deep: opts.deep,
+				oldVal: opts.oldVal,
+				newVal: opts.newVal
+			});
+		}
+	};
+
+	op.getPathId = function (paths) {
+		var arr = [];
+		for (var i = 0, len = paths.length; i < len; i++) {
+			var p = paths[i].p;
+			if (typeof p == 'string') {
+				arr.push(p);
+			} else {
+				arr.push('$i');
+			}
+		}
+		return arr.join('.');
+	};
+
+	op.observeObject = function (object, paths, val, parent) {
+		var ob = this,
+		    hooker = ob.getPropHooker(object, paths, val, parent);
+		var hookSet = hooker.hookSet;
+
+		if (!hookSet.__o__) hookSet.__o__ = {};
+
+		var hooks = hookSet.__o__,
+		    pathId = ob.getPathId(paths);
+
+		if (hooks[pathId]) return;
+
+		hooks[pathId] = function (opts) {
+			var myPath = ob.formatPaths(paths).join('.');
+			opts.path = myPath;
+			ob.trigger(opts);
+		};
+	};
+
 	/**
   * 拦截对象属性存取描述符（绑定监测）
   * @param   {Object|Array}  object  [对象或数组]
   * @param   {Array}         paths   [访问路径数组]
   * @param   {Any}           val     [默认值]
   */
-	op.observeObject = function (object, paths, val, parent) {
-		var prop = paths[paths.length - 1].p;
-		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
-		var getter = descriptor.get,
-		    setter = descriptor.set,
-		    ob = this;
+	// op._observeObject = function (object, paths, val, parent) {
+	// 	var prop = paths[paths.length - 1].p;
+	// 	var descriptor = Object.getOwnPropertyDescriptor(object, prop);
+	// 	var getter = descriptor.get, setter = descriptor.set, ob = this;
 
-		// 已经监测过则无需检测， 至更新关键变量
-		if (getter && getter.__o__) {
-			return;
-		};
+	// 	// 已经监测过则无需检测， 至更新关键变量
+	// 	// if(getter&&getter.__o__) {
+	// 	// 	return;
+	// 	// };
 
-		var Getter = function Getter() {
-			return getter ? getter.call(object) : val;
-		};
-		Getter.__o__ = true;
+	// 	var Getter = function Getter() {
+	// 		return getter ? getter.call(object) : val;
+	// 	};
+	// 	// Getter.__o__ = true;
 
-		var Setter = function Setter(newValue) {
-			var oldValue = getter ? getter.call(object) : val;
 
-			// ob.updateTruePaths(paths, object, parent);
+	// 	var Setter = function Setter(newValue) {
+	// 		var oldValue = getter ? getter.call(object) : val;
 
-			var myPath = ob.formatPaths(paths).join('.');
+	// 		// ob.updateTruePaths(paths, object, parent);
 
-			if (ob.isEqual(newValue, oldValue)) {
-				return;
-			}
+	// 		var myPath = ob.formatPaths(paths).join('.');
 
-			// 新值为对象或数组重新监测
-			var isNeed = observeUtil.isNeed(newValue);
-			if (isNeed) {
+	// 		if (ob.isEqual(newValue, oldValue)) {
+	// 			return;
+	// 		}
 
-				if (isNeed === 1) {
-					var oldNeed = observeUtil.isNeed(oldValue);
-					var _oldValue = oldNeed ? $.extend(true, oldNeed === 1 ? {} : [], oldValue) : oldValue;
+	// 		// 新值为对象或数组重新监测
+	// 		var isNeed = observeUtil.isNeed(newValue);
+	// 		if (isNeed) {
 
-					$.extend(true, oldValue || {}, newValue);
+	// 			if(isNeed===1){
+	// 				var oldNeed = observeUtil.isNeed(oldValue);
+	// 				var _oldValue = oldNeed ? $.extend(true, oldNeed===1?{}:[], oldValue) : oldValue;
 
-					ob.trigger({
-						deep: true,
-						path: myPath,
-						oldVal: _oldValue,
-						newVal: newValue
-					});
+	// 				$.extend(true, oldValue||{},newValue);
 
-					ob.observe(oldValue, paths, parent);
-				}
-				if (isNeed === 2) {
-					try {
-						oldValue.$reset(newValue);
-					} catch (e) {
-						// 如果赋值的为数组，但是初始值不是数组，则需要执行setter
-						if (setter) {
-							setter.call(object, newValue);
-						} else {
-							val = newValue;
-						}
+	// 				ob.trigger({
+	// 					deep: true,
+	// 					path: myPath,
+	// 					oldVal: _oldValue,
+	// 					newVal: newValue
+	// 				});
 
-						ob.trigger({
-							deep: true,
-							path: myPath,
-							oldVal: oldValue,
-							newVal: newValue
-						});
-					}
+	// 				ob.observe(oldValue, paths, parent);
+	// 			}
+	// 			if(isNeed===2) {
+	// 				try{
+	// 					oldValue.$reset(newValue);
+	// 				}catch(e){
+	// 					// 如果赋值的为数组，但是初始值不是数组，则需要执行setter
+	// 					if (setter) {
+	// 						setter.call(object, newValue);
+	// 					} else {
+	// 						val = newValue;
+	// 					}
 
-					ob.observe(newValue, paths, parent);
-				}
+	// 					ob.trigger({
+	// 						deep: true,
+	// 						path: myPath,
+	// 						oldVal: oldValue,
+	// 						newVal: newValue
+	// 					});
+	// 				}
 
-				// ob.observe(newValue, paths, parent);
-				return;
-			}
+	// 				ob.observe(newValue, paths, parent);
+	// 			}
 
-			if (setter) {
-				setter.call(object, newValue);
-			} else {
-				val = newValue;
-			}
+	// 			// ob.observe(newValue, paths, parent);
+	// 			return;
+	// 		}
 
-			// 触发变更回调
-			ob.trigger({
-				path: myPath,
-				oldVal: oldValue,
-				newVal: newValue
-			});
-		};
+	// 		if (setter) {
+	// 			setter.call(object, newValue);
+	// 		} else {
+	// 			val = newValue;
+	// 		}
 
-		// 定义 object[prop] 的 getter 和 setter
-		Object.defineProperty(object, prop, {
-			get: Getter,
-			set: Setter
-		});
-	};
+	// 		// 触发变更回调
+	// 		ob.trigger({
+	// 			path: myPath,
+	// 			oldVal: oldValue,
+	// 			newVal: newValue
+	// 		});
+
+	// 	};
+
+	// 	// 定义 object[prop] 的 getter 和 setter
+	// 	Object.defineProperty(object, prop, {
+	// 		get: Getter,
+	// 		set: Setter
+	// 	});
+
+	// };
 
 	/**
   * 重写数组方法的回调处理

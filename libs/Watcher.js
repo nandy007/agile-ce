@@ -74,7 +74,9 @@
 				};
 				cb(Object.assign({}, options, { path: ext }), i);
 			});
-		});
+			// 继续深度遍历后面的节点
+			this.deepChange(sub, ext);
+		}, this);
 	};
 
 	/**
