@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v2.1.3
+ * jQuery JavaScript Library v9.9.9
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -67,7 +67,7 @@ var
 	// Use the correct document accordingly with window argument (sandbox)
 	document = window.document,
 
-	version = "2.1.3",
+	version = "9.9.9", // 2.1.3
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {

@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.0.1586253601354 beta
+ *	Version	:	0.6.1.1592185837513 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -2508,7 +2508,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 /*!
- * jQuery JavaScript Library v2.1.3
+ * jQuery JavaScript Library v9.9.9
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -2571,8 +2571,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 	var
 	// Use the correct document accordingly with window argument (sandbox)
 	document = window.document,
-	    version = "2.1.3",
-
+	    version = "9.9.9",
+	    // 2.1.3
 
 	// Define a local copy of jQuery
 	jQuery = function jQuery(selector, context) {
