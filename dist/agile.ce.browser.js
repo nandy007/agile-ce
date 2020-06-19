@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.1.1592185837513 beta
+ *	Version	:	0.6.2.1592556912011 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -940,11 +940,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			});
 		},
 		'vtemplate': function vtemplate($node, fors, expression) {
-			var scope = this.$scope;
+			// var scope = this.$scope;
 			// Parser.transAttr($node, 'v-template', 'useTemplate');
 			// var template = $node.attr('useTemplate') || $node.html();
 			var template = (expression ? this.getValue(expression, fors) : '') || expression || $node.html();
-			var html = $.template(template, $.extend({}, scope, scope.$alias)) || '';
+			var html = $.template(template, this.getTemplateScope()) || '';
 			$node.html(html);
 		},
 		// 隐式监听
@@ -1017,6 +1017,40 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	};
 
 	var pp = Parser.prototype;
+
+	pp.getTemplateScope = function () {
+
+		var scope = this.$scope;
+		var vmPre = this.vmPre;
+		// Parser.transAttr($node, 'v-template', 'useTemplate');
+		// var template = $node.attr('useTemplate') || $node.html();
+		var obj = vmPre.data || vmPre.method ? function () {
+			var o = {};
+			if (vmPre.data) {
+				$.extend(o, scope[vmPre.data]);
+			} else {
+				for (var k in scope) {
+					if (k !== '$alias' && typeof socpe[k] !== 'function') {
+						o[k] = scope[k];
+					}
+				}
+			}
+			if (vmPre.method) {
+				$.extend(o, scope[vmPre.method]);
+			} else {
+				for (var k in scope) {
+					if (typeof socpe[k] === 'function') {
+						o[k] = scope[k];
+					}
+				}
+			}
+			return o;
+		}() : scope;
+
+		var templateScope = $.extend({}, obj, scope.$alias);
+
+		return templateScope;
+	};
 
 	pp.initVmPre = function () {
 		if (!Parser.hasVMPre()) return;
@@ -1294,8 +1328,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}
 			tpl = $tpl.html();
 		}
-		var scope = this.$scope,
-		    html = $.template(tpl, $.extend({}, scope, scope.$alias));
+		var html = $.template(tpl, this.getTemplateScope());
 		$plate.html(html);
 	};
 
