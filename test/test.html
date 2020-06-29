@@ -35,6 +35,8 @@
         </div>
         <div>{{item2.item.length}}</div>
         <div v-on:click="click">click</div>
+
+        <div v-replace:deep="re"></div>
     </div>
 
     <!-- <div id="app1">
@@ -59,7 +61,8 @@
                 item1: {
                     title: 'b333'
                 },
-                item2: {}
+                item2: {},
+                re: `<span>111</span><span>222</span>`
             },
             methods: {
                 click: function(){
@@ -85,6 +88,8 @@
 
         obj.data.item.title = '111';
         obj.data.item1.title = '222';
+
+        obj.data.re = `<div v-on:click="click">333</div><div>444</div>`;
 
         // obj.data.item2 = obj.data.item;
 

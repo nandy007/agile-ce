@@ -850,6 +850,36 @@
 					updater.updateDataSet($node, attr, parser.getValue(exp, fors));
 				}, fors);
 			});
+		},
+		'vreplace': function($node, fors, expression, dir){
+			var updater = this.updater;
+			var parser = this;
+
+			var before$placeholder = $.ui.createJQPlaceholder(),
+					after$placeholder = $.ui.createJQPlaceholder();
+			before$placeholder.insertBefore($node);
+			after$placeholder.insertAfter($node);
+
+			$node.remove();
+
+			directiveUtil.commonHandler.call(this, {
+				$node: $node,
+				fors: fors,
+				expression: directiveUtil.wrapperDir(expression),
+				cb: function cb(rs) {
+					var $next;
+					while(($next = before$placeholder.next()) && $next.length===1 && !$next.def('isPlaceholder')){
+						$next.remove();
+					}
+
+					const $cur = $(rs);
+					$cur.insertAfter(before$placeholder);
+
+					if(dir==='v-replace:deep') parser.vm.compileSteps($cur, fors);
+
+					$cur.triggerHandler('contentUpdated');
+				}
+			});
 		}
 	};
 

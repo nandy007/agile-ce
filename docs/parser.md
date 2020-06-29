@@ -71,6 +71,14 @@ html富文本注入扩展指令，用于自定义组件中。
 其中<code>slot-name</code>为组件内元素的属性slot-name对应的值。表达式的计算结果将作为代码片段添加到该元素内，如果代码片段中包含指令会继续编译和注入数据。
 
 
+
+## v-replace
+
+标签替换指令，当前标签将被<code>v-replace="expression"</code>表达式运算后的内容替换。
+
+如果增加deep选项，即<code>v-replace:deep</code>，替换后的内容可以被当前数据进行渲染。
+
+
 ## v-for
 
 循环体指令。
@@ -368,6 +376,21 @@ $('#app').render({
 ```
 
 初始化结果为value值为2的checkbox选中，如果不加number属性则没有checkbox选中。其他双向绑定指令同理。
+
+
+## v-template
+
+模板注入指令，当前标签的children将被<code>v-template="templateId"</code>id为templateId的模板渲染后的结果替换掉。
+
+模板设置的方法为：
+
+```javascript
+
+$.template.setter(templateId, templateStr);
+
+```
+
+
 
 
 
