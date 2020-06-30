@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.3.1593398123265 beta
+ *	Version	:	0.6.5.1593518674464 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -706,19 +706,25 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			// var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex, field = duplexField.field;;
 
 			updater.updateValue($node, parser.getValue(expression, fors));
 
-			var deps = [access];
+			// var deps = [access];
 			parser.watcher.watch(deps, function () {
 				updater.updateValue($node, parser.getValue(expression, fors));
 			}, fors);
 
 			Parser.bindTextEvent($node, function () {
-				var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+				var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+				var access = depsalias.exps.join('');
+				// var deps = depsalias.deps;
 				var duplexField = parser.getDuplexField(access),
 				    duplex = duplexField.duplex(parser.$scope),
 				    field = duplexField.field;
@@ -729,7 +735,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -746,7 +755,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			updater.updateRadioChecked($node, value);
 
-			var deps = [access];
+			// var deps = [access];
 			parser.watcher.watch(deps, function () {
 				updater.updateRadioChecked($node, parser.getValue(expression, fors));
 			}, fors);
@@ -764,7 +773,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(this.$scope),
@@ -784,7 +796,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			updater.updateCheckboxChecked($node, value);
 
-			var deps = [access];
+			// var deps = [access];
 			parser.watcher.watch(deps, function () {
 				updater.updateCheckboxChecked($node, parser.getValue(expression, fors));
 			}, fors);
@@ -822,7 +834,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -866,7 +881,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			$node.def('__model_init__', init);
 
-			var deps = [access];
+			// var deps = [access];
 
 			parser.watcher.watch(deps, function () {
 				updater.updateSelectChecked($node, parser.getValue(expression, fors), multi);
@@ -883,7 +898,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -891,7 +909,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			updater.updateValue($node, duplex[field]);
 
-			var deps = [access];
+			// var deps = [access];
 			parser.watcher.watch(deps, function () {
 				$node.val(parser.getValue(expression, fors));
 			}, fors);
@@ -906,7 +924,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var parser = this,
 			    updater = this.updater;
 
-			var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			// var access = Parser.makeDep(expression, fors, parser.getVmPre());
+			var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+			var access = depsalias.exps.join('');
+			var deps = depsalias.deps;
 
 			var duplexField = parser.getDuplexField(access),
 			    duplex = duplexField.duplex(parser.$scope),
@@ -918,7 +939,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				updater.updateSwitchChecked($node, duplex[field] === Parser.getSwitch($node, true) ? true : false);
 			}
 
-			var deps = [access];
+			// var deps = [access];
 			parser.watcher.watch(deps, function () {
 				updater.updateSwitchChecked($node, duplex[field] === Parser.getSwitch($node, true) ? true : false);
 			}, fors);
@@ -1211,7 +1232,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
   * @return  {Object}     {duplex: , field:}
   */
 	pp.getDuplexField = function (access) {
-		var ac = ('scope.' + access).split('.');
+		var ac = access.split('.');
 		var field = ac.pop();
 		var duplex = Parser.formateSubscript(ac.join('.'));
 		var scope = this.$scope;
@@ -1369,6 +1390,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		var path = isFull ? $access : 'scope.' + Parser.formateSubscript($access);
 		var aliasCache = this.aliasCache || {};
 		if (aliasCache[path]) return aliasCache[path];
+
+		// path = path.replace(/\[([^\d\]]+)\]/g, function(s, s1){
+		// 	return '[scope.$alias.' + $.util.trim(s1) + ']';
+		// });
+
 		var func = Parser.makeFunc(path);
 
 		return aliasCache[path] = func;
@@ -1553,7 +1579,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			if (exp !== '' && !Parser.isConst(exp)) {
 				deps.push(Parser.makeDep(exp, fors, type));
-				return Parser.makeAliasPath(exp, fors, type);
+				exp = Parser.makeAliasPath(exp, fors, type, function (es) {
+					deps = deps.concat(es);
+				});
 			}
 
 			return exp;
@@ -1649,7 +1677,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 	};
 
 	//获取指令表达式的别名路径
-	Parser.makeAliasPath = function (exp, fors, type) {
+	Parser.makeAliasPath = function (exp, fors, type, cb) {
 		//li.pid==item.pid
 		//$index
 		//obj.title
@@ -1687,6 +1715,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			return 'scope.' + s;
 		});
 		exp = exps.join('.');
+
+		exp = exp.replace(/\[([^\d\]]+)\]/g, function (s, s1) {
+			var des = Parser.getDepsAlias(s1, fors, type);
+			cb && cb(des.deps);
+			return '[' + des.exps.join('') + ']';
+		});
 
 		return exp;
 	};

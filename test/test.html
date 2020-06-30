@@ -28,15 +28,11 @@
 <body>
     <div id="app">
         <div v-for="item in list">
-            <span>{{item.title}}</span>
+            <span>{{$index}}</span>|<span>{{item.title}}</span>|<span>{{copy[$index].status}}</span>
+            <input type="checkbox" v-model:checkbox="copy[$index].status" value="1"/>
+            <!-- <span>{{copy[$index].status}}</span> -->
         </div>
-        <div v-for="item in list1">
-            <span>{{item.title}}</span>
-        </div>
-        <div>{{item2.item.length}}</div>
-        <div v-on:click="click">click</div>
-
-        <div v-replace:deep="re"></div>
+        
     </div>
 
     <!-- <div id="app1">
@@ -53,16 +49,14 @@
         
         var obj = {
             data: {
-                list: [],
-                list1: [{title: '2222'}],
-                item: {
-                    title: 'a333'
-                },
-                item1: {
-                    title: 'b333'
-                },
-                item2: {},
-                re: `<span>111</span><span>222</span>`
+                list: [{
+                    title: '选项一'
+                }],
+                copy: [
+                    {
+                        status: ["1"]
+                    }
+                ]
             },
             methods: {
                 click: function(){
@@ -74,6 +68,15 @@
         };
 
         $('#app').render(obj);
+
+        obj.data.copy.unshift({
+            status: []
+        });
+
+        obj.data.list.unshift({
+            title: '选项二'
+        });
+
         // $('#app1').render(obj);
 
         // obj.data.list = [
@@ -82,14 +85,6 @@
         //         title: '222'
         //     }
         // ];
-
-        obj.data.list.push(obj.data.item);
-        obj.data.list1.push(obj.data.item);
-
-        obj.data.item.title = '111';
-        obj.data.item1.title = '222';
-
-        obj.data.re = `<div v-on:click="click">333</div><div>444</div>`;
 
         // obj.data.item2 = obj.data.item;
 
