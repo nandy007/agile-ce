@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.5.1593518679443 beta
+ *	Version	:	0.6.8.1593757430114 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -752,6 +752,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindTextEvent($node, function () {
+				parser.setDeepScope(fors);
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
 				var access = depsalias.exps.join('');
@@ -793,6 +794,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 			Parser.bindChangeEvent($node, function () {
 				if ($node.isChecked()) {
+					parser.setDeepScope(fors);
 					// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
@@ -833,6 +835,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+
+				parser.setDeepScope(fors);
 
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
@@ -919,6 +923,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+				parser.setDeepScope(fors);
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				var selects = Parser.getSelecteds($(this));
@@ -946,6 +951,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+				parser.setDeepScope(fors);
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 				duplex[field] = $node.val();
@@ -976,6 +982,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			}, fors);
 
 			Parser.bindChangeEvent($node, function () {
+				parser.setDeepScope(fors);
 				duplex[field] = Parser.getSwitch($node, $node.xprop('checked'));
 			});
 		},

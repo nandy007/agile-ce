@@ -30,7 +30,8 @@
         <div v-for="item in list">
             <span>{{$index}}</span>|<span>{{item.title}}</span>|<span>{{copy[$index].status}}</span>
             <input type="checkbox" v-model:checkbox="copy[$index].status" value="1"/>
-            <!-- <span>{{copy[$index].status}}</span> -->
+            <span>{{copy[$index].status}}</span>
+            <input type="text" v-model:text="item.title"/>
         </div>
         
     </div>
