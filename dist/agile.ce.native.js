@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.8.1593757430114 beta
+ *	Version	:	0.6.9.1595920780681 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1469,7 +1469,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		var arr = this.getAliasValue($access);
 		scope[str$alias][alias] = arr[$index];
 		// if (!isParent) scope[str$alias]['$index'] = $index;
-		if (!isParent) scope[str$alias][indexAlias] = $index;
+		if (!isParent || indexAlias !== '$index') scope[str$alias][indexAlias] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makeAliasPath(fors.filter, fors, this.getVmPre('method'));
 

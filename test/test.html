@@ -27,13 +27,13 @@
 
 <body>
     <div id="app">
-        <div v-for="item in list">
-            <span>{{$index}}</span>|<span>{{item.title}}</span>|<span>{{copy[$index].status}}</span>
-            <input type="checkbox" v-model:checkbox="copy[$index].status" value="1"/>
-            <span>{{copy[$index].status}}</span>
-            <input type="text" v-model:text="item.title"/>
+        <div class="collect-module" v-for="(item, $indexx) in moduleList">
+            <ul>
+                <li v-for="itemm in item.subs">
+                    <input type="checkbox" v-model:checkbox="form.modules[$indexx].subCode" v-bind:value="itemm"></input>{{itemm}}
+                </li>
+            </ul>
         </div>
-        
     </div>
 
     <!-- <div id="app1">
@@ -50,14 +50,13 @@
         
         var obj = {
             data: {
-                list: [{
-                    title: '选项一'
-                }],
-                copy: [
-                    {
-                        status: ["1"]
-                    }
-                ]
+                values:["",""],
+                form:{
+                    modules:[
+                        {"subCode":[],},{"subCode":[],}
+                    ]
+                },
+                moduleList:[{subs:[1]},{subs:[2,3,4]}]
             },
             methods: {
                 click: function(){
@@ -70,44 +69,7 @@
 
         $('#app').render(obj);
 
-        obj.data.copy.unshift({
-            status: []
-        });
-
-        obj.data.list.unshift({
-            title: '选项二'
-        });
-
-        // $('#app1').render(obj);
-
-        // obj.data.list = [
-        //     obj.data.item,
-        //     {
-        //         title: '222'
-        //     }
-        // ];
-
-        // obj.data.item2 = obj.data.item;
-
-        
-        // var arr = [obj.data.list[1], obj.data.list[0]];
-        // obj.data.list = arr;
-
-        
-        // obj.data.list.shift();
-
-        // setInterval(function(){
-        //     var arr = [obj.data.list[1], obj.data.list[0]];
-        //     obj.data.list = arr;
-        //     obj.data.item.title = '111' + Math.random();
-        //     obj.data.item1.title = '222' + Math.random();
-        // }, 500);
-
-        
-
-        // obj.data.list.$set(0, obj.data.item);
-
-        
+       
 
     </script>
 </body>

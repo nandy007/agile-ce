@@ -1311,7 +1311,7 @@
 		var arr = this.getAliasValue($access);
 		scope[str$alias][alias] = arr[$index];
 		// if (!isParent) scope[str$alias]['$index'] = $index;
-		if (!isParent) scope[str$alias][indexAlias] = $index;
+		if (!isParent || indexAlias!=='$index') scope[str$alias][indexAlias] = $index;
 		if (fors.filter) {
 			var filter$access = Parser.makeAliasPath(fors.filter, fors, this.getVmPre('method'));
 
