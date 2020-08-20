@@ -303,7 +303,7 @@
 			var pos = start + rank;
 			gap = args.length - rank;
 
-			for(var i=pos;i<len;i++){
+			for(var i=len-1;i>=gap;i--){
 				
 				var ni = i+gap,
 					oPath = $access+'.'+i,

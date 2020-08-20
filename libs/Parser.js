@@ -161,12 +161,11 @@
 		},
 		'vfor': function ($node, fors, expression) {
 
-			Parser.transAttr($node, 'v-template', 'useTemplate');
-
-			const forTpl = $node.outerHTML();
-			$node.def('__forTpl', forTpl);
-
 			var parser = this;
+
+			Parser.transAttr($node, 'v-template', 'useTemplate');
+			const forTpl = parser.getOuterHTML($node);
+			$node.def('__forTpl', forTpl);
 
 			var vforIndex = this.vforIndex++;
 
@@ -184,7 +183,7 @@
 
 			var forsCache = {};
 
-			var $listFragment = parser.preCompileVFor($node, function () {
+			var {$listFragment, curDomList} = parser.preCompileVFor($node, function () {
 				return parser.getAliasValue($access);
 			}, 0, fors, aliasGroup, access, forsCache, vforIndex, __filter);
 
@@ -194,12 +193,13 @@
 				return;
 			}
 
-			var domList = [];
-			$listFragment.children().each(function(){
-				domList.push($(this));
-			});
+			// var domList = [];
+			// $listFragment.children().each(function(){
+			// 	domList.push($(this));
+			// });
 
-			
+			var domList = [].concat(curDomList);
+
 			if($node.attr('mode')==='single'){
 				$listFragment.replaceTo($node);
 			}else{
@@ -238,7 +238,7 @@
 				options.vforIndex = vforIndex;
 
 				var handlerFlag = (i === 0);
-				parser.watcher.updateIndex($access, options, function (opts) {
+				parser.watcher.updateIndex(options.path || $access, options, function (opts) {
 					var cFor = forsCache[opts.newVal] = forsCache[opts.oldVal];
 					if(__filter) cFor.filter = __filter;
 					cFor['$index'] = opts.newVal;
@@ -246,18 +246,21 @@
 				}, handlerFlag);
 
 				updater.updateList($parent, $node, options, function (arr, isRender) {
-					var $listFragment;
+					var $listFragment, curDomList;
 					if(isRender){
 						if (__filter) $node.data('__filter', __filter);
 						var baseIndex = Parser.getBaseIndex(options);
-						$listFragment = parser.preCompileVFor($node, function () {
+						var buildResult = parser.preCompileVFor($node, function () {
 							return arr;
 						}, baseIndex, fors, aliasGroup, access, forsCache, vforIndex, __filter);
+						$listFragment = buildResult.$listFragment;
+						curDomList = buildResult.curDomList;
 					}
 					
 					return {
 						$fragment: $listFragment,
-						domList: domList
+						domList: domList,
+						curDomList: curDomList
 					};
 				});
 
@@ -545,7 +548,7 @@
 
 			var $siblingNode = $node.next();
 			nodes.push({
-				html: $node.outerHTML(),
+				html: parser.getOuterHTML($node),
 				expression: expression,
 				dir: dir
 			});
@@ -949,6 +952,17 @@
 
 	var pp = Parser.prototype;
 
+	pp.isTemplate = function($node){
+		return $node.is('template');
+	};
+
+	pp.getOuterHTML = function($node){
+		if(this.isTemplate($node)){
+			return $node.html();
+		}
+		return $node.outerHTML();
+	};
+
 	pp.getTemplateScope = function(){
 
 		var scope = this.$scope;
@@ -1192,7 +1206,7 @@
 			//刷新适配器
 			$.ui.refreshDom($adapter);
 
-			return $adapter;
+			return $adapter; // to do 需返回 {$listFragment, curDomList}
 		}
 
 		return parser.buildList($node, getter(), baseIndex, fors, aliasGroup, access, forsCache, vforIndex, false, filter);
@@ -1234,23 +1248,34 @@
 	 * @param   {filter}     filter        [过滤器]
 	 */
 	pp.buildList = function ($node, array, baseIndex, fors, aliasGroup, access, forsCache, vforIndex, ignor, filter) {
-		var $listFragment = $.ui.createJQFragment();
+		var $listFragment = $.ui.createJQFragment(), curDomList = [];
+
+		const isTpl = this.isTemplate($node);
 
 		$.util.each(array, function (i, item) {
 			var ni = baseIndex + i;
 			var cFors = forsCache[ni] = Parser.createFors(fors, aliasGroup, access, ni, filter);
 			// var $plate = $node.clone();//.data('vforIndex', vforIndex);
-			var $plate = $($node.def('__forTpl')); // clone会导致组件内部有子组件，导致dom结构变化的问题
+			var $plate = $('<!-- -->'+$node.def('__forTpl')+'<!-- -->'); // clone会导致组件内部有子组件，导致dom结构变化的问题
+			if(isTpl){
+				$plate = $(document.createDocumentFragment()).append($plate);
+			}
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 
 			this.handleTemplate($plate);
 
 			this.vm.compileSteps($plate, cFors);
+
+			curDomList.push(isTpl ? $plate.contents() : $plate);
+
 			$listFragment.append($plate);
 		}, this);
 
-		return $listFragment;
+		return {
+			$listFragment: $listFragment,
+			curDomList: curDomList
+		};
 	};
 
 	pp.handleTemplate = function($plate){

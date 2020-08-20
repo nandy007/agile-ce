@@ -110,14 +110,14 @@
 	};
 
 	//获取vfor数据的第一个节点
-	var getVforFirstChild = function(children){
-		return children.length===0?null:children[0];
-	};
+	// var getVforFirstChild = function(children){
+	// 	return children.length===0?null:children[0];
+	// };
 
 	//获取vfor数据的最后一个节点
-	var getVforLastChild = function(children){
-		return children.length===0?null:children[children.length-1];
-	};
+	// var getVforLastChild = function(children){
+	// 	return children.length===0?null:children[children.length-1];
+	// };
 
 	//获取vfor数据的所有节点
 	// var getVforChildren = function($parent, vforIndex){
@@ -132,169 +132,328 @@
 	// 	return arr;
 	// };
 
-	function copyFragment($fragment, arr){
-		arr = arr || [];
-		$fragment.children().each(function(){
-			arr.push($(this));
-		});
-		return arr;
+	// function copyFragment($fragment, arr){
+	// 	arr = arr || [];
+	// 	$fragment.children().each(function(){
+	// 		arr.push($(this));
+	// 	});
+	// 	return arr;
+	// }
+
+	// up.updateListXReset = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+	// 	var	$placeholder = $node.def('$placeholder');
+	// 	if($placeholder){
+	// 		var	before$placeholder = $placeholder.before,
+	// 			$next = before$placeholder.next();
+	// 		//var children = getVforChildren($parent, options['vforIndex']);
+	// 		while($next && ($next.length===1) && !$next.def('isPlaceholder')){
+	// 			$next.remove();
+	// 			$next = before$placeholder.next();
+	// 		}
+	// 		$fragment.insertAfter(before$placeholder);
+	// 	}else{
+	// 		// var children = getVforChildren($parent, options['vforIndex']);
+	// 		if(children.length===0){
+	// 			$fragment.appendTo($parent);
+	// 		}else{
+	// 			$fragment.replaceTo(children[0]);
+	// 			$.util.each(children, function(i, $child){
+	// 				//$parent.remove($child);
+	// 				$child.remove();
+	// 			});
+	// 		}
+	// 	}
+	// 	copy$fragment.unshift(0, children.length);
+	// 	children.splice.apply(children, copy$fragment);
+	// };
+
+	function removeContent($content) {
+		if (!$content || $content.length === 0) return;
+		var $first = $content.first(), $last = $content.last(), last = $last[0],
+		    dom = $first[0],
+		    next;
+		while (dom) {
+			next = dom===last ? null : dom.nextSibling;
+			$(dom).remove();
+			dom = next;
+		}
+	}
+
+	function getBeforeContent(domList){
+		if(!domList || domList.length===0) return null;
+		var $first = domList[0], $before = $first && $first.first();
+		if($before.length===0) $before = null;
+		return $before;
+	}
+
+	function getAfterContent(domList){
+		if(!domList || domList.length===0) return null;
+		var $last = domList[domList.length-1], $after = $last && $last.last();
+		if($last.length===0) $last = null;
+		return $after;
 	}
 
 	up.updateListXReset = function($parent, $node, options, cb){
-		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, domList = cbrs.domList, curDomList = cbrs.curDomList;
+		for(var i=0, len = domList.length;i<len;i++){
+			var $content = domList[i];
+			removeContent($content);
+		}
+
 		var	$placeholder = $node.def('$placeholder');
 		if($placeholder){
-			var	before$placeholder = $placeholder.before,
-				$next = before$placeholder.next();
-			//var children = getVforChildren($parent, options['vforIndex']);
-			while($next && ($next.length===1) && !$next.def('isPlaceholder')){
-				$next.remove();
-				$next = before$placeholder.next();
-			}
+			var	before$placeholder = $placeholder.before;
 			$fragment.insertAfter(before$placeholder);
 		}else{
-			// var children = getVforChildren($parent, options['vforIndex']);
-			if(children.length===0){
-				$fragment.appendTo($parent);
-			}else{
-				$fragment.replaceTo(children[0]);
-				$.util.each(children, function(i, $child){
-					//$parent.remove($child);
-					$child.remove();
-				});
-			}
+			$fragment.appendTo($parent);
 		}
-		copy$fragment.unshift(0, children.length);
-		children.splice.apply(children, copy$fragment);
+
+		domList.splice.apply(domList, [0, domList.length].concat(curDomList));
 	};
+
+	// up.updateListPop = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args), children = cbrs.domList;
+	// 	var $placeholder = $node.def('$placeholder');
+	// 	if($placeholder){
+	// 		var	after$placeholder = $placeholder.after;
+	// 		var $last = after$placeholder.prev();
+	// 		$last&&($last.length===1)&&(!$last.def('isPlaceholder'))&&$last.remove();
+	// 	}else{
+	// 		var $children = getVforFirstChild(children);
+	// 		$children&&$children.remove();
+	// 	}
+	// 	children.pop();
+	// };
 
 	up.updateListPop = function($parent, $node, options, cb){
-		var cbrs = cb(options.args), children = cbrs.domList;
-		var $placeholder = $node.def('$placeholder');
-		if($placeholder){
-			var	after$placeholder = $placeholder.after;
-			var $last = after$placeholder.prev();
-			$last&&($last.length===1)&&(!$last.def('isPlaceholder'))&&$last.remove();
-		}else{
-			var $children = getVforFirstChild(children);
-			$children&&$children.remove();
-		}
-		children.pop();
+		var cbrs = cb(options.args), domList = cbrs.domList;
+
+		var $last = domList.pop();
+
+		removeContent($last);
 	};
 
+	// up.updateListPush = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+	// 	var $placeholder = $node.def('$placeholder');
+	// 	if($placeholder){
+	// 		var	after$placeholder = $placeholder.after;
+	// 		$fragment.insertBefore(after$placeholder);
+	// 	}else{
+	// 		var $children = getVforLastChild(children);
+	// 		if($children&&$children.length>0){
+	// 			$fragment.insertAfter($children);
+	// 		}else{
+	// 			$fragment.appendTo($parent);
+	// 		}
+	// 	}
+	// 	children.push.apply(children, copy$fragment);
+	// };
+
 	up.updateListPush = function($parent, $node, options, cb){
-		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, domList = cbrs.domList, curDomList = cbrs.curDomList;
 		var $placeholder = $node.def('$placeholder');
-		if($placeholder){
+		var $after = getAfterContent(domList);
+
+		if($after){ // 存在则说明有数据
+			$fragment.insertAfter($after);
+		}else if($placeholder){
 			var	after$placeholder = $placeholder.after;
 			$fragment.insertBefore(after$placeholder);
 		}else{
-			var $children = getVforLastChild(children);
-			if($children&&$children.length>0){
-				$fragment.insertAfter($children);
-			}else{
-				$fragment.appendTo($parent);
-			}
+			$fragment.appendTo($parent);
 		}
-		children.push.apply(children, copy$fragment);
+
+		domList.push.apply(domList, curDomList);
 	};
+
+	// up.updateListShift = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args), children = cbrs.domList;
+	// 	var $placeholder = $node.def('$placeholder');
+	// 	if($placeholder){
+	// 		var	before$placeholder = $placeholder.before;
+	// 		var $first = before$placeholder.next();
+	// 		$first&&($first.length===1)&&(!$first.def('isPlaceholder'))&&$first.remove();
+	// 	}else{
+	// 		var $children = getVforFirstChild(children);
+	// 		$children&&$children.remove();
+	// 	}
+	// 	children.shift();
+	// };
+
 
 	up.updateListShift = function($parent, $node, options, cb){
-		var cbrs = cb(options.args), children = cbrs.domList;
-		var $placeholder = $node.def('$placeholder');
-		if($placeholder){
-			var	before$placeholder = $placeholder.before;
-			var $first = before$placeholder.next();
-			$first&&($first.length===1)&&(!$first.def('isPlaceholder'))&&$first.remove();
-		}else{
-			var $children = getVforFirstChild(children);
-			$children&&$children.remove();
-		}
-		children.shift();
+		var cbrs = cb(options.args), domList = cbrs.domList;
+
+		const $first = domList.shift();
+		
+		removeContent($first);
+
 	};
 
+	// up.updateListUnshift = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+	// 	var $placeholder = $node.def('$placeholder');
+	// 	if($placeholder){
+	// 		var	before$placeholder = $placeholder.before;
+	// 		$fragment.insertAfter(before$placeholder);
+	// 	}else{
+	// 		var $children = getVforFirstChild(children);
+	// 		if($children&&$children.length>0){
+	// 			$fragment.insertBefore($children);
+	// 		}else{
+	// 			$fragment.appendTo($parent);
+	// 		}	
+	// 	}
+	// 	children.unshift.apply(children, copy$fragment);
+	// };
+
+
 	up.updateListUnshift = function($parent, $node, options, cb){
-		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, children = cbrs.domList, copy$fragment = copyFragment($fragment);
+		var cbrs = cb(options.args, true), $fragment = cbrs.$fragment, domList = cbrs.domList, curDomList = cbrs.curDomList;
 		var $placeholder = $node.def('$placeholder');
-		if($placeholder){
+		var $before = getBeforeContent(domList);
+
+		if($before){
+			$fragment.insertBefore($before);
+		}else if($placeholder){
 			var	before$placeholder = $placeholder.before;
 			$fragment.insertAfter(before$placeholder);
 		}else{
-			var $children = getVforFirstChild(children);
-			if($children&&$children.length>0){
-				$fragment.insertBefore($children);
-			}else{
-				$fragment.appendTo($parent);
-			}	
+			$fragment.appendTo($parent);
 		}
-		children.unshift.apply(children, copy$fragment);
+
+		domList.unshift.apply(domList, curDomList);
 	};
+
+	// up.updateListSplice = function($parent, $node, options, cb){
+
+	// 	var cbrs = cb(options.args), children = cbrs.domList, copy$fragment = [];
+
+	// 	var $placeholder = $node.def('$placeholder');
+
+	// 	var args = $.util.copyArray(options.args);
+	// 	var startP = args.shift(), rank = args.shift(), spliceLen;
+
+	// 	if(typeof rank==='undefined') rank = children.length;
+
+	// 	spliceLen = startP + (rank||1);
+
+	// 	for(var i=startP;i<spliceLen;i++){
+	// 		var $child = children[i];
+	// 		if(args.length>0){
+	// 			// var $fragment = cb(args);
+	// 			var child$cbrs = cb(args, true), $fragment = child$cbrs.$fragment;
+	// 			copy$fragment.push.apply(copy$fragment, copyFragment($fragment));
+	// 			if($child){
+	// 				$fragment.insertBefore($child);
+	// 			}else{
+	// 				if($placeholder){
+	// 					var	after$placeholder = $placeholder.after;
+	// 					$fragment.insertBefore(after$placeholder);
+	// 				}else{
+	// 					$fragment.appendTo($parent);
+	// 				}
+	// 			}
+	// 			args = [];
+	// 		};
+	// 		if(rank!==0) $child&&$child.remove();
+	// 	}
+
+	// 	copy$fragment.unshift(startP, rank);
+		
+	// 	children.splice.apply(children, copy$fragment);
+
+	// };
 
 	up.updateListSplice = function($parent, $node, options, cb){
 
-		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment = [];
+		var args = $.util.copyArray(options.args);
+
+		if(args.length===0) return;
+
+		var startP = args.shift(), rank = args.length > 0 ? args.shift() : null;
+
+		var cbrs = cb(args, true), $fragment = cbrs.$fragment, domList = cbrs.domList, curDomList = cbrs.curDomList;
+
 
 		var $placeholder = $node.def('$placeholder');
 
-		var args = $.util.copyArray(options.args);
-		var startP = args.shift(), rank = args.shift(), spliceLen;
+		var spliceArr = domList.splice.apply(domList, (rank===null?[startP]:[startP, rank]).concat(curDomList));
 
-		if(typeof rank==='undefined') rank = children.length;
-
-		spliceLen = startP + (rank||1);
-
-		for(var i=startP;i<spliceLen;i++){
-			var $child = children[i];
-			if(args.length>0){
-				// var $fragment = cb(args);
-				var child$cbrs = cb(args, true), $fragment = child$cbrs.$fragment;
-				copy$fragment.push.apply(copy$fragment, copyFragment($fragment));
-				if($child){
-					$fragment.insertBefore($child);
-				}else{
-					if($placeholder){
-						var	after$placeholder = $placeholder.after;
-						$fragment.insertBefore(after$placeholder);
-					}else{
-						$fragment.appendTo($parent);
-					}
-				}
-				args = [];
-			};
-			if(rank!==0) $child&&$child.remove();
+		for(var i=0, len = spliceArr.length;i<len;i++){
+			removeContent(spliceArr[i]);
 		}
 
-		copy$fragment.unshift(startP, rank);
-		
-		children.splice.apply(children, copy$fragment);
+		if(curDomList.length===0) return;
 
+		var $relative;
+
+		if(startP>0){
+			var $temp = domList[startP-1];
+			if($temp){
+				$relative = $temp.last();
+				if($relative.length===0){
+					$relative = null;
+				}
+			}
+		}
+
+		if($placeholder && !$relative){
+			$relative = $placeholder.before;
+		}
+
+		if($relative){
+			$fragment.insertAfter($relative);
+		}else{
+			$fragment.appendTo($parent);
+		}
 	};
 
+	// up.updateListCommon = function($parent, $node, options, cb){
+	// 	var cbrs = cb(options.args), children = cbrs.domList, copy$fragment;
+	// 	var $placeholder = $node.def('$placeholder');
+	// 	var args = options.newArray;
+	// 	for(var i=0, len=children.length;i<len;i++){
+	// 		var $child = children[i];
+	// 		if(args.length>0){
+	// 			var child$cbrs = cb(args, true), $fragment =  child$cbrs.$fragment, copy$fragment = copyFragment($fragment);
+	// 			if($child){
+	// 				$fragment.insertBefore($child);
+	// 			}else{
+	// 				if($placeholder){
+	// 					var	after$placeholder = $placeholder.after;
+	// 					$fragment.insertBefore(after$placeholder);
+	// 				}else{
+	// 					$fragment.appendTo($parent);
+	// 				}
+	// 			}
+	// 			args = [];
+	// 		};
+	// 		$child&&$child.remove();
+	// 	}
+	// 	if(copy$fragment){
+	// 		copy$fragment.unshift(0, children.length);
+	// 		children.splice.apply(children, copy$fragment);
+	// 	}
+	// };
+
 	up.updateListCommon = function($parent, $node, options, cb){
-		var cbrs = cb(options.args), children = cbrs.domList, copy$fragment;
+		var cbrs = cb(options.newArray, true), $fragment =  cbrs.$fragment, domList = cbrs.domList, curDomList = cbrs.curDomList;
 		var $placeholder = $node.def('$placeholder');
-		var args = options.newArray;
-		for(var i=0, len=children.length;i<len;i++){
-			var $child = children[i];
-			if(args.length>0){
-				var child$cbrs = cb(args, true), $fragment =  child$cbrs.$fragment, copy$fragment = copyFragment($fragment);
-				if($child){
-					$fragment.insertBefore($child);
-				}else{
-					if($placeholder){
-						var	after$placeholder = $placeholder.after;
-						$fragment.insertBefore(after$placeholder);
-					}else{
-						$fragment.appendTo($parent);
-					}
-				}
-				args = [];
-			};
-			$child&&$child.remove();
+		
+		var $cur;
+		while($cur = domList.pop()){
+			removeContent($cur);
 		}
-		if(copy$fragment){
-			copy$fragment.unshift(0, children.length);
-			children.splice.apply(children, copy$fragment);
+
+		domList.push.apply(domList, curDomList);
+
+		if($placeholder){
+			$fragment.insertAfter($placeholder.before);
+		}else{
+			$fragment.appendTo($parent);
 		}
 	};
 
