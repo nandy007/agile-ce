@@ -1826,6 +1826,9 @@
 		$node.__on__(eventRefer.change || 'change', function () {
 			callback.apply(this, arguments);
 		});
+		$node.__on__('customchange', function () {
+			callback.apply(this, arguments);
+		});
 	};
 
 	//获取指令值为json数据的依赖，仅针对指令取值后为json格式的指令解析	

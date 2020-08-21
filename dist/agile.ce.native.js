@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.10.1597919062382 beta
+ *	Version	:	0.6.11.1598007639536 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1985,6 +1985,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		var eventRefer = $node[0].__eventRefer || {}; // hook 
 
 		$node.__on__(eventRefer.change || 'change', function () {
+			callback.apply(this, arguments);
+		});
+		$node.__on__('customchange', function () {
 			callback.apply(this, arguments);
 		});
 	};
@@ -5575,57 +5578,132 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}
 	};
 
+	// wp.updateIndexForSplice = function($access, options, cb, handlerFlag){
+
+	// 	var args = $.util.copyArray(options.args),
+	// 		start = args.shift(),
+	// 		rank = args.shift(),
+	// 		len = options.oldLen,
+	// 		gap = 0;
+
+	// 	var subs = this.$depSub;
+
+	// 	var swapFunc = this.makeSwapFunc($access);
+	// 	var delFunc = this.makeDelFunc($access);
+
+	// 	if(options.args.length===1){
+	// 		if(!handlerFlag) return;
+	// 		for(var i=start;i<len;i++){
+	// 			// watcherUtil.deleteSub(subs, $access+'.'+i);
+	// 			delFunc(subs, i);
+	// 		}
+	// 	}else if(rank===0){
+	// 		var len = options.oldLen;
+	// 		var gap = options.newLen-options.oldLen;
+	// 		var subs = this.$depSub;
+
+	// 		for(var i=len-1;i>start-1;i--){
+	// 			var ni = i+gap,
+	// 				oPath = $access+'.'+i,
+	// 				nPath = $access+'.'+ni,
+	// 				oIndexPath = oPath+'.*',
+	// 				nIndexPath = nPath+'.*';
+
+	// 			if(handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
+
+	// 			cb({
+	// 				path : nIndexPath,
+	// 				oldVal : i,
+	// 				newVal : ni
+	// 			});
+	// 		}
+
+	// 		if(!handlerFlag) return;
+	// 		for(var i=start;i<start+gap;i++){
+	// 			// watcherUtil.deleteSub(subs, $access+'.'+i);
+	// 			delFunc(subs, i);
+	// 		}
+	// 	}else{
+	// 		var pos = start + rank;
+	// 		gap = args.length - rank;
+
+	// 		for(var i=len-1;i>=gap;i--){
+
+	// 			var ni = i+gap,
+	// 				oPath = $access+'.'+i,
+	// 				nPath = $access+'.'+ni,
+	// 				oIndexPath = oPath+'.*',
+	// 				nIndexPath = nPath+'.*';
+
+	// 			if(handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
+
+	// 			cb({
+	// 				path : nIndexPath,
+	// 				oldVal : i,
+	// 				newVal : ni
+	// 			});
+	// 		}
+	// 		if(!handlerFlag) return;
+	// 		if(gap<0){
+	// 			for(var i=len+gap;i<len;i++){
+	// 				// watcherUtil.deleteSub(subs, $access+'.'+i);
+	// 				delFunc(subs, i);
+	// 			}
+	// 		}else if(gap>0){
+	// 			for(var i=start;i<pos+1;i++){
+	// 				// watcherUtil.deleteSub(subs, $access+'.'+i);
+	// 				delFunc(subs, i);
+	// 			}
+	// 		}
+
+	// 		//$.util.warn(JSON.stringify(subs));
+	// 	}
+
+	// };
+
 	wp.updateIndexForSplice = function ($access, options, cb, handlerFlag) {
 
-		var args = $.util.copyArray(options.args),
-		    start = args.shift(),
-		    rank = args.shift(),
-		    len = options.oldLen,
-		    gap = 0;
+		var args = $.util.copyArray(options.args);
+
+		if (args.length === 0) return;
+
+		var start = args.shift();
+		start = start < 0 ? options.oldLen + start : start;
+		if (start < 0) {
+			start = 0;
+		} else if (start >= options.oldLen) {
+			return; // 如果开始位置大于原始长度，则跟push效果一样，无需重新计算index
+		}
+
+		var rank = args.length > 0 ? args.shift() : 0;
+		if (rank < 0) {
+			rank = 0;
+		} else if (start + rank >= options.oldLen) {
+			rank = options.oldLen - start;
+		}
+
+		var end = start + rank,
+		    len = options.oldLen;
+
+		var gap = args.length - rank;
 
 		var subs = this.$depSub;
 
 		var swapFunc = this.makeSwapFunc($access);
 		var delFunc = this.makeDelFunc($access);
 
-		if (options.args.length === 1) {
-			if (!handlerFlag) return;
-			for (var i = start; i < len; i++) {
-				// watcherUtil.deleteSub(subs, $access+'.'+i);
+		// 被切割数据先删掉
+		if (handlerFlag) {
+			for (var i = start; i < end; i++) {
 				delFunc(subs, i);
 			}
-		} else if (rank === 0) {
-			var len = options.oldLen;
-			var gap = options.newLen - options.oldLen;
-			var subs = this.$depSub;
+		}
 
-			for (var i = len - 1; i > start - 1; i--) {
-				var ni = i + gap,
-				    oPath = $access + '.' + i,
-				    nPath = $access + '.' + ni,
-				    oIndexPath = oPath + '.*',
-				    nIndexPath = nPath + '.*';
+		// [0, 1, 2, 3, 4]   splice(1, 2, 5);  0/5/3/4
 
-				if (handlerFlag) swapFunc(subs, ni, i); //watcherUtil.swapSub(subs, nPath, oPath);
-
-				cb({
-					path: nIndexPath,
-					oldVal: i,
-					newVal: ni
-				});
-			}
-
-			if (!handlerFlag) return;
-			for (var i = start; i < start + gap; i++) {
-				// watcherUtil.deleteSub(subs, $access+'.'+i);
-				delFunc(subs, i);
-			}
-		} else {
-			var pos = start + rank;
-			gap = args.length - rank;
-
-			for (var i = len - 1; i >= gap; i--) {
-
+		if (gap > 0) {
+			// 如果添加的数据大于删除的数据，则从后往前移
+			for (var i = len - 1; i >= end; i--) {
 				var ni = i + gap,
 				    oPath = $access + '.' + i,
 				    nPath = $access + '.' + ni,
@@ -5640,20 +5718,36 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 					newVal: ni
 				});
 			}
-			if (!handlerFlag) return;
-			if (gap < 0) {
-				for (var i = len + gap; i < len; i++) {
-					// watcherUtil.deleteSub(subs, $access+'.'+i);
-					delFunc(subs, i);
-				}
-			} else if (gap > 0) {
-				for (var i = start; i < pos + 1; i++) {
-					// watcherUtil.deleteSub(subs, $access+'.'+i);
+			// 前面多余的数据删掉
+			if (handlerFlag) {
+				var tlen = end + gap;
+				for (var i = end; i < tlen; i++) {
 					delFunc(subs, i);
 				}
 			}
+		} else {
+			// 如果添加的数据小于等于删除的数据，则从前往后移
+			for (var i = end; i < len; i++) {
+				var ni = i + gap,
+				    oPath = $access + '.' + i,
+				    nPath = $access + '.' + ni,
+				    oIndexPath = oPath + '.*',
+				    nIndexPath = nPath + '.*';
 
-			//$.util.warn(JSON.stringify(subs));
+				if (handlerFlag) swapFunc(subs, ni, i); // watcherUtil.swapSub(subs, nPath, oPath);
+
+				cb({
+					path: nIndexPath,
+					oldVal: i,
+					newVal: ni
+				});
+			}
+			// 后面多余的数据删掉
+			if (handlerFlag) {
+				for (var i = len - gap; i < len; i++) {
+					delFunc(subs, i);
+				}
+			}
 		}
 	};
 

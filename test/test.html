@@ -41,22 +41,15 @@
                             <td colspan="3">{{subEve.title}}</td>
                         </tr>
                         <template step="3" v-for="itemEve in subEve.itemArr">
-                            <template v-if="$index%2===0">
-                                <tr colspan="5">
-                                    <td>{{$index}}</td>
-                                </tr>
-                            </template>
-                            <template v-else>
-                                <tr>
-                                    <td>{{$index}}</td>
-                                    <td>{{itemEve.num}}</td>
-                                    <td>{{itemEve.title}}</td>
-                                    <td>
-                                        
-                                    </td>
-                                    <td>编辑</td>
-                                </tr>
-                            </template>
+                            <tr>
+                                <td>{{$index}}</td>
+                                <td>{{itemEve.num}}</td>
+                                <td>{{itemEve.title}}</td>
+                                <td>
+                                    
+                                </td>
+                                <td>编辑</td>
+                            </tr>
                         </template>
                     </template>
                 </template>
@@ -185,6 +178,23 @@
         })
 
         obj.data.show = false;
+
+        obj.data.contentArr[0].subArr[0].itemArr = [];
+
+        obj.data.contentArr[0].subArr[0].itemArr.push({
+            num:'11',
+            title:'11111111111'
+        });
+        obj.data.contentArr[0].subArr[0].itemArr.push({
+            num:'12',
+            title:'1212121212'
+        });
+        obj.data.contentArr[0].subArr[0].itemArr.push({
+            num:'13',
+            title:'1313131313'
+        });
+
+        obj.data.contentArr[0].subArr[0].itemArr.splice(0,1);
 
     </script>
 </body>
