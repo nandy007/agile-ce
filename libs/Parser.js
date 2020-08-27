@@ -975,7 +975,7 @@
 				$.extend(o, scope[vmPre.data]);
 			}else{
 				for(var k in scope){
-					if(k!=='$alias' && (typeof socpe[k]!=='function')){
+					if(k!=='$alias' && (typeof scope[k]!=='function')){
 						o[k] = scope[k];
 					}
 				}
@@ -984,7 +984,7 @@
 				$.extend(o, scope[vmPre.method]);
 			}else{
 				for(var k in scope){
-					if(typeof socpe[k]==='function'){
+					if(typeof scope[k]==='function'){
 						o[k] = scope[k];
 					}
 				}
@@ -1263,7 +1263,7 @@
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 
-			this.handleTemplate($plate);
+			this.handleTemplate($plate, isTpl);
 
 			this.vm.compileSteps($plate, cFors);
 
@@ -1278,17 +1278,27 @@
 		};
 	};
 
-	pp.handleTemplate = function($plate){
-		if(!$plate.hasAttr('useTemplate')) return;
-		var tpl = $plate.attr('useTemplate'), $tpl;
+	pp.handleTemplate = function($plate, isTpl){
+		var $target, $children = isTpl ? $plate.contents() : $plate;
+		for(var i=1, len=$children.length-1;i<len;i++){
+			var $cur = $($plate.get(i));
+			if($cur.hasAttr('useTemplate')){
+				$target = $cur;
+				break;
+			}
+		}
+
+		if(!$target) return;
+
+		var tpl = $target.attr('useTemplate'), $tpl;
 		if(!tpl){
-			if(!(($tpl = $plate.find('script, template')) && $tpl.length>0)){
-				$tpl = $plate;
+			if(!(($tpl = $target.find('script, template')) && $tpl.length>0)){
+				$tpl = $target;
 			}
 			tpl = $tpl.html();
 		}
 		var html = $.template(tpl, this.getTemplateScope());
-		$plate.html(html);
+		$target.html(html);
 	}
 
 	/**

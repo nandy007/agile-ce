@@ -27,174 +27,75 @@
 
 <body>
     <div id="app">
-        <table>
-            <tbody>
-                <template step="1" v-for="mainEve in contentArr">
-                    <tr>
-                        <td colspan="2">{{mainEve.num}}</td>
-                        <td colspan="3">{{mainEve.title}}</td>
-                    </tr>
-                    <template step="2" v-for="subEve in mainEve.subArr">
-                        <tr>
-                            <td>{{subEve.num}}</td>
-                            <td></td>
-                            <td colspan="3">{{subEve.title}}</td>
-                        </tr>
-                        <template step="3" v-for="itemEve in subEve.itemArr">
-                            <tr>
-                                <td>{{$index}}</td>
-                                <td>{{itemEve.num}}</td>
-                                <td>{{itemEve.title}}</td>
-                                <td>
-                                    
-                                </td>
-                                <td>编辑</td>
-                            </tr>
-                        </template>
-                    </template>
-                </template>
-            </tbody>
-        </table>
-        <div>
-            <template v-if="show">
-                <span>{{aaa}}</span>
-            </template>
-            <template v-else>
-                <span>{{bbb}}</span>
-            </template>
-        </div>
+
+        <div v-for="item in arr" v-template="my"></div>
+        
+        
     </div>
-
-
 
     <script>
 		$.vm.setVMPre({
-            data: '',
+            data: 'data',
             method: ''
         });
-        
+
+        $.template.setter('my', `
+        <div><%=item.key%></div>
+        `)
+
+
         var obj = {
             data: {
-                aaa: '111',
-                bbb: '222',
-                show: true,
-                contentArr:[
-                    {
-                        num:'一',
-                        title:'是否公开收集使用个人信息的规则',
-                        subArr:[
-                            {
-                                num:'1.1',
-                                title:'是否公开隐私政策等收集使用规则',
-                                itemArr:[
-                                    {
-                                        num:'1',
-                                        title:'是否公开隐私政策等收集使用规则'
-                                    },
-                                    {
-                                        num:'2',
-                                        title:'隐私政策中包含收集使用个人信息规则的相关内容。'
-                                    },
-                                    {
-                                        num:'3',
-                                        title:'隐私政策文本链接有效，文本可正常显示。'
-                                    },
-                                    {
-                                        num:'4',
-                                        title:'如存在涉及收集使用儿童个人信息相关业务功能的，需制定针对儿童的个人信息保护规则。'
-                                    }
-                                ]
-                            },
-                            {
-                                num:'1.2',
-                                title:'是否公开隐私政策等收集使用规则',
-                                itemArr:[
-                                    {
-                                        num:'5',
-                                        title:'是否公开隐私政策等收集使用规则'
-                                    },
-                                    {
-                                        num:'6',
-                                        title:'隐私政策中包含收集使用个人信息规则的相关内容。'
-                                    },
-                                    {
-                                        num:'7',
-                                        title:'隐私政策文本链接有效，文本可正常显示。'
-                                    },
-                                    {
-                                        num:'8',
-                                        title:'如存在涉及收集使用儿童个人信息相关业务功能的，需制定针对儿童的个人信息保护规则。'
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            },
-            methods: {
-                click: function(){
-                    obj.data.item2 = {
-                        item: [obj.data.item]
-                    };
+                aaa: 111,
+                saveData: {
+                   a:{},
+                   b: {}
+                },
+                arr: [
+                    
+                ],
+                str(s){
+                    if(!s) return '';
+                    return JSON.stringify(s);
                 }
             }
         };
-
-        const vm = $('#app').render(obj);
-
-        // vm.dataChange(function(...args){
-        //     console.log(...args);
-        // });
-
-        obj.data.contentArr[0].subArr[0].itemArr[1].title = '222';
-
-        obj.data.contentArr[0].subArr[1].itemArr.pop();
-
-        obj.data.contentArr[0].subArr[0].itemArr.unshift(
-            {
-                num:'9',
-                title:'9999'
-            }
-        );
-
         
-        obj.data.contentArr[0].subArr[1].itemArr.push(
+
+        var mv = $('#app').render(obj);
+
+        // setTimeout(function(){
+        //     obj.data.saveData.push({
+        //         code: []
+        //     });
+        //     obj.data.arr.pop();
+        //     obj.data.arr.push({
+        //         t: 't4',
+        //         v: '1'
+        //     });
+        // }, 1000);
+
+        var aaa = {"msg":"成功","code":0,"data":{"necessaryRule":{"a10002":{"code":10002,"module":1,"btnType":2,"btn":"{\"key1\":\"2\"}","btnData":{"key1":"2"},"suggestion":"建议radiobutton11","reason":"原因radio11","picture":"2","ruleCode":"a10002","detail":{"reason":"原因radio11","suggestion":"建议radiobutton11","pic":["2"]}},"a10001":{"code":10001,"module":1,"btnType":1,"btn":"{\"key1\":[],\"key2\":[\"1\"],\"key3\":[]}","btnData":{"key1":[],"key2":["1"],"key3":[]},"suggestion":"","reason":"","picture":"","ruleCode":"a10001","detail":{"reason":"","suggestion":"","pic":[""]}}}}}
+        var bbb = {"msg":"成功","code":0,"data":{"necessaryRule":{"a10002":{"code":10002,"module":1,"btnType":2,"btn":"{\"key1\":\"2\"}","btnData":{"key1":"2"},"suggestion":"建议radiobutton11","reason":"原因radio11","picture":"2","ruleCode":"a10002","detail":{"reason":"原因radio11","suggestion":"建议radiobutton11","pic":["2"]}},"a10001":{"code":10001,"module":1,"btnType":1,"btn":"{\"key1\":[\"1\"],\"key2\":[],\"key3\":[]}","btnData":{"key1":["1"],"key2":[],"key3":[]},"suggestion":"","reason":"","picture":"","ruleCode":"a10001","detail":{"reason":"","suggestion":"","pic":[""]}}}}}
+        
+        
+
+        obj.data.saveData.a = {
+            ...aaa.data.necessaryRule
+        }
+
+        obj.data.arr = [
             {
-                num:'10',
-                title:'1010101010'
-            }
-        );
+                "label": "111",
+                "value": 1,
+                "key": "key1"
+            },
+        ];
 
-        obj.data.contentArr[0].subArr.shift();
-
-        obj.data.contentArr[0].subArr[0].itemArr.reverse();
-
-        obj.data.contentArr[0].subArr[0].itemArr.splice(1,1, {
-            num:'11',
-            title:'11111111111'
-        }, {
-            num:'12',
-            title:'1212121212'
-        })
-
-        obj.data.show = false;
-
-        obj.data.contentArr[0].subArr[0].itemArr = [];
-
-        obj.data.contentArr[0].subArr[0].itemArr.push({
-            num:'11',
-            title:'11111111111'
-        });
-        obj.data.contentArr[0].subArr[0].itemArr.push({
-            num:'12',
-            title:'1212121212'
-        });
-        obj.data.contentArr[0].subArr[0].itemArr.push({
-            num:'13',
-            title:'1313131313'
-        });
-
-        obj.data.contentArr[0].subArr[0].itemArr.splice(0,1);
+        setTimeout(()=>{
+            obj.data.saveData.a = {...bbb.data.necessaryRule}
+        }, 1000);
+     
 
     </script>
 </body>

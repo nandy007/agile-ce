@@ -367,7 +367,8 @@
 				jqlite.util.sequence.apply(jqlite.util.copyArray(arguments), args);
 			});
 			func.apply(null, _this);
-		}
+		},
+		extend: jqliteUtil.extend
 	};
 
 	

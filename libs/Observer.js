@@ -205,9 +205,9 @@
 				
 					if(isNeed===1){
 						var oldNeed = observeUtil.isNeed(oldValue);
-						var _oldValue = oldNeed ? $.extend(true, oldNeed===1?{}:[], oldValue) : oldValue;
+						var _oldValue = oldNeed ? $.util.extend(true, oldNeed===1?{}:[], oldValue) : oldValue;
 	
-						$.extend(true, oldValue||{},newValue);
+						$.util.extend(true, oldValue||{},newValue);
 						
 						ob.triggerByPaths({
 							deep: true,

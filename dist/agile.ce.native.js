@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.11.1598007639536 beta
+ *	Version	:	0.6.12.1598540195246 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -1136,7 +1136,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				$.extend(o, scope[vmPre.data]);
 			} else {
 				for (var k in scope) {
-					if (k !== '$alias' && typeof socpe[k] !== 'function') {
+					if (k !== '$alias' && typeof scope[k] !== 'function') {
 						o[k] = scope[k];
 					}
 				}
@@ -1145,7 +1145,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 				$.extend(o, scope[vmPre.method]);
 			} else {
 				for (var k in scope) {
-					if (typeof socpe[k] === 'function') {
+					if (typeof scope[k] === 'function') {
 						o[k] = scope[k];
 					}
 				}
@@ -1421,7 +1421,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			cFors.__$plate = $plate;
 			this.setDeepScope(cFors);
 
-			this.handleTemplate($plate);
+			this.handleTemplate($plate, isTpl);
 
 			this.vm.compileSteps($plate, cFors);
 
@@ -1436,18 +1436,29 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 		};
 	};
 
-	pp.handleTemplate = function ($plate) {
-		if (!$plate.hasAttr('useTemplate')) return;
-		var tpl = $plate.attr('useTemplate'),
+	pp.handleTemplate = function ($plate, isTpl) {
+		var $target,
+		    $children = isTpl ? $plate.contents() : $plate;
+		for (var i = 1, len = $children.length - 1; i < len; i++) {
+			var $cur = $($plate.get(i));
+			if ($cur.hasAttr('useTemplate')) {
+				$target = $cur;
+				break;
+			}
+		}
+
+		if (!$target) return;
+
+		var tpl = $target.attr('useTemplate'),
 		    $tpl;
 		if (!tpl) {
-			if (!(($tpl = $plate.find('script, template')) && $tpl.length > 0)) {
-				$tpl = $plate;
+			if (!(($tpl = $target.find('script, template')) && $tpl.length > 0)) {
+				$tpl = $target;
 			}
 			tpl = $tpl.html();
 		}
 		var html = $.template(tpl, this.getTemplateScope());
-		$plate.html(html);
+		$target.html(html);
 	};
 
 	/**
@@ -2177,6 +2188,77 @@ var util = module.exports = {
             return this.prop(name, val);
         }
         return this;
+    },
+    extend: function extend() {
+        var jQuery = JQLite;
+        var options,
+            name,
+            src,
+            copy,
+            copyIsArray,
+            clone,
+            target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            deep = false;
+
+        // Handle a deep copy situation
+        if (typeof target === "boolean") {
+            deep = target;
+
+            // Skip the boolean and the target
+            target = arguments[i] || {};
+            i++;
+        }
+
+        // Handle case when target is a string or something (possible in deep copy)
+        if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !jQuery.isFunction(target)) {
+            target = {};
+        }
+
+        // Extend jQuery itself if only one argument is passed
+        if (i === length) {
+            target = this;
+            i--;
+        }
+
+        for (; i < length; i++) {
+            // Only deal with non-null/undefined values
+            if ((options = arguments[i]) != null) {
+                // Extend the base object
+                for (name in options) {
+                    src = target[name];
+                    copy = options[name];
+
+                    // Prevent never-ending loop
+                    if (target === copy) {
+                        continue;
+                    }
+
+                    // Recurse if we're merging plain objects or arrays
+                    if (deep && copy && (jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)))) {
+                        if (copyIsArray) {
+                            copyIsArray = false;
+                            clone = src && jQuery.isArray(src) ? src : [];
+                            target[name] = copy;
+                        } else {
+                            clone = src && jQuery.isPlainObject(src) ? src : {};
+                            target[name] = this.extend(deep, clone, copy);
+                        }
+
+                        // Never move original objects, clone them
+                        // target[ name ] = jQuery.extend( deep, clone, copy );
+
+                        // Don't bring in undefined values
+                    } else if (copy !== undefined) {
+                        target[name] = copy;
+                    }
+                }
+            }
+        }
+
+        // Return the modified object
+        return target;
     }
 };
 
@@ -5974,9 +6056,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 					if (isNeed === 1) {
 						var oldNeed = observeUtil.isNeed(oldValue);
-						var _oldValue = oldNeed ? $.extend(true, oldNeed === 1 ? {} : [], oldValue) : oldValue;
+						var _oldValue = oldNeed ? $.util.extend(true, oldNeed === 1 ? {} : [], oldValue) : oldValue;
 
-						$.extend(true, oldValue || {}, newValue);
+						$.util.extend(true, oldValue || {}, newValue);
 
 						ob.triggerByPaths({
 							deep: true,
