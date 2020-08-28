@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.13.1598604016000 beta
+ *	Version	:	0.6.14.1598605356727 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  */var __ACE__ = {};
@@ -480,7 +480,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 				// exp = depsAlias.exps.join('.');
 
-				updater.updateAttribute($node, attr, parser.getValue(exp, fors));
+				updater.updateAttribute($node, attr, parser.getValue(exp, fors, depsAlias));
 
 				var deps = depsAlias.deps;
 
@@ -587,9 +587,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 			var defaultValue = $node.css('display');
 			if (!defaultValue || defaultValue === 'none') defaultValue = '';
 
-			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
+			var depsAlias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
 
-			var deps = Parser.getDepsAlias(expression, fors, parser.getVmPre()).deps;
+			updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors, depsAlias));
+
+			var deps = depsAlias.deps;
 
 			parser.watcher.watch(deps, function (options) {
 				updater.updateShowHide($node, defaultValue, parser.getValue(expression, fors));
@@ -1307,10 +1309,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
   * @param   {Object}     fors       [for别名映射]
   * @return  {Any}      取决于实际值
   */
-	pp.getValue = function (exp, fors) {
+	pp.getValue = function (exp, fors, depsalias) {
 		var scope = this.$scope;
 		if (arguments.length > 1) {
-			var depsalias = Parser.getDepsAlias(exp, fors, this.getVmPre());
+			depsalias = depsalias || Parser.getDepsAlias(exp, fors, this.getVmPre());
 			exp = depsalias.exps.join('');
 		}
 		var func = this.getAliasFunc(exp, true);
