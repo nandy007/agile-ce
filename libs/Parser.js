@@ -342,7 +342,7 @@
 
 				var depsAlias = Parser.getDepsAlias(exp, fors, parser.getVmPre());
 
-				exp = depsAlias.exps.join('.');
+				// exp = depsAlias.exps.join('.');
 
 				updater.updateAttribute($node, attr, parser.getValue(exp, fors));
 

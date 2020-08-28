@@ -28,7 +28,9 @@
 <body>
     <div id="app">
 
-        <div v-for="item in arr" v-template="my"></div>
+        <div v-for="item in arr">
+            <img v-bind:src="saveData[item.key].default"/>
+        </div>
         
         
     </div>
@@ -39,62 +41,27 @@
             method: ''
         });
 
-        $.template.setter('my', `
-        <div><%=item.key%></div>
-        `)
-
 
         var obj = {
             data: {
                 aaa: 111,
                 saveData: {
-                   a:{},
-                   b: {}
+                    key1: {
+                        default: 'http://127.0.0.1:3000/build/framework/images/conslogo.20df3b93727bc6db64130dba3ebda435.png',
+                    }
                 },
                 arr: [
-                    
+                    {
+                        "label": "111",
+                        "value": 1,
+                        "key": "key1"
+                    },
                 ],
-                str(s){
-                    if(!s) return '';
-                    return JSON.stringify(s);
-                }
             }
         };
         
 
         var mv = $('#app').render(obj);
-
-        // setTimeout(function(){
-        //     obj.data.saveData.push({
-        //         code: []
-        //     });
-        //     obj.data.arr.pop();
-        //     obj.data.arr.push({
-        //         t: 't4',
-        //         v: '1'
-        //     });
-        // }, 1000);
-
-        var aaa = {"msg":"成功","code":0,"data":{"necessaryRule":{"a10002":{"code":10002,"module":1,"btnType":2,"btn":"{\"key1\":\"2\"}","btnData":{"key1":"2"},"suggestion":"建议radiobutton11","reason":"原因radio11","picture":"2","ruleCode":"a10002","detail":{"reason":"原因radio11","suggestion":"建议radiobutton11","pic":["2"]}},"a10001":{"code":10001,"module":1,"btnType":1,"btn":"{\"key1\":[],\"key2\":[\"1\"],\"key3\":[]}","btnData":{"key1":[],"key2":["1"],"key3":[]},"suggestion":"","reason":"","picture":"","ruleCode":"a10001","detail":{"reason":"","suggestion":"","pic":[""]}}}}}
-        var bbb = {"msg":"成功","code":0,"data":{"necessaryRule":{"a10002":{"code":10002,"module":1,"btnType":2,"btn":"{\"key1\":\"2\"}","btnData":{"key1":"2"},"suggestion":"建议radiobutton11","reason":"原因radio11","picture":"2","ruleCode":"a10002","detail":{"reason":"原因radio11","suggestion":"建议radiobutton11","pic":["2"]}},"a10001":{"code":10001,"module":1,"btnType":1,"btn":"{\"key1\":[\"1\"],\"key2\":[],\"key3\":[]}","btnData":{"key1":["1"],"key2":[],"key3":[]},"suggestion":"","reason":"","picture":"","ruleCode":"a10001","detail":{"reason":"","suggestion":"","pic":[""]}}}}}
-        
-        
-
-        obj.data.saveData.a = {
-            ...aaa.data.necessaryRule
-        }
-
-        obj.data.arr = [
-            {
-                "label": "111",
-                "value": 1,
-                "key": "key1"
-            },
-        ];
-
-        setTimeout(()=>{
-            obj.data.saveData.a = {...bbb.data.necessaryRule}
-        }, 1000);
      
 
     </script>
