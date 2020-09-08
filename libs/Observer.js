@@ -186,7 +186,7 @@
 		var descriptor = Object.getOwnPropertyDescriptor(object, prop);
 		var getter = descriptor.get, setter = descriptor.set, ob = this;
 		var originSet, originGet, hookSet, hookGet;
-		if(getter&&getter.name==='GetHooker'){
+		if(getter&&getter.__hook){
 			hookSet = setter;
 			hookGet = getter;
 			originSet = setter.originSet;
@@ -262,6 +262,7 @@
 				var getter = hookGet.originGet;
 				return getter ? getter.call(object) : val;
 			};
+			hookGet.__hook = true;
 			originSet = hookSet.originSet = setter;
 			originGet = hookGet.originGet = getter;
 			// 定义 object[prop] 的 getter 和 setter

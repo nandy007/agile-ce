@@ -29,7 +29,11 @@
     <div id="app">
 
         <div v-for="item in arr">
-            <img v-bind:src="saveData[item.key].default"/>
+            <select v-model:select="item.value">
+                <option value="">please</option>
+                <option value="1">111</option>
+                <option value="2">222</option>
+            </select>
         </div>
         
         
@@ -62,6 +66,27 @@
         
 
         var mv = $('#app').render(obj);
+
+        mv.dataChange(function(opts){
+            console.log(opts.path);
+        });
+
+        obj.data.arr = [
+            {
+                "label": "222",
+                "value": 2,
+                "key": "key2"
+            },
+            {
+                "label": "111",
+                "value": 1,
+                "key": "key1"
+            },
+        ];
+
+        
+
+        // obj.data.saveData.key1.default = 'https://www.baidu.com/img/flexible/logo/pc/result.png';
      
 
     </script>

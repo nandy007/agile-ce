@@ -1,6 +1,6 @@
 /*
  *	Agile CE 移动前端MVVM框架
- *	Version	:	0.6.14.1598605349869 beta
+ *	Version	:	0.6.15.1599544803975 beta
  *	Author	:	nandy007
  *	License MIT @ https://github.com/nandy007/agile-ce
  *//******/ (function(modules) { // webpackBootstrap
@@ -13539,7 +13539,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		    setter = descriptor.set,
 		    ob = this;
 		var originSet, originGet, hookSet, hookGet;
-		if (getter && getter.name === 'GetHooker') {
+		if (getter && getter.__hook) {
 			hookSet = setter;
 			hookGet = getter;
 			originSet = setter.originSet;
@@ -13614,6 +13614,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 				var getter = hookGet.originGet;
 				return getter ? getter.call(object) : val;
 			};
+			hookGet.__hook = true;
 			originSet = hookSet.originSet = setter;
 			originGet = hookGet.originGet = getter;
 			// 定义 object[prop] 的 getter 和 setter
