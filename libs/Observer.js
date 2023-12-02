@@ -73,10 +73,22 @@
 		'xPush'
 	];
 
-	var observeUtil = {
+	var observeUtil = $.observeUtil = {
 		isNeed: function (val) {
-			return $.isArray(val) ? 2 : ($.util.isObject(val) ? 1 : 0);
-		}
+			return $.isArray(val) ? 2 : (!observeUtil.ignoreObject(val) && $.util.isObject(val) ? 1 : 0);
+		},
+		ignoreObject(v) {
+			try{
+				if(v instanceof HTMLElement) {
+					return true;
+				} else if(v[observeUtil.IGNOREFLAG] === true) {
+					return true;
+				}
+			} catch(e) {}
+
+			return false;
+		},
+		IGNOREFLAG: Symbol.for('__ace__')
 	};
 
 	/**

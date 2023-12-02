@@ -22,6 +22,7 @@ var util = module.exports = {
     },
     stringify: function(json){
         try{
+            if(json instanceof HTMLElement) return json;
             return typeof json==='object' ? JSON.stringify(json) : json;
         }catch(e){
             console.error('json数据转换字符串失败：'+String(json));
