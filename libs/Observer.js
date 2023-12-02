@@ -213,10 +213,19 @@
 
 				// 新值为对象或数组重新监测
 				var isNeed = observeUtil.isNeed(newValue);
-				if (isNeed) {
-				
+
+				var oldNeed = observeUtil.isNeed(oldValue);
+
+				if(isNeed===1 && !oldNeed) {
+					try{
+						if(oldValue[observeUtil.IGNOREFLAG]) {
+							newValue[observeUtil.IGNOREFLAG] = true;
+						}
+					}catch(e){}
+				} else if (isNeed) {
 					if(isNeed===1){
-						var oldNeed = observeUtil.isNeed(oldValue);
+						// var oldNeed = observeUtil.isNeed(oldValue);
+						
 						var _oldValue = oldNeed ? $.util.extend(true, oldNeed===1?{}:[], oldValue) : oldValue;
 	
 						$.util.extend(true, oldValue||{},newValue);
