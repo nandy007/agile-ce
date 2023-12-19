@@ -586,6 +586,7 @@
 				case 'textarea': this.vmtext.apply(this, arguments); return;
 				case 'radio': this.vmradio.apply(this, arguments); return;
 				case 'checkbox': this.vmcheckbox.apply(this, arguments); return;
+				case 'multiselect': $node.attr('multiple', true);
 				case 'select': this.vmselect.apply(this, arguments); return;
 				case 'switch': this.vmswitch.apply(this, arguments); return;
 			}
