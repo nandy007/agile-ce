@@ -654,6 +654,9 @@
 			Parser.bindChangeEvent($node, function () {
 				if($node.isChecked()) {
 					parser.setDeepScope(fors);
+					var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+					var access = depsalias.exps.join('');
+					var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 					// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 					duplex[field] = Parser.formatValue($node, $node.val());
@@ -693,6 +696,10 @@
 			Parser.bindChangeEvent($node, function () {
 
 				parser.setDeepScope(fors);
+
+				var depsalias = Parser.getDepsAlias(expression, fors, parser.getVmPre());
+				var access = depsalias.exps.join('');
+				var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
 
 				// var access = Parser.makeDep(expression, fors, parser.getVmPre());
 				// var duplexField = parser.getDuplexField(access), duplex = duplexField.duplex(parser.$scope), field = duplexField.field;
