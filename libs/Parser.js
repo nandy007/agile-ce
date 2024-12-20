@@ -1139,18 +1139,45 @@
 	 * @return  {Object}     {duplex: , field:}
 	 */
 	pp.getDuplexField = function (access) {
+		var flag = false;
 		var ac = access.split('.');
 		var field = ac.pop();
+		if(field.indexOf(']')>-1) {
+			flag = true;
+			ac.push(field);
+			field = 'field';
+		}
 		var duplex = Parser.formateSubscript(ac.join('.'));
 		var scope = this.$scope;
 
 		var func = this.getAliasFunc(duplex, true);
-		// duplex = func(scope);
+		var parser = this;
 
 		return {
-			duplex: func,
+			duplex: flag ? function(...args) {
+				var ret = func(...args);
+				return {
+					get field() {
+						ret
+					},
+					set field(v) {
+						var duplex = Parser.formateSubscript(access);
+						var func = parser.invokeAliasFunc(duplex , true);
+						func(scope, v);
+					}
+				};
+			} : func,
 			field: field
 		}
+	};
+
+	pp.duplexFieldAssign = function (access, $node) {
+		var val = Parser.formatValue($node, $node.val());
+		var duplex = Parser.formateSubscript(access);
+		var scope = this.$scope;
+		var func = this.invokeAliasFunc(duplex , true);
+
+		func(scope, val);
 	};
 
 	/**
@@ -1325,6 +1352,17 @@
 		var func = Parser.makeFunc(path);
 
 		return aliasCache[path] = func;
+	};
+
+	pp.invokeAliasFunc = function($access, isFull){
+		var path = isFull?$access:('scope.'+Parser.formateSubscript($access));
+		var aliasCache = this.aliasCache || {};
+		var aliasPath = `invoke$${path}`;
+		if(aliasCache[aliasPath]) return aliasCache[aliasPath];
+
+		var func = Parser.makeInvokeFunc(path);
+
+		return aliasCache[aliasPath] = func;
 	};
 
 	pp.getAliasValue = function($access, isFull){
@@ -1746,6 +1784,10 @@
 	//取值函数创建
 	Parser.makeFunc = function (str) {
 		return new Function('scope', 'try{ return ' + str + '; }catch(e){return "";}');
+	};
+
+	Parser.makeInvokeFunc = function (str) {
+		return new Function('scope', 'scopeValue', 'try{ ' + str + ' = scopeValue; }catch(e){}');
 	};
 
 	//根据表达式取值
